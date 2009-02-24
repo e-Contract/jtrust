@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.security.NoSuchProviderException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -33,15 +34,39 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.ocsp.BasicOCSPResp;
+import org.bouncycastle.ocsp.CertificateID;
+import org.bouncycastle.ocsp.OCSPException;
+import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.ocsp.SingleResp;
 
 public class OcspTrustLinker implements TrustLinker {
 
 	private static final Log LOG = LogFactory.getLog(OcspTrustLinker.class);
+
+	private final OcspRepository ocspRepository;
+
+	/**
+	 * Default OCSP freshness interval.
+	 */
+	public static final long DEFAULT_FRESHNESS_INTERVAL = 1000 * 10;
+
+	private long freshnessInterval = DEFAULT_FRESHNESS_INTERVAL;
+
+	public OcspTrustLinker(OcspRepository ocspRepository) {
+		this.ocspRepository = ocspRepository;
+	}
+
+	public void setFreshnessInterval(long freshnessInterval) {
+		this.freshnessInterval = freshnessInterval;
+	}
 
 	public Boolean hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate) {
@@ -50,7 +75,72 @@ public class OcspTrustLinker implements TrustLinker {
 			return null;
 		}
 		LOG.debug("OCSP URI: " + ocspUri);
-		// TODO
+
+		OCSPResp ocspResp = this.ocspRepository.findOcspResponse(ocspUri);
+		if (null == ocspResp) {
+			return null;
+		}
+
+		int ocspRespStatus = ocspResp.getStatus();
+		if (OCSPResponseStatus.SUCCESSFUL != ocspRespStatus) {
+			LOG.debug("OCSP response status: " + ocspRespStatus);
+			return null;
+		}
+
+		Object responseObject;
+		try {
+			responseObject = ocspResp.getResponseObject();
+		} catch (OCSPException e) {
+			LOG.debug("OCSP exception: " + e.getMessage(), e);
+			return null;
+		}
+		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
+
+		boolean verificationResult;
+		try {
+			verificationResult = basicOCSPResp.verify(certificate
+					.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
+		} catch (NoSuchProviderException e) {
+			LOG.debug("JCA provider exception: " + e.getMessage(), e);
+			return null;
+		} catch (OCSPException e) {
+			LOG.debug("OCSP exception: " + e.getMessage(), e);
+			return null;
+		}
+
+		if (false == verificationResult) {
+			LOG.debug("OCSP response signature invalid");
+			return null;
+		}
+
+		CertificateID certificateId;
+		try {
+			certificateId = new CertificateID(CertificateID.HASH_SHA1,
+					certificate, childCertificate.getSerialNumber());
+		} catch (OCSPException e) {
+			LOG.debug("OCSP exception: " + e.getMessage(), e);
+			return null;
+		}
+
+		SingleResp[] singleResps = basicOCSPResp.getResponses();
+		for (SingleResp singleResp : singleResps) {
+			CertificateID responseCertificateId = singleResp.getCertID();
+			if (false == certificateId.equals(responseCertificateId)) {
+				continue;
+			}
+			Date thisUpdate = singleResp.getThisUpdate();
+			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
+			if (dt > this.freshnessInterval) {
+				LOG.debug("freshness interval exceeded: " + dt);
+				continue;
+			}
+			if (null == singleResp.getCertStatus()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
 		return null;
 	}
 

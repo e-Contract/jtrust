@@ -37,6 +37,15 @@ public class OnlineCrlRepository implements CrlRepository {
 
 	private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
 
+	private String proxyHost;
+
+	private int proxyPort;
+
+	public void setProxy(String proxyHost, int proxyPort) {
+		this.proxyHost = proxyHost;
+		this.proxyPort = proxyPort;
+	}
+
 	public X509CRL findCrl(URI crlUri, Date validationDate) {
 		try {
 			X509CRL crl = getCrl(crlUri);
@@ -50,7 +59,13 @@ public class OnlineCrlRepository implements CrlRepository {
 	private X509CRL getCrl(URI crlUri) throws HttpException, IOException,
 			CertificateException, CRLException {
 		HttpClient httpClient = new HttpClient();
-		GetMethod getMethod = new GetMethod(crlUri.toURL().toString());
+		if (null != this.proxyHost) {
+			httpClient.getHostConfiguration().setProxy(this.proxyHost,
+					this.proxyPort);
+		}
+		String downloadUrl = crlUri.toURL().toString();
+		LOG.debug("downloading CRL from: " + downloadUrl);
+		GetMethod getMethod = new GetMethod(downloadUrl);
 		int statusCode = httpClient.executeMethod(getMethod);
 		if (HttpURLConnection.HTTP_OK != statusCode) {
 			return null;
@@ -59,6 +74,7 @@ public class OnlineCrlRepository implements CrlRepository {
 				.getInstance("X.509");
 		X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
 				.getResponseBodyAsStream());
+		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
 		return crl;
 	}
 }

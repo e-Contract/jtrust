@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
@@ -50,17 +51,19 @@ public class PublicKeyTrustLinkerTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertNull(result);
 	}
-	
+
 	@Test
 	public void testNoCaFlagFails() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
@@ -71,17 +74,19 @@ public class PublicKeyTrustLinkerTest {
 						notBefore, notAfter, false);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertFalse(result);
 	}
-	
+
 	@Test
 	public void testChildNotAllowToBeCA() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
@@ -92,14 +97,16 @@ public class PublicKeyTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate(), true);
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), true);
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertFalse(result);
 	}
 
@@ -119,8 +126,10 @@ public class PublicKeyTrustLinkerTest {
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(root2Certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertNotNull(result);
 		assertFalse(result);
 	}
@@ -137,14 +146,16 @@ public class PublicKeyTrustLinkerTest {
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime childNotAfter = notAfter.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, childNotAfter,
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, childNotAfter,
 				rootCertificate, rootKeyPair.getPrivate());
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertNotNull(result);
 		assertFalse(result);
 	}
@@ -161,14 +172,16 @@ public class PublicKeyTrustLinkerTest {
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime childNotBefore = notBefore.minusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", childNotBefore, notAfter,
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", childNotBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate());
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
+		Date validationDate = new Date();
+
 		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, validationDate);
 		assertNotNull(result);
 		assertFalse(result);
 	}

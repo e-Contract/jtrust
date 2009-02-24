@@ -55,6 +55,7 @@ public class CrlTrustLinker implements TrustLinker {
 			X509Certificate certificate, Date validationDate) {
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
+			LOG.debug("no CRL uri in certificate");
 			return null;
 		}
 		LOG.debug("CRL URI: " + crlUri);
@@ -95,6 +96,7 @@ public class CrlTrustLinker implements TrustLinker {
 		if (thisUpdate.after(validationDate)) {
 			return false;
 		}
+		LOG.debug("CRL next update: " + x509crl.getNextUpdate());
 		if (validationDate.after(x509crl.getNextUpdate())) {
 			return false;
 		}

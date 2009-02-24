@@ -33,6 +33,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			X509Certificate certificate, Date validationDate) {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
+			LOG
+					.debug("child certificate issuer not the same as the issuer certificate subject");
 			return false;
 		}
 		try {
@@ -43,10 +45,26 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		}
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
+			LOG
+					.debug("child certificate validity end is before certificate validity end");
 			return false;
 		}
 		if (true == childCertificate.getNotBefore().before(
 				certificate.getNotBefore())) {
+			LOG
+					.debug("child certificate validity begin after certificate validity begin");
+			LOG.debug("child certificate validity begin: "
+					+ childCertificate.getNotBefore());
+			LOG.debug("certificate validity begin: "
+					+ certificate.getNotBefore());
+			return false;
+		}
+		if (true == validationDate.before(childCertificate.getNotBefore())) {
+			LOG.debug("certificate is not yet valid");
+			return false;
+		}
+		if (true == validationDate.after(childCertificate.getNotAfter())) {
+			LOG.debug("certificate already expired");
 			return false;
 		}
 		if (-1 == certificate.getBasicConstraints()) {
