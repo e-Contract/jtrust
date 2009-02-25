@@ -65,6 +65,62 @@ public class PublicKeyTrustLinkerTest {
 	}
 
 	@Test
+	public void testExpiredCertificate() throws Exception {
+		// setup
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = notAfter.plusDays(1).toDate();
+
+		// operate
+		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate);
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result);
+	}
+
+	@Test
+	public void testCertificateNotYetValid() throws Exception {
+		// setup
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = notBefore.minusDays(1).toDate();
+
+		// operate
+		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate);
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result);
+	}
+
+	@Test
 	public void testNoCaFlagFails() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();

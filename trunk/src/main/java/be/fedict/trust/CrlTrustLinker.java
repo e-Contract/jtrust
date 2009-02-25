@@ -71,9 +71,14 @@ public class CrlTrustLinker implements TrustLinker {
 		X509CRLEntry crlEntry = x509crl.getRevokedCertificate(childCertificate
 				.getSerialNumber());
 		if (null == crlEntry) {
+			LOG.debug("CRL OK for: "
+					+ childCertificate.getSubjectX500Principal());
 			return true;
 		}
 		if (crlEntry.getRevocationDate().after(validationDate)) {
+			LOG.debug("CRL OK for: "
+					+ childCertificate.getSubjectX500Principal() + " at "
+					+ validationDate);
 			return true;
 		}
 		// TODO: delta CRL

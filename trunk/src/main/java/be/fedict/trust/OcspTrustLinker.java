@@ -24,8 +24,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +36,12 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -79,6 +83,7 @@ public class OcspTrustLinker implements TrustLinker {
 		OCSPResp ocspResp = this.ocspRepository.findOcspResponse(ocspUri,
 				childCertificate, certificate);
 		if (null == ocspResp) {
+			LOG.debug("OCSP response not found");
 			return null;
 		}
 
@@ -112,10 +117,10 @@ public class OcspTrustLinker implements TrustLinker {
 					return null;
 				}
 			} else {
-				for (X509Certificate responseCertificate : responseCertificates) {
-					LOG.debug("response certificate subject: "
-							+ responseCertificate.getSubjectX500Principal());
-				}
+				/*
+				 * We're dealing with a dedicated authorized OCSP Responder
+				 * certificate.
+				 */
 				X509Certificate ocspResponderCertificate = responseCertificates[0];
 				boolean verificationResult = basicOCSPResp.verify(
 						ocspResponderCertificate.getPublicKey(),
@@ -124,7 +129,49 @@ public class OcspTrustLinker implements TrustLinker {
 					LOG.debug("OCSP Responser response signature invalid");
 					return null;
 				}
-				// TODO trust the OCSP responder certificate
+				X509Certificate issuingCaCertificate = responseCertificates[1];
+				if (false == certificate.equals(issuingCaCertificate)) {
+					LOG.debug("OCSP responder certificate not issued by CA");
+					return null;
+				}
+				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+				Boolean trusted = publicKeyTrustLinker.hasTrustLink(
+						ocspResponderCertificate, issuingCaCertificate,
+						validationDate);
+				if (null != trusted) {
+					if (false == trusted) {
+						LOG.debug("OCSP responder not trusted");
+						return null;
+					}
+				}
+				if (null == ocspResponderCertificate
+						.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck
+								.getId())) {
+					LOG
+							.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
+					return null;
+				}
+				List<String> extendedKeyUsage;
+				try {
+					extendedKeyUsage = ocspResponderCertificate
+							.getExtendedKeyUsage();
+				} catch (CertificateParsingException e) {
+					LOG.debug(
+							"OCSP Responder parsing error: " + e.getMessage(),
+							e);
+					return null;
+				}
+				if (null == extendedKeyUsage) {
+					LOG
+							.debug("OCSP Responder certificate has no extended key usage extension");
+					return null;
+				}
+				if (false == extendedKeyUsage
+						.contains(KeyPurposeId.id_kp_OCSPSigning.getId())) {
+					LOG
+							.debug("OCSP Responder certificate should have a OCSPSigning extended key usage");
+					return null;
+				}
 			}
 		} catch (NoSuchProviderException e) {
 			LOG.debug("JCA provider exception: " + e.getMessage(), e);
@@ -157,12 +204,15 @@ public class OcspTrustLinker implements TrustLinker {
 				continue;
 			}
 			if (null == singleResp.getCertStatus()) {
+				LOG.debug("OCSP OK for: "
+						+ childCertificate.getSubjectX500Principal());
 				return true;
 			} else {
 				return false;
 			}
 		}
 
+		LOG.debug("no matching OCSP response entry");
 		return null;
 	}
 
