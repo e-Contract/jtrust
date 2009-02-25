@@ -18,13 +18,33 @@
 
 package be.fedict.trust;
 
-import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.bouncycastle.ocsp.OCSPResp;
+public class FallbackTrustLinker implements TrustLinker {
 
-public interface OcspRepository {
+	private List<TrustLinker> trustLinkers;
 
-	OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate);
+	public FallbackTrustLinker() {
+		this.trustLinkers = new LinkedList<TrustLinker>();
+	}
+
+	public void addTrustLinker(TrustLinker trustLinker) {
+		this.trustLinkers.add(trustLinker);
+	}
+
+	public Boolean hasTrustLink(X509Certificate childCertificate,
+			X509Certificate certificate, Date validationDate) {
+		for (TrustLinker trustLinker : this.trustLinkers) {
+			Boolean result = trustLinker.hasTrustLink(childCertificate,
+					certificate, validationDate);
+			if (null == result) {
+				continue;
+			}
+			return result;
+		}
+		return null;
+	}
 }
