@@ -18,13 +18,28 @@
 
 package be.fedict.trust;
 
-import java.net.URI;
-import java.security.cert.X509Certificate;
+/**
+ * Network configuration.
+ * 
+ * @author fcorneli
+ * 
+ */
+public class NetworkConfig {
 
-import org.bouncycastle.ocsp.OCSPResp;
+	private final String proxyHost;
 
-public interface OcspRepository {
+	private final int proxyPort;
 
-	OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate);
+	public NetworkConfig(String proxyHost, int proxyPort) {
+		this.proxyHost = proxyHost;
+		this.proxyPort = proxyPort;
+	}
+
+	public String getProxyHost() {
+		return this.proxyHost;
+	}
+
+	public int getProxyPort() {
+		return this.proxyPort;
+	}
 }

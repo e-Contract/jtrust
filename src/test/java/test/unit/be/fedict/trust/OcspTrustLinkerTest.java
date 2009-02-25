@@ -104,8 +104,8 @@ public class OcspTrustLinkerTest {
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
 		EasyMock.expect(
-				mockOcspRepository.findOcspResponse(new URI("ocsp-uri")))
-				.andReturn(null);
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(null);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);
@@ -142,8 +142,8 @@ public class OcspTrustLinkerTest {
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
 		EasyMock.expect(
-				mockOcspRepository.findOcspResponse(new URI("ocsp-uri")))
-				.andReturn(ocspResp);
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);
@@ -183,8 +183,8 @@ public class OcspTrustLinkerTest {
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
 		EasyMock.expect(
-				mockOcspRepository.findOcspResponse(new URI("ocsp-uri")))
-				.andReturn(ocspResp);
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);
@@ -228,8 +228,8 @@ public class OcspTrustLinkerTest {
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
 		EasyMock.expect(
-				mockOcspRepository.findOcspResponse(new URI("ocsp-uri")))
-				.andReturn(ocspResp2);
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp2);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);
@@ -268,8 +268,8 @@ public class OcspTrustLinkerTest {
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
 		EasyMock.expect(
-				mockOcspRepository.findOcspResponse(new URI("ocsp-uri")))
-				.andReturn(ocspResp);
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);

@@ -37,13 +37,14 @@ public class OnlineCrlRepository implements CrlRepository {
 
 	private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
 
-	private String proxyHost;
+	private final NetworkConfig networkConfig;
 
-	private int proxyPort;
+	public OnlineCrlRepository(NetworkConfig networkConfig) {
+		this.networkConfig = networkConfig;
+	}
 
-	public void setProxy(String proxyHost, int proxyPort) {
-		this.proxyHost = proxyHost;
-		this.proxyPort = proxyPort;
+	public OnlineCrlRepository() {
+		this(null);
 	}
 
 	public X509CRL findCrl(URI crlUri, Date validationDate) {
@@ -59,9 +60,10 @@ public class OnlineCrlRepository implements CrlRepository {
 	private X509CRL getCrl(URI crlUri) throws HttpException, IOException,
 			CertificateException, CRLException {
 		HttpClient httpClient = new HttpClient();
-		if (null != this.proxyHost) {
-			httpClient.getHostConfiguration().setProxy(this.proxyHost,
-					this.proxyPort);
+		if (null != this.networkConfig) {
+			httpClient.getHostConfiguration().setProxy(
+					this.networkConfig.getProxyHost(),
+					this.networkConfig.getProxyPort());
 		}
 		String downloadUrl = crlUri.toURL().toString();
 		LOG.debug("downloading CRL from: " + downloadUrl);

@@ -76,7 +76,8 @@ public class OcspTrustLinker implements TrustLinker {
 		}
 		LOG.debug("OCSP URI: " + ocspUri);
 
-		OCSPResp ocspResp = this.ocspRepository.findOcspResponse(ocspUri);
+		OCSPResp ocspResp = this.ocspRepository.findOcspResponse(ocspUri,
+				childCertificate, certificate);
 		if (null == ocspResp) {
 			return null;
 		}
@@ -96,20 +97,40 @@ public class OcspTrustLinker implements TrustLinker {
 		}
 		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
 
-		boolean verificationResult;
 		try {
-			verificationResult = basicOCSPResp.verify(certificate
-					.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
+			X509Certificate[] responseCertificates = basicOCSPResp
+					.getCerts(BouncyCastleProvider.PROVIDER_NAME);
+			if (0 == responseCertificates.length) {
+				/*
+				 * This means that the OCSP response has been signed by the
+				 * issuing CA itself.
+				 */
+				boolean verificationResult = basicOCSPResp.verify(certificate
+						.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
+				if (false == verificationResult) {
+					LOG.debug("OCSP response signature invalid");
+					return null;
+				}
+			} else {
+				for (X509Certificate responseCertificate : responseCertificates) {
+					LOG.debug("response certificate subject: "
+							+ responseCertificate.getSubjectX500Principal());
+				}
+				X509Certificate ocspResponderCertificate = responseCertificates[0];
+				boolean verificationResult = basicOCSPResp.verify(
+						ocspResponderCertificate.getPublicKey(),
+						BouncyCastleProvider.PROVIDER_NAME);
+				if (false == verificationResult) {
+					LOG.debug("OCSP Responser response signature invalid");
+					return null;
+				}
+				// TODO trust the OCSP responder certificate
+			}
 		} catch (NoSuchProviderException e) {
 			LOG.debug("JCA provider exception: " + e.getMessage(), e);
 			return null;
 		} catch (OCSPException e) {
 			LOG.debug("OCSP exception: " + e.getMessage(), e);
-			return null;
-		}
-
-		if (false == verificationResult) {
-			LOG.debug("OCSP response signature invalid");
 			return null;
 		}
 
@@ -131,7 +152,8 @@ public class OcspTrustLinker implements TrustLinker {
 			Date thisUpdate = singleResp.getThisUpdate();
 			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
 			if (dt > this.freshnessInterval) {
-				LOG.debug("freshness interval exceeded: " + dt);
+				LOG.debug("freshness interval exceeded: " + dt
+						+ " milliseconds");
 				continue;
 			}
 			if (null == singleResp.getCertStatus()) {
