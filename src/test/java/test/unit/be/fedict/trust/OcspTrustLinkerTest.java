@@ -163,6 +163,88 @@ public class OcspTrustLinkerTest {
 	}
 
 	@Test
+	public void ocspResponder() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
+				"ocsp-uri");
+
+		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		OcspRepository mockOcspRepository = EasyMock
+				.createMock(OcspRepository.class);
+		EasyMock.expect(
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
+
+		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
+				mockOcspRepository);
+
+		EasyMock.replay(mockOcspRepository);
+
+		Date validationDate = new Date();
+
+		// operate
+		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate);
+
+		// verify
+		assertNotNull(result);
+		assertTrue(result);
+		EasyMock.verify(mockOcspRepository);
+	}
+
+	@Test
+	public void ocspResponseWronglySigned() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
+				"ocsp-uri");
+
+		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
+		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
+				rootCertificate, ocspResponderKeyPair.getPrivate());
+
+		OcspRepository mockOcspRepository = EasyMock
+				.createMock(OcspRepository.class);
+		EasyMock.expect(
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
+
+		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
+				mockOcspRepository);
+
+		EasyMock.replay(mockOcspRepository);
+
+		Date validationDate = new Date();
+
+		// operate
+		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate);
+
+		// verify
+		assertNull(result);
+		EasyMock.verify(mockOcspRepository);
+	}
+
+	@Test
 	public void ocspNotFresh() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
