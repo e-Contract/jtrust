@@ -25,26 +25,50 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Trust Validator.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class TrustValidator {
 
 	private final CertificateRepository certificateRepository;
 
 	private final List<TrustLinker> trustLinkers;
 
-	public TrustValidator(CertificateRepository certificateRepository,
-			List<TrustLinker> trustLinkers) {
-		this.certificateRepository = certificateRepository;
-		this.trustLinkers = trustLinkers;
-	}
-
+	/**
+	 * Main constructor.
+	 * 
+	 * @param certificateRepository
+	 *            the certificate repository used by this trust validator.
+	 */
 	public TrustValidator(CertificateRepository certificateRepository) {
-		this(certificateRepository, new LinkedList<TrustLinker>());
+		this.certificateRepository = certificateRepository;
+		this.trustLinkers = new LinkedList<TrustLinker>();
 	}
 
+	/**
+	 * Adds a trust linker to this trust validator. The order in which trust
+	 * linkers are added determine the runtime behavior of the trust validator.
+	 * 
+	 * @param trustLinker
+	 *            the trust linker component.
+	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);
 	}
 
+	/**
+	 * Validates whether the given certificate path is valid according to the
+	 * configured trust linkers.
+	 * 
+	 * @param certificatePath
+	 *            the X509 certificate path to validate.
+	 * @throws CertPathValidatorException
+	 *             in case the certificate path is invalid.
+	 * @see #isTrusted(List, Date)
+	 */
 	public void isTrusted(List<X509Certificate> certificatePath)
 			throws CertPathValidatorException {
 		isTrusted(certificatePath, new Date());
@@ -65,6 +89,19 @@ public class TrustValidator {
 		return true;
 	}
 
+	/**
+	 * Validates whether the certificate path was valid at the given validation
+	 * date.
+	 * 
+	 * @param certificatePath
+	 *            the X509 certificate path to be validated.
+	 * @param validationDate
+	 *            the date at which the certificate path validation should be
+	 *            verified.
+	 * @throws CertPathValidatorException
+	 *             in case of an invalid certificate path.
+	 * @see #isTrusted(List)
+	 */
 	public void isTrusted(List<X509Certificate> certificatePath,
 			Date validationDate) throws CertPathValidatorException {
 		if (certificatePath.isEmpty()) {
@@ -134,5 +171,4 @@ public class TrustValidator {
 		throw new CertPathValidatorException(
 				"self-signed certificate not in repository");
 	}
-
 }

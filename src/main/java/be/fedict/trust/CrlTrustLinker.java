@@ -41,12 +41,24 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
+/**
+ * Trust linker implementation based on CRL revocation information.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class CrlTrustLinker implements TrustLinker {
 
 	private static final Log LOG = LogFactory.getLog(CrlTrustLinker.class);
 
 	private final CrlRepository crlRepository;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param crlRepository
+	 *            the CRL repository used by this CRL trust linker.
+	 */
 	public CrlTrustLinker(CrlRepository crlRepository) {
 		this.crlRepository = crlRepository;
 	}

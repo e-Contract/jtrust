@@ -18,46 +18,38 @@
 
 package be.fedict.trust;
 
+import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * Network configuration.
+ * In-Memory Certificate Repository implementation.
  * 
  * @author fcorneli
  * 
  */
-public class NetworkConfig {
+public class MemoryCertificateRepository implements CertificateRepository {
 
-	private final String proxyHost;
-
-	private final int proxyPort;
+	private final Set<X509Certificate> trustPoints;
 
 	/**
-	 * Main constructor.
-	 * 
-	 * @param proxyHost
-	 *            the HTTP proxy host.
-	 * @param proxyPort
-	 *            the HTTP proxy port.
+	 * Default constructor.
 	 */
-	public NetworkConfig(String proxyHost, int proxyPort) {
-		this.proxyHost = proxyHost;
-		this.proxyPort = proxyPort;
+	public MemoryCertificateRepository() {
+		this.trustPoints = new HashSet<X509Certificate>();
 	}
 
 	/**
-	 * Gives back the HTTP proxy host.
+	 * Adds a trust point to this certificate repository.
 	 * 
-	 * @return
+	 * @param certificate
+	 *            the X509 trust point certificate.
 	 */
-	public String getProxyHost() {
-		return this.proxyHost;
+	public void addTrustPoint(X509Certificate certificate) {
+		this.trustPoints.add(certificate);
 	}
 
-	/**
-	 * Gives back the HTTP proxy port.
-	 * 
-	 * @return
-	 */
-	public int getProxyPort() {
-		return this.proxyPort;
+	public boolean isTrustPoint(X509Certificate certificate) {
+		return this.trustPoints.contains(certificate);
 	}
 }

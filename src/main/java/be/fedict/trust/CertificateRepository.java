@@ -20,7 +20,20 @@ package be.fedict.trust;
 
 import java.security.cert.X509Certificate;
 
+/**
+ * Interface for certificate repository component.
+ * 
+ * @author fcorneli
+ * 
+ */
 public interface CertificateRepository {
 
+	/**
+	 * Checks whether the given X509 certificate is a trust point.
+	 * 
+	 * @param certificate
+	 *            the X509 certificate.
+	 * @return
+	 */
 	boolean isTrustPoint(X509Certificate certificate);
 }

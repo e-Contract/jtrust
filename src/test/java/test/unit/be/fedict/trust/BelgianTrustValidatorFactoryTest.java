@@ -16,28 +16,22 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package test.unit.be.fedict.trust;
 
-import java.net.URI;
-import java.security.cert.X509CRL;
-import java.util.Date;
+import static org.junit.Assert.assertNotNull;
 
-/**
- * Interface for CRL repository components.
- * 
- * @author fcorneli
- * 
- */
-public interface CrlRepository {
+import org.junit.Test;
 
-	/**
-	 * Finds the request CRL.
-	 * 
-	 * @param crlUri
-	 *            the CRL URI.
-	 * @param validationDate
-	 *            the validation date.
-	 * @return the X509 CRL, or <code>null</code> if not found.
-	 */
-	X509CRL findCrl(URI crlUri, Date validationDate);
+import be.fedict.trust.BelgianTrustValidatorFactory;
+import be.fedict.trust.TrustValidator;
+
+public class BelgianTrustValidatorFactoryTest {
+
+	@Test
+	public void testCreateTrustValidator() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTrustValidator(null);
+
+		assertNotNull(trustValidator);
+	}
 }

@@ -33,16 +33,32 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Online CRL repository. This CRL repository implementation will download the
+ * CRLs from the given CRL URIs.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class OnlineCrlRepository implements CrlRepository {
 
 	private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
 
 	private final NetworkConfig networkConfig;
 
+	/**
+	 * Main construtor.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration used for downloading CRLs.
+	 */
 	public OnlineCrlRepository(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
 	}
 
+	/**
+	 * Default constructor.
+	 */
 	public OnlineCrlRepository() {
 		this(null);
 	}
