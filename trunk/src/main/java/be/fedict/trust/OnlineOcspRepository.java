@@ -37,6 +37,13 @@ import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
 
+/**
+ * Online OCSP repository. This implementation will contact the OCSP Responder
+ * to retrieve the OCSP response.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class OnlineOcspRepository implements OcspRepository {
 
 	private static final Log LOG = LogFactory
@@ -44,10 +51,20 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	private final NetworkConfig networkConfig;
 
+	/**
+	 * Main construtor.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration used during OCSP Responder
+	 *            communication.
+	 */
 	public OnlineOcspRepository(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
 	}
 
+	/**
+	 * Default constructor.
+	 */
 	public OnlineOcspRepository() {
 		this(null);
 	}
@@ -109,6 +126,8 @@ public class OnlineOcspRepository implements OcspRepository {
 		OCSPResp ocspResp;
 		try {
 			ocspResp = new OCSPResp(postMethod.getResponseBodyAsStream());
+			LOG.debug("OCSP response size: " + ocspResp.getEncoded().length
+					+ " bytes");
 		} catch (IOException e) {
 			throw new RuntimeException("OCSP response decoding error: "
 					+ e.getMessage(), e);

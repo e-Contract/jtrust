@@ -23,14 +23,29 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Fallback trust linker. Implements a trust linker fallback strategy.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class FallbackTrustLinker implements TrustLinker {
 
 	private List<TrustLinker> trustLinkers;
 
+	/**
+	 * Default constructor.
+	 */
 	public FallbackTrustLinker() {
 		this.trustLinkers = new LinkedList<TrustLinker>();
 	}
 
+	/**
+	 * Adds a trust linker. The order in which the trust linkers are added will
+	 * determine the runtime fallback strategy.
+	 * 
+	 * @param trustLinker
+	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);
 	}

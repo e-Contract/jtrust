@@ -51,6 +51,12 @@ import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.SingleResp;
 
+/**
+ * Trust linker based on OCSP revocation information.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class OcspTrustLinker implements TrustLinker {
 
 	private static final Log LOG = LogFactory.getLog(OcspTrustLinker.class);
@@ -64,10 +70,24 @@ public class OcspTrustLinker implements TrustLinker {
 
 	private long freshnessInterval = DEFAULT_FRESHNESS_INTERVAL;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param ocspRepository
+	 *            the OCSP repository component used by this OCSP trust linker.
+	 */
 	public OcspTrustLinker(OcspRepository ocspRepository) {
 		this.ocspRepository = ocspRepository;
 	}
 
+	/**
+	 * Sets the OCSP response freshness interval in milliseconds. This interval
+	 * is used to determine whether an OCSP response can be considered fresh
+	 * enough to use as basis for linking trust between child certificate and
+	 * parent certificate.
+	 * 
+	 * @param freshnessInterval
+	 */
 	public void setFreshnessInterval(long freshnessInterval) {
 		this.freshnessInterval = freshnessInterval;
 	}
@@ -216,7 +236,7 @@ public class OcspTrustLinker implements TrustLinker {
 		return null;
 	}
 
-	public URI getOcspUri(X509Certificate certificate) {
+	private URI getOcspUri(X509Certificate certificate) {
 		URI ocspURI = getAccessLocation(certificate,
 				X509ObjectIdentifiers.ocspAccessMethod);
 		return ocspURI;
@@ -273,5 +293,4 @@ public class OcspTrustLinker implements TrustLinker {
 					+ e.getMessage());
 		}
 	}
-
 }

@@ -23,8 +23,25 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.ocsp.OCSPResp;
 
+/**
+ * Interface for OCSP repository components.
+ * 
+ * @author fcorneli
+ * 
+ */
 public interface OcspRepository {
 
+	/**
+	 * Finds the requested OCSP response in this OCSP repository.
+	 * 
+	 * @param ocspUri
+	 *            the OCSP responder URI.
+	 * @param certificate
+	 *            the X509 certificate.
+	 * @param issuerCertificate
+	 *            the X509 issuer certificate.
+	 * @return the OCSP response, or <code>null</code> if not found.
+	 */
 	OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate);
 }

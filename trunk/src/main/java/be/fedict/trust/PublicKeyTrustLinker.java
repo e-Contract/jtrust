@@ -24,6 +24,13 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Public key trust linker implementation. Performs simple sanity checks based
+ * on the public keys.
+ * 
+ * @author fcorneli
+ * 
+ */
 public class PublicKeyTrustLinker implements TrustLinker {
 
 	private static final Log LOG = LogFactory

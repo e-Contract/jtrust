@@ -21,13 +21,27 @@ package be.fedict.trust;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+/**
+ * Interface for trust linker components.
+ * 
+ * @author fcorneli
+ * 
+ */
 public interface TrustLinker {
 
 	/**
+	 * Verifies whether there is a trust link between the given certificates at
+	 * the given validation date.
+	 * 
 	 * @param childCertificate
+	 *            the X509 child certificate.
 	 * @param certificate
+	 *            the X509 parent certificate.
 	 * @param validationDate
-	 * @return <code>null</code> if the trust is unknown.
+	 *            the validation date.
+	 * @return <code>true</code> is there is a trust link, <code>false</code> in
+	 *         case the child certificate cannot be trusted at all.
+	 *         <code>null</code> if the trust is unknown.
 	 */
 	Boolean hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate);
