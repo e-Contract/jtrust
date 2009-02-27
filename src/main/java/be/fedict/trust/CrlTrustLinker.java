@@ -120,7 +120,7 @@ public class CrlTrustLinker implements TrustLinker {
 		return true;
 	}
 
-	public URI getCrlUri(X509Certificate certificate) {
+	private URI getCrlUri(X509Certificate certificate) {
 		byte[] crlDistributionPointsValue = certificate
 				.getExtensionValue(X509Extensions.CRLDistributionPoints.getId());
 		if (null == crlDistributionPointsValue) {

@@ -114,7 +114,7 @@ public class TrustTestUtils {
 			String crlUri, String ocspUri) throws IOException,
 			InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {
-		String signatureAlgorithm = "SHA1WithRSAEncryption";
+		String signatureAlgorithm = "SHA1withRSA";
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
 		certificateGenerator.setPublicKey(subjectPublicKey);

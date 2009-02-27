@@ -67,8 +67,11 @@ public class OnlineCrlRepository implements CrlRepository {
 		try {
 			X509CRL crl = getCrl(crlUri);
 			return crl;
+		} catch (CRLException e) {
+			LOG.debug("error parsing CRL: " + e.getMessage(), e);
+			return null;
 		} catch (Exception e) {
-			LOG.error("getCRL: " + e.getMessage(), e);
+			LOG.error("find CRL error: " + e.getMessage(), e);
 			return null;
 		}
 	}
@@ -86,6 +89,7 @@ public class OnlineCrlRepository implements CrlRepository {
 		GetMethod getMethod = new GetMethod(downloadUrl);
 		int statusCode = httpClient.executeMethod(getMethod);
 		if (HttpURLConnection.HTTP_OK != statusCode) {
+			LOG.debug("HTTP status code: " + statusCode);
 			return null;
 		}
 		CertificateFactory certificateFactory = CertificateFactory
