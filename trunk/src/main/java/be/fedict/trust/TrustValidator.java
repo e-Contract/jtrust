@@ -21,7 +21,6 @@ package be.fedict.trust;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -108,26 +107,21 @@ public class TrustValidator {
 			throw new CertPathValidatorException("certificate path is empty");
 		}
 
-		Iterator<X509Certificate> certIterator = certificatePath.iterator();
-		X509Certificate childCertificate = null;
-		while (certIterator.hasNext()) {
-			X509Certificate certificate = certIterator.next();
-			/*
-			 * One of the disadvantages of a bottom-up validation approach is
-			 * the risk for denial-of-service attack via the CRL distribution
-			 * point extensions.
-			 * 
-			 * TODO: top-down validation
-			 */
+		int certIdx = certificatePath.size() - 1;
+		X509Certificate certificate = certificatePath.get(certIdx);
+		if (false == isSelfSigned(certificate)) {
+			throw new CertPathValidatorException(
+					"root certificate should be self-signed");
+		}
+		checkSelfSignedTrust(certificate, validationDate);
+		certIdx--;
+
+		while (certIdx >= 0) {
+			X509Certificate childCertificate = certificatePath.get(certIdx);
+			certIdx--;
 			checkTrustLink(childCertificate, certificate, validationDate);
-			if (isSelfSigned(certificate)) {
-				checkSelfSignedTrust(certificate, validationDate);
-				return;
-			}
 			childCertificate = certificate;
 		}
-
-		throw new CertPathValidatorException("no trust");
 	}
 
 	private void checkTrustLink(X509Certificate childCertificate,

@@ -36,6 +36,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,6 +58,17 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.ocsp.BasicOCSPResp;
+import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
+import org.bouncycastle.ocsp.CertificateID;
+import org.bouncycastle.ocsp.CertificateStatus;
+import org.bouncycastle.ocsp.OCSPReq;
+import org.bouncycastle.ocsp.OCSPReqGenerator;
+import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.ocsp.OCSPRespGenerator;
+import org.bouncycastle.ocsp.Req;
+import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -321,5 +333,47 @@ public class TrustTestUtils {
 
 		X509CRL x509Crl = crlGenerator.generate(issuerPrivateKey);
 		return x509Crl;
+	}
+
+	public static OCSPResp createOcspResp(X509Certificate certificate,
+			boolean revoked, X509Certificate issuerCertificate,
+			X509Certificate ocspResponderCertificate,
+			PrivateKey ocspResponderPrivateKey) throws Exception {
+		// request
+		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
+		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
+				issuerCertificate, certificate.getSerialNumber());
+		ocspReqGenerator.addRequest(certId);
+		OCSPReq ocspReq = ocspReqGenerator.generate();
+
+		BasicOCSPRespGenerator basicOCSPRespGenerator = new BasicOCSPRespGenerator(
+				ocspResponderCertificate.getPublicKey());
+
+		// request processing
+		Req[] requestList = ocspReq.getRequestList();
+		for (Req ocspRequest : requestList) {
+			CertificateID certificateID = ocspRequest.getCertID();
+			CertificateStatus certificateStatus;
+			if (revoked) {
+				certificateStatus = new RevokedStatus(new Date(),
+						CRLReason.unspecified);
+			} else {
+				certificateStatus = CertificateStatus.GOOD;
+			}
+			basicOCSPRespGenerator
+					.addResponse(certificateID, certificateStatus);
+		}
+
+		// basic response generation
+		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
+				"SHA1WITHRSA", ocspResponderPrivateKey, null, new Date(),
+				BouncyCastleProvider.PROVIDER_NAME);
+
+		// response generation
+		OCSPRespGenerator ocspRespGenerator = new OCSPRespGenerator();
+		OCSPResp ocspResp = ocspRespGenerator.generate(
+				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
+
+		return ocspResp;
 	}
 }

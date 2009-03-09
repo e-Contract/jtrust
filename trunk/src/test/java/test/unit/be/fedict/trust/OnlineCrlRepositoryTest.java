@@ -63,7 +63,7 @@ public class OnlineCrlRepositoryTest {
 		this.servletTester.addServlet(CrlRepositoryTestServlet.class, pathSpec);
 		this.servletTester.start();
 
-		String servletUrl = servletTester.createSocketConnector(true);
+		String servletUrl = this.servletTester.createSocketConnector(true);
 		this.crlUri = new URI(servletUrl + pathSpec);
 		this.validationDate = new Date();
 
@@ -84,7 +84,8 @@ public class OnlineCrlRepositoryTest {
 				.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
 
 		// operate
-		X509CRL crl = this.testedInstance.findCrl(crlUri, validationDate);
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri,
+				this.validationDate);
 
 		// verify
 		assertNull(crl);
@@ -96,7 +97,8 @@ public class OnlineCrlRepositoryTest {
 		CrlRepositoryTestServlet.setCrlData("foobar".getBytes());
 
 		// operate
-		X509CRL crl = this.testedInstance.findCrl(this.crlUri, validationDate);
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri,
+				this.validationDate);
 
 		// verify
 		assertNull(crl);
@@ -117,7 +119,7 @@ public class OnlineCrlRepositoryTest {
 
 		// operate
 		X509CRL result = this.testedInstance.findCrl(this.crlUri,
-				validationDate);
+				this.validationDate);
 
 		// verify
 		assertNotNull(result);

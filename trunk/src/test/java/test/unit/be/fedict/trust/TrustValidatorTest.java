@@ -71,8 +71,9 @@ public class TrustValidatorTest {
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateSelfSignedCertificate(
-				keyPair, "CN=Test", notBefore, notAfter);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -99,8 +100,9 @@ public class TrustValidatorTest {
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateSelfSignedCertificate(
-				keyPair, "CN=Test", notBefore, notAfter);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -126,8 +128,9 @@ public class TrustValidatorTest {
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime().minusMonths(2);
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateSelfSignedCertificate(
-				keyPair, "CN=Test", notBefore, notAfter);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -157,8 +160,9 @@ public class TrustValidatorTest {
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime().minusMonths(2);
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateSelfSignedCertificate(
-				keyPair, "CN=Test", notBefore, notAfter);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -188,9 +192,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -223,8 +227,8 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=TestRoot", notBefore, notAfter,
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=TestRoot", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
@@ -258,9 +262,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -298,9 +302,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -341,9 +345,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -353,6 +357,10 @@ public class TrustValidatorTest {
 		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
 
 		Date validationDate = new Date();
 
@@ -384,9 +392,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
@@ -396,6 +404,10 @@ public class TrustValidatorTest {
 		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
 
 		Date validationDate = new Date();
 
@@ -434,9 +446,9 @@ public class TrustValidatorTest {
 						notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter, rootCertificate,
-				rootKeyPair.getPrivate());
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
 
 		CertificateRepository mockCertificateRepository = EasyMock
 				.createMock(CertificateRepository.class);
