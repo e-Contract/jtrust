@@ -25,23 +25,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.BasicOCSPResp;
-import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.CertificateStatus;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.OCSPRespGenerator;
-import org.bouncycastle.ocsp.Req;
-import org.bouncycastle.ocsp.RevokedStatus;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -136,8 +125,8 @@ public class OcspTrustLinkerTest {
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
-				rootCertificate, rootKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -177,8 +166,8 @@ public class OcspTrustLinkerTest {
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
-				rootCertificate, rootKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -219,8 +208,9 @@ public class OcspTrustLinkerTest {
 				"ocsp-uri");
 
 		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
-		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
-				rootCertificate, ocspResponderKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+				rootCertificate, rootCertificate, ocspResponderKeyPair
+						.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -259,8 +249,8 @@ public class OcspTrustLinkerTest {
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = createOcspResp(certificate, false, rootCertificate,
-				rootCertificate, rootKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -304,7 +294,7 @@ public class OcspTrustLinkerTest {
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp2 = createOcspResp(certificate2, false,
+		OCSPResp ocspResp2 = TrustTestUtils.createOcspResp(certificate2, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -344,8 +334,8 @@ public class OcspTrustLinkerTest {
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = createOcspResp(certificate, true, rootCertificate,
-				rootCertificate, rootKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, true,
+				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -368,47 +358,5 @@ public class OcspTrustLinkerTest {
 		assertNotNull(result);
 		assertFalse(result);
 		EasyMock.verify(mockOcspRepository);
-	}
-
-	private OCSPResp createOcspResp(X509Certificate certificate,
-			boolean revoked, X509Certificate issuerCertificate,
-			X509Certificate ocspResponderCertificate,
-			PrivateKey ocspResponderPrivateKey) throws Exception {
-		// request
-		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
-		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
-				issuerCertificate, certificate.getSerialNumber());
-		ocspReqGenerator.addRequest(certId);
-		OCSPReq ocspReq = ocspReqGenerator.generate();
-
-		BasicOCSPRespGenerator basicOCSPRespGenerator = new BasicOCSPRespGenerator(
-				ocspResponderCertificate.getPublicKey());
-
-		// request processing
-		Req[] requestList = ocspReq.getRequestList();
-		for (Req ocspRequest : requestList) {
-			CertificateID certificateID = ocspRequest.getCertID();
-			CertificateStatus certificateStatus;
-			if (revoked) {
-				certificateStatus = new RevokedStatus(new Date(),
-						CRLReason.unspecified);
-			} else {
-				certificateStatus = CertificateStatus.GOOD;
-			}
-			basicOCSPRespGenerator
-					.addResponse(certificateID, certificateStatus);
-		}
-
-		// basic response generation
-		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
-				"SHA1WITHRSA", ocspResponderPrivateKey, null, new Date(),
-				BouncyCastleProvider.PROVIDER_NAME);
-
-		// response generation
-		OCSPRespGenerator ocspRespGenerator = new OCSPRespGenerator();
-		OCSPResp ocspResp = ocspRespGenerator.generate(
-				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
-
-		return ocspResp;
 	}
 }

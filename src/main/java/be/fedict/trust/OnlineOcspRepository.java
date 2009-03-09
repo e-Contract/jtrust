@@ -71,20 +71,29 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate) {
-		LOG.debug("OCSP URI: " + ocspUri);
-		byte[] ocspReqData;
 		try {
-			OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
-			CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
-					issuerCertificate, certificate.getSerialNumber());
-			ocspReqGenerator.addRequest(certId);
-			OCSPReq ocspReq = ocspReqGenerator.generate();
-			ocspReqData = ocspReq.getEncoded();
+			OCSPResp ocspResp = getOcspResponse(ocspUri, certificate,
+					issuerCertificate);
+			return ocspResp;
 		} catch (OCSPException e) {
-			throw new RuntimeException("OCSP error: " + e.getMessage(), e);
+			LOG.debug("OCSP error: " + e.getMessage(), e);
+			return null;
 		} catch (IOException e) {
-			throw new RuntimeException("I/O error: " + e.getMessage(), e);
+			LOG.debug("I/O error: " + e.getMessage(), e);
+			return null;
 		}
+	}
+
+	private OCSPResp getOcspResponse(URI ocspUri, X509Certificate certificate,
+			X509Certificate issuerCertificate) throws OCSPException,
+			IOException {
+		LOG.debug("OCSP URI: " + ocspUri);
+		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
+		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
+				issuerCertificate, certificate.getSerialNumber());
+		ocspReqGenerator.addRequest(certId);
+		OCSPReq ocspReq = ocspReqGenerator.generate();
+		byte[] ocspReqData = ocspReq.getEncoded();
 
 		PostMethod postMethod = new PostMethod(ocspUri.toString());
 		RequestEntity requestEntity = new ByteArrayRequestEntity(ocspReqData,
@@ -106,32 +115,38 @@ public class OnlineOcspRepository implements OcspRepository {
 		} catch (ConnectException e) {
 			LOG.debug("OCSP responder is down");
 			return null;
-		} catch (IOException e) {
-			throw new RuntimeException("I/O error: " + e.getMessage(), e);
 		}
 
 		if (HttpURLConnection.HTTP_OK != responseCode) {
 			LOG.error("HTTP response code: " + responseCode);
 			return null;
 		}
+
 		Header responseContentTypeHeader = postMethod
 				.getResponseHeader("Content-Type");
 		if (null == responseContentTypeHeader) {
+			LOG.debug("no Content-Type response header");
 			return null;
 		}
 		String resultContentType = responseContentTypeHeader.getValue();
 		if (!"application/ocsp-response".equals(resultContentType)) {
-			LOG.warn("result content type not application/ocsp-response");
+			LOG.debug("result content type not application/ocsp-response");
+			return null;
 		}
-		OCSPResp ocspResp;
-		try {
-			ocspResp = new OCSPResp(postMethod.getResponseBodyAsStream());
-			LOG.debug("OCSP response size: " + ocspResp.getEncoded().length
-					+ " bytes");
-		} catch (IOException e) {
-			throw new RuntimeException("OCSP response decoding error: "
-					+ e.getMessage(), e);
+
+		Header responseContentLengthHeader = postMethod
+				.getResponseHeader("Content-Length");
+		if (null != responseContentLengthHeader) {
+			String resultContentLength = responseContentLengthHeader.getValue();
+			if ("0".equals(resultContentLength)) {
+				LOG.debug("no content returned");
+				return null;
+			}
 		}
+
+		OCSPResp ocspResp = new OCSPResp(postMethod.getResponseBodyAsStream());
+		LOG.debug("OCSP response size: " + ocspResp.getEncoded().length
+				+ " bytes");
 		return ocspResp;
 	}
 }
