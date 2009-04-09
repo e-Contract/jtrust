@@ -42,7 +42,8 @@ public class BelgianTrustValidatorFactory {
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules.
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * authentication certificates.
 	 * 
 	 * @return a trust validator instance.
 	 */
@@ -51,7 +52,8 @@ public class BelgianTrustValidatorFactory {
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules.
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * authentication certificates.
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
@@ -85,6 +87,27 @@ public class BelgianTrustValidatorFactory {
 				cachedCrlRepository));
 
 		trustValidator.addTrustLinker(fallbackTrustLinker);
+
+		KeyUsageCertificateConstraint keyUsageCertificateConstraint = new KeyUsageCertificateConstraint();
+		keyUsageCertificateConstraint.setDigitalSignatureFilter(true);
+		keyUsageCertificateConstraint.setNonRepudiationFilter(false);
+		trustValidator.addCertificateConstrain(keyUsageCertificateConstraint);
+
+		CertificatePoliciesCertificateConstraint certificatePoliciesCertificateConstraint = new CertificatePoliciesCertificateConstraint();
+		// RootCA citizen authn
+		certificatePoliciesCertificateConstraint
+				.addCertificatePolicy("2.16.56.1.1.1.2.2");
+		// RootCA foreigner authn
+		certificatePoliciesCertificateConstraint
+				.addCertificatePolicy("2.16.56.1.1.1.7.2");
+		// RootCA2 citizen authn
+		certificatePoliciesCertificateConstraint
+				.addCertificatePolicy("2.16.56.9.1.1.2.2");
+		// RootCA2 foreigner authn
+		certificatePoliciesCertificateConstraint
+				.addCertificatePolicy("2.16.56.9.1.1.7.2");
+		trustValidator
+				.addCertificateConstrain(certificatePoliciesCertificateConstraint);
 
 		return trustValidator;
 	}

@@ -24,6 +24,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Trust Validator.
  * 
@@ -32,9 +35,13 @@ import java.util.List;
  */
 public class TrustValidator {
 
+	private static final Log LOG = LogFactory.getLog(TrustValidator.class);
+
 	private final CertificateRepository certificateRepository;
 
 	private final List<TrustLinker> trustLinkers;
+
+	private final List<CertificateConstraint> certificateConstraints;
 
 	/**
 	 * Main constructor.
@@ -45,6 +52,7 @@ public class TrustValidator {
 	public TrustValidator(CertificateRepository certificateRepository) {
 		this.certificateRepository = certificateRepository;
 		this.trustLinkers = new LinkedList<TrustLinker>();
+		this.certificateConstraints = new LinkedList<CertificateConstraint>();
 	}
 
 	/**
@@ -56,6 +64,17 @@ public class TrustValidator {
 	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);
+	}
+
+	/**
+	 * Adds a certificate constraint to this trust validator.
+	 * 
+	 * @param certificateConstraint
+	 *            the certificate constraint component.
+	 */
+	public void addCertificateConstrain(
+			CertificateConstraint certificateConstraint) {
+		this.certificateConstraints.add(certificateConstraint);
 	}
 
 	/**
@@ -109,6 +128,8 @@ public class TrustValidator {
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
+		LOG.debug("verifying root certificate: "
+				+ certificate.getSubjectX500Principal());
 		if (false == isSelfSigned(certificate)) {
 			throw new CertPathValidatorException(
 					"root certificate should be self-signed");
@@ -118,9 +139,17 @@ public class TrustValidator {
 
 		while (certIdx >= 0) {
 			X509Certificate childCertificate = certificatePath.get(certIdx);
+			LOG.debug("verifying certificate: "
+					+ childCertificate.getSubjectX500Principal());
 			certIdx--;
 			checkTrustLink(childCertificate, certificate, validationDate);
-			childCertificate = certificate;
+			certificate = childCertificate;
+		}
+
+		for (CertificateConstraint certificateConstraint : this.certificateConstraints) {
+			if (false == certificateConstraint.check(certificate)) {
+				throw new CertPathValidatorException("certificate constraint");
+			}
 		}
 	}
 
