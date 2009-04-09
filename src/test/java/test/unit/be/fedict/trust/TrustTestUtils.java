@@ -53,6 +53,7 @@ import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -126,6 +127,19 @@ public class TrustTestUtils {
 			String crlUri, String ocspUri) throws IOException,
 			InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {
+		X509Certificate certificate = generateCertificate(subjectPublicKey,
+				subjectDn, notBefore, notAfter, issuerCertificate,
+				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null);
+		return certificate;
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage)
+			throws IOException, InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
 		String signatureAlgorithm = "SHA1withRSA";
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
@@ -187,6 +201,11 @@ public class TrustTestUtils {
 					authorityInformationAccess);
 		}
 
+		if (null != keyUsage) {
+			certificateGenerator.addExtension(X509Extensions.KeyUsage, true,
+					keyUsage);
+		}
+
 		X509Certificate certificate;
 		certificate = certificateGenerator.generate(issuerPrivateKey);
 
@@ -238,11 +257,21 @@ public class TrustTestUtils {
 			DateTime notAfter, boolean caFlag, int pathLength, String crlUri)
 			throws IOException, InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {
+		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
+				notAfter, caFlag, pathLength, crlUri, null);
+	}
+
+	public static X509Certificate generateSelfSignedCertificate(
+			KeyPair keyPair, String subjectDn, DateTime notBefore,
+			DateTime notAfter, boolean caFlag, int pathLength, String crlUri,
+			KeyUsage keyUsage) throws IOException, InvalidKeyException,
+			IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException {
 		PublicKey subjectPublicKey = keyPair.getPublic();
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
 				subjectDn, notBefore, notAfter, null, issuerPrivateKey, caFlag,
-				pathLength, crlUri);
+				pathLength, crlUri, null, keyUsage);
 		return certificate;
 	}
 

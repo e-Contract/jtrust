@@ -36,6 +36,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.CertificateConstraint;
 import be.fedict.trust.CertificateRepository;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustValidator;
@@ -324,6 +325,164 @@ public class TrustValidatorTest {
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
+						validationDate)).andReturn(true);
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
+
+		trustValidator.isTrusted(certificatePath, validationDate);
+
+		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+	}
+
+	@Test
+	public void trustWithCertificateConstraint() throws Exception {
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
+						validationDate)).andReturn(true);
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		CertificateConstraint mockCertificateConstraint = EasyMock
+				.createMock(CertificateConstraint.class);
+		EasyMock.expect(mockCertificateConstraint.check(certificate))
+				.andReturn(true);
+		trustValidator.addCertificateConstrain(mockCertificateConstraint);
+
+		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
+				mockTrustLinker);
+
+		trustValidator.isTrusted(certificatePath, validationDate);
+
+		EasyMock.verify(mockCertificateRepository, mockCertificateConstraint,
+				mockTrustLinker);
+	}
+
+	@Test
+	public void trustInvalidCertificateConstraint() throws Exception {
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
+						validationDate)).andReturn(true);
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		CertificateConstraint mockCertificateConstraint = EasyMock
+				.createMock(CertificateConstraint.class);
+		EasyMock.expect(mockCertificateConstraint.check(certificate))
+				.andReturn(false);
+		trustValidator.addCertificateConstrain(mockCertificateConstraint);
+
+		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
+				mockTrustLinker);
+
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository,
+					mockCertificateConstraint, mockTrustLinker);
+		}
+	}
+
+	@Test
+	public void trustLinkThreeCertificates() throws Exception {
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair interKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate interCertificate = TrustTestUtils.generateCertificate(
+				interKeyPair.getPublic(), "CN=Inter", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				interCertificate, interKeyPair.getPrivate());
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+		certificatePath.add(interCertificate);
+		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(interCertificate, rootCertificate,
+						validationDate)).andReturn(true);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(certificate, interCertificate,
 						validationDate)).andReturn(true);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
