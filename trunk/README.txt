@@ -3,15 +3,15 @@ README for FedICT jTrust Project
 
 === 1. Introduction
 
-This project contains the source core tree of the FedICT jTrust library.
+This project contains the source code tree of the FedICT jTrust library.
 The source code is hosted at: http://code.google.com/p/jtrust/
 
 
 === 2. Requirements
 
 The following is required for compiling the eID Applet software:
-* Sun Java 1.6.0_12
-* Apache Maven 2.0.9
+* Sun Java 1.6.0_13
+* Apache Maven 2.0.10
 
 
 === 3. Build
