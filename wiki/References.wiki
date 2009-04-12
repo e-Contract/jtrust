@@ -1,0 +1,6 @@
+#summary References
+
+= References =
+
+  * [http://www.ietf.org/rfc/rfc3280.txt Internet X.509 Public Key Infrastructure - Certificate and Certificate Revocation List (CRL) Profile]
+  * [http://www.ietf.org/rfc/rfc2560.txt X.509 Internet Public Key Infrastructure - Online Certificate Status Protocol - OCSP]
