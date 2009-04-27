@@ -64,9 +64,10 @@ public class OcspTrustLinker implements TrustLinker {
 	private final OcspRepository ocspRepository;
 
 	/**
-	 * Default OCSP freshness interval.
+	 * Default OCSP freshness interval. Apparently 10 seconds it too low for NTP
+	 * synchronized servers.
 	 */
-	public static final long DEFAULT_FRESHNESS_INTERVAL = 1000 * 10;
+	public static final long DEFAULT_FRESHNESS_INTERVAL = 1000 * 60;
 
 	private long freshnessInterval = DEFAULT_FRESHNESS_INTERVAL;
 
@@ -219,8 +220,9 @@ public class OcspTrustLinker implements TrustLinker {
 			Date thisUpdate = singleResp.getThisUpdate();
 			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
 			if (dt > this.freshnessInterval) {
-				LOG.debug("freshness interval exceeded: " + dt
-						+ " milliseconds");
+				LOG
+						.warn("freshness interval exceeded: " + dt
+								+ " milliseconds");
 				continue;
 			}
 			if (null == singleResp.getCertStatus()) {

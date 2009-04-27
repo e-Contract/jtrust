@@ -11,4 +11,6 @@ TrustValidator trustValidator =
     BelgianTrustValidatorFactory.createTrustValidator();
 
 trustValidator.isTrusted(certificateChain);
-+-- 
++--
+
+ Note: the BouncyCastle Security provider should be registered in the JCA. 
