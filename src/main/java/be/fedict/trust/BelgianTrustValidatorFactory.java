@@ -61,6 +61,28 @@ public class BelgianTrustValidatorFactory {
 	 */
 	public static TrustValidator createTrustValidator(
 			NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(networkConfig,
+				null);
+		return trustValidator;
+	}
+
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * authentication certificates.
+	 * 
+	 * <p>
+	 * Via the external trust linker one can implement a CRL fetcher validation
+	 * architecture based on Java EE.
+	 * </p>
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @param externalTrustLinker
+	 *            the optional external trust linker to be used.
+	 * @return a trust validator instance.
+	 */
+	public static TrustValidator createTrustValidator(
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		// trust points
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
@@ -82,6 +104,9 @@ public class BelgianTrustValidatorFactory {
 				crlRepository);
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
+		if (null != externalTrustLinker) {
+			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
+		}
 		fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
 		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
 				cachedCrlRepository));
