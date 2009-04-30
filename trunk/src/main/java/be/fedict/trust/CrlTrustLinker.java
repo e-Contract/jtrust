@@ -97,7 +97,7 @@ public class CrlTrustLinker implements TrustLinker {
 		return false;
 	}
 
-	private boolean checkCrlIntegrity(X509CRL x509crl,
+	public static boolean checkCrlIntegrity(X509CRL x509crl,
 			X509Certificate issuerCertificate, Date validationDate) {
 		if (false == x509crl.getIssuerX500Principal().equals(
 				issuerCertificate.getSubjectX500Principal())) {
