@@ -163,14 +163,15 @@ public class TrustValidator {
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			Boolean trusted = trustLinker.hasTrustLink(childCertificate,
 					certificate, validationDate);
-			if (null != trusted) {
-				if (trusted) {
-					sometrustLinkerTrusts = true;
-				} else {
-					throw new CertPathValidatorException("no trust between "
-							+ childCertificate.getSubjectX500Principal()
-							+ " and " + certificate.getSubjectX500Principal());
-				}
+			if (null == trusted) {
+				continue;
+			}
+			if (trusted) {
+				sometrustLinkerTrusts = true;
+			} else {
+				throw new CertPathValidatorException("untrusted between "
+						+ childCertificate.getSubjectX500Principal() + " and "
+						+ certificate.getSubjectX500Principal());
 			}
 		}
 		if (false == sometrustLinkerTrusts) {
