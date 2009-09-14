@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
  * Online CRL repository. This CRL repository implementation will download the
  * CRLs from the given CRL URIs.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class OnlineCrlRepository implements CrlRepository {

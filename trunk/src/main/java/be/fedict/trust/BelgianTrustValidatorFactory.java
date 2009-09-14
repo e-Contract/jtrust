@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Trust Validator Factory for Belgian (eID) PKI.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class BelgianTrustValidatorFactory {

@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Key Usage Certificate Constraint implementation.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class KeyUsageCertificateConstraint implements CertificateConstraint {

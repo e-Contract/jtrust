@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * Public key trust linker implementation. Performs simple sanity checks based
  * on the public keys.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class PublicKeyTrustLinker implements TrustLinker {

@@ -44,7 +44,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 /**
  * Trust linker implementation based on CRL revocation information.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class CrlTrustLinker implements TrustLinker {
@@ -110,11 +110,14 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 		Date thisUpdate = x509crl.getThisUpdate();
 		LOG.debug("validation date: " + validationDate);
+		LOG.debug("CRL this update: " + thisUpdate);
 		if (thisUpdate.after(validationDate)) {
+			LOG.warn("CRL too young");
 			return false;
 		}
 		LOG.debug("CRL next update: " + x509crl.getNextUpdate());
 		if (validationDate.after(x509crl.getNextUpdate())) {
+			LOG.debug("CRL too old");
 			return false;
 		}
 		return true;

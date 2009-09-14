@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * In-Memory Certificate Repository implementation.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class MemoryCertificateRepository implements CertificateRepository {

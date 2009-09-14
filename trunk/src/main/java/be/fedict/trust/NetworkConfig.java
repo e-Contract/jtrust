@@ -21,7 +21,7 @@ package be.fedict.trust;
 /**
  * Network configuration.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class NetworkConfig {

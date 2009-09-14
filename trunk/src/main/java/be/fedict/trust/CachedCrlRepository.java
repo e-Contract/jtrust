@@ -33,7 +33,7 @@ import org.joda.time.DateTime;
  * A cached CRL repository implementation. This CRL repository will cache CRLs
  * in memory.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class CachedCrlRepository implements CrlRepository {

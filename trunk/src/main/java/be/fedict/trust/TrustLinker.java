@@ -24,7 +24,7 @@ import java.util.Date;
 /**
  * Interface for trust linker components.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public interface TrustLinker {

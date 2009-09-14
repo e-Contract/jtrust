@@ -23,7 +23,7 @@ import java.security.cert.X509Certificate;
 /**
  * Interface for certificate repository component.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public interface CertificateRepository {

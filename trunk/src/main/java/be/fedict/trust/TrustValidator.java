@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Trust Validator.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class TrustValidator {

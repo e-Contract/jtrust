@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * Interface for CRL repository components.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public interface CrlRepository {
