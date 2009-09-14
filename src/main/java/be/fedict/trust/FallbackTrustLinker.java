@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Fallback trust linker. Implements a trust linker fallback strategy.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class FallbackTrustLinker implements TrustLinker {

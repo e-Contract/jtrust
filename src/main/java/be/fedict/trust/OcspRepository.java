@@ -26,7 +26,7 @@ import org.bouncycastle.ocsp.OCSPResp;
 /**
  * Interface for OCSP repository components.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public interface OcspRepository {

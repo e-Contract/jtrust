@@ -37,7 +37,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 /**
  * Certificate Policies certificate constraint implementation.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class CertificatePoliciesCertificateConstraint implements

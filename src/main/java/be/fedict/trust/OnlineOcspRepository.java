@@ -41,7 +41,7 @@ import org.bouncycastle.ocsp.OCSPResp;
  * Online OCSP repository. This implementation will contact the OCSP Responder
  * to retrieve the OCSP response.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class OnlineOcspRepository implements OcspRepository {

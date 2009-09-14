@@ -54,7 +54,7 @@ import org.bouncycastle.ocsp.SingleResp;
 /**
  * Trust linker based on OCSP revocation information.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public class OcspTrustLinker implements TrustLinker {

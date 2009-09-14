@@ -23,7 +23,7 @@ import java.security.cert.X509Certificate;
 /**
  * Interface for X509 certificate constraint components.
  * 
- * @author fcorneli
+ * @author Frank Cornelis
  * 
  */
 public interface CertificateConstraint {
