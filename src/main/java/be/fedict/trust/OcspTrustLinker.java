@@ -67,7 +67,7 @@ public class OcspTrustLinker implements TrustLinker {
 	 * Default OCSP freshness interval. Apparently 10 seconds it too low for NTP
 	 * synchronized servers.
 	 */
-	public static final long DEFAULT_FRESHNESS_INTERVAL = 1000 * 60;
+	public static final long DEFAULT_FRESHNESS_INTERVAL = 1000 * 60 * 5;
 
 	private long freshnessInterval = DEFAULT_FRESHNESS_INTERVAL;
 
