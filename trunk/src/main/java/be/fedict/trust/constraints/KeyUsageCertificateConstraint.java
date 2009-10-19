@@ -16,12 +16,14 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import be.fedict.trust.CertificateConstraint;
 
 /**
  * Key Usage Certificate Constraint implementation.

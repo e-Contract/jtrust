@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
@@ -25,6 +25,14 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.trust.CertificateConstraint;
+
+/**
+ * Distinguished Name Certificate Constraint implemenation.
+ * 
+ * @author Frank Cornelis
+ * 
+ */
 public class DistinguishedNameCertificateConstraint implements
 		CertificateConstraint {
 

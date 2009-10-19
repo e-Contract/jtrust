@@ -29,7 +29,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.KeyUsageCertificateConstraint;
+import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 
 public class KeyUsageCertificateConstraintTest {
 
