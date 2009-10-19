@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.constraints;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,6 +33,8 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
+
+import be.fedict.trust.CertificateConstraint;
 
 /**
  * Certificate Policies certificate constraint implementation.

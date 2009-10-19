@@ -26,6 +26,9 @@ import java.security.cert.X509Certificate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
+import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
+import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
