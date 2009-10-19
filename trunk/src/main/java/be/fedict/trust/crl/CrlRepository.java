@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.crl;
 
 import java.net.URI;
 import java.security.cert.X509CRL;

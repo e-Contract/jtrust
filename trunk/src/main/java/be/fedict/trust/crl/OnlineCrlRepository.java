@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.crl;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -32,6 +32,8 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import be.fedict.trust.NetworkConfig;
 
 /**
  * Online CRL repository. This CRL repository implementation will download the

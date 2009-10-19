@@ -132,7 +132,8 @@ public class TrustValidator {
 				+ certificate.getSubjectX500Principal());
 		if (false == isSelfSigned(certificate)) {
 			throw new CertPathValidatorException(
-					"root certificate should be self-signed");
+					"root certificate should be self-signed: "
+							+ certificate.getSubjectX500Principal());
 		}
 		checkSelfSignedTrust(certificate, validationDate);
 		certIdx--;
@@ -147,8 +148,14 @@ public class TrustValidator {
 		}
 
 		for (CertificateConstraint certificateConstraint : this.certificateConstraints) {
+			String certificateConstraintName = certificateConstraint.getClass()
+					.getSimpleName();
+			LOG.debug("certificate constraint check: "
+					+ certificateConstraintName);
 			if (false == certificateConstraint.check(certificate)) {
-				throw new CertPathValidatorException("certificate constraint");
+				throw new CertPathValidatorException(
+						"certificate constraint failure: "
+								+ certificateConstraintName);
 			}
 		}
 	}
@@ -193,6 +200,7 @@ public class TrustValidator {
 			return;
 		}
 		throw new CertPathValidatorException(
-				"self-signed certificate not in repository");
+				"self-signed certificate not in repository: "
+						+ certificate.getSubjectX500Principal());
 	}
 }

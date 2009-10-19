@@ -10,7 +10,7 @@ The source code is hosted at: http://code.google.com/p/jtrust/
 === 2. Requirements
 
 The following is required for compiling the eID Applet software:
-* Sun Java 1.6.0_13
+* Sun Java 1.6.0_16
 * Apache Maven 2.0.10
 
 
@@ -33,7 +33,12 @@ repository location. Do this via:
     mvn eclipse:add-maven-repo -Declipse.workspace=<location of your workspace>
 
 
-=== 5. License
+=== 5. NetBeans IDE
+
+As of NetBeans version 6.7 this free IDE from Sun has native Maven 2 support.
+
+
+=== 6. License
 
 The license conditions can be found in the file: LICENSE.txt
 

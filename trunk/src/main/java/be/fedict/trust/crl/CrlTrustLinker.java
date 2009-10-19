@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.crl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,6 +40,8 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extensions;
+
+import be.fedict.trust.TrustLinker;
 
 /**
  * Trust linker implementation based on CRL revocation information.

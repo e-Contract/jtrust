@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.ocsp;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -36,6 +36,8 @@ import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
+
+import be.fedict.trust.NetworkConfig;
 
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder

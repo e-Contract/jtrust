@@ -84,9 +84,10 @@ public class CertificatePoliciesCertificateConstraint implements
 			PolicyInformation policyInfo = PolicyInformation
 					.getInstance(certPoliciesEnum.nextElement());
 			DERObjectIdentifier policyOid = policyInfo.getPolicyIdentifier();
-			if (this.certificatePolicies.contains(policyOid.getId())) {
-				LOG.debug("matching certificate policy OID: "
-						+ policyOid.getId());
+			String policyId = policyOid.getId();
+			LOG.debug("present policy OID: " + policyId);
+			if (this.certificatePolicies.contains(policyId)) {
+				LOG.debug("matching certificate policy OID: " + policyId);
 				return true;
 			}
 		}
