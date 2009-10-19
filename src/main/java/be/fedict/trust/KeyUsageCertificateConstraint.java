@@ -75,10 +75,12 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 			}
 			if (false == flag) {
 				if (keyUsage[idx]) {
+					LOG.debug("should not have key usage: " + idx);
 					return false;
 				}
 			} else {
 				if (false == keyUsage[idx]) {
+					LOG.debug("missing key usage: " + idx);
 					return false;
 				}
 			}

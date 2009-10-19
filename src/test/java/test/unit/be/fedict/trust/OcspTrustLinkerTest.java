@@ -36,8 +36,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.OcspRepository;
-import be.fedict.trust.OcspTrustLinker;
+import be.fedict.trust.ocsp.OcspRepository;
+import be.fedict.trust.ocsp.OcspTrustLinker;
 
 public class OcspTrustLinkerTest {
 

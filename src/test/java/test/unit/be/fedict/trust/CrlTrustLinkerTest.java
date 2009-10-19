@@ -39,8 +39,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.CrlRepository;
-import be.fedict.trust.CrlTrustLinker;
+import be.fedict.trust.crl.CrlRepository;
+import be.fedict.trust.crl.CrlTrustLinker;
 
 public class CrlTrustLinkerTest {
 

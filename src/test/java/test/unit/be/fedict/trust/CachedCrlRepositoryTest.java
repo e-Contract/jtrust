@@ -31,8 +31,8 @@ import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import be.fedict.trust.CachedCrlRepository;
-import be.fedict.trust.CrlRepository;
+import be.fedict.trust.crl.CachedCrlRepository;
+import be.fedict.trust.crl.CrlRepository;
 
 public class CachedCrlRepositoryTest {
 

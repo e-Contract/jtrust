@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.testing.ServletTester;
 
-import be.fedict.trust.OnlineCrlRepository;
+import be.fedict.trust.crl.OnlineCrlRepository;
 
 public class OnlineCrlRepositoryTest {
 

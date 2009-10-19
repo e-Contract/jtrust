@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.crl;
 
 import java.lang.ref.SoftReference;
 import java.net.URI;
@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+
 
 /**
  * A cached CRL repository implementation. This CRL repository will cache CRLs

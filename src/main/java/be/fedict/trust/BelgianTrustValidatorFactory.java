@@ -26,6 +26,12 @@ import java.security.cert.X509Certificate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.trust.crl.CachedCrlRepository;
+import be.fedict.trust.crl.CrlTrustLinker;
+import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.ocsp.OcspTrustLinker;
+import be.fedict.trust.ocsp.OnlineOcspRepository;
+
 /**
  * Trust Validator Factory for Belgian (eID) PKI.
  * 
@@ -66,6 +72,10 @@ public class BelgianTrustValidatorFactory {
 		return trustValidator;
 	}
 
+	private enum CertificateType {
+		AUTHN, SIGN, NATIONAL_REGISTRY
+	};
+
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
@@ -83,6 +93,39 @@ public class BelgianTrustValidatorFactory {
 	 */
 	public static TrustValidator createTrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+		TrustValidator trustValidator = createTrustValidator(
+				CertificateType.AUTHN, networkConfig, externalTrustLinker);
+
+		return trustValidator;
+	}
+
+	public static TrustValidator createNonRepudiationTrustValidator(
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+		TrustValidator trustValidator = createTrustValidator(
+				CertificateType.SIGN, networkConfig, externalTrustLinker);
+
+		return trustValidator;
+	}
+
+	public static TrustValidator createNonRepudiationTrustValidator(
+			NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(
+				CertificateType.SIGN, networkConfig, null);
+
+		return trustValidator;
+	}
+
+	public static TrustValidator createNationalRegistryTrustValidator(
+			NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(
+				CertificateType.NATIONAL_REGISTRY, networkConfig, null);
+
+		return trustValidator;
+	}
+
+	private static TrustValidator createTrustValidator(
+			CertificateType certificateType, NetworkConfig networkConfig,
+			TrustLinker externalTrustLinker) {
 		// trust points
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
@@ -114,25 +157,65 @@ public class BelgianTrustValidatorFactory {
 		trustValidator.addTrustLinker(fallbackTrustLinker);
 
 		KeyUsageCertificateConstraint keyUsageCertificateConstraint = new KeyUsageCertificateConstraint();
-		keyUsageCertificateConstraint.setDigitalSignatureFilter(true);
-		keyUsageCertificateConstraint.setNonRepudiationFilter(false);
+		switch (certificateType) {
+		case AUTHN:
+			keyUsageCertificateConstraint.setDigitalSignatureFilter(true);
+			keyUsageCertificateConstraint.setNonRepudiationFilter(false);
+			break;
+		case SIGN:
+			keyUsageCertificateConstraint.setDigitalSignatureFilter(false);
+			keyUsageCertificateConstraint.setNonRepudiationFilter(true);
+			break;
+		case NATIONAL_REGISTRY:
+			keyUsageCertificateConstraint.setDigitalSignatureFilter(true);
+			keyUsageCertificateConstraint.setNonRepudiationFilter(true);
+			break;
+		}
 		trustValidator.addCertificateConstrain(keyUsageCertificateConstraint);
 
 		CertificatePoliciesCertificateConstraint certificatePoliciesCertificateConstraint = new CertificatePoliciesCertificateConstraint();
-		// RootCA citizen authn
-		certificatePoliciesCertificateConstraint
-				.addCertificatePolicy("2.16.56.1.1.1.2.2");
-		// RootCA foreigner authn
-		certificatePoliciesCertificateConstraint
-				.addCertificatePolicy("2.16.56.1.1.1.7.2");
-		// RootCA2 citizen authn
-		certificatePoliciesCertificateConstraint
-				.addCertificatePolicy("2.16.56.9.1.1.2.2");
-		// RootCA2 foreigner authn
-		certificatePoliciesCertificateConstraint
-				.addCertificatePolicy("2.16.56.9.1.1.7.2");
+		switch (certificateType) {
+		case AUTHN:
+			// RootCA citizen authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.1.1.1.2.2");
+			// RootCA foreigner authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.1.1.1.7.2");
+			// RootCA2 citizen authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.9.1.1.2.2");
+			// RootCA2 foreigner authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.9.1.1.7.2");
+			break;
+		case SIGN:
+			// RootCA citizen sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.1.1.1.2.1");
+			// RootCA foreigner sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.1.1.1.7.1");
+			// RootCA2 citizen sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.9.1.1.2.1");
+			// RootCA2 foreigner sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.9.1.1.7.1");
+			break;
+		case NATIONAL_REGISTRY:
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.1.1.1.4");
+			break;
+		}
 		trustValidator
 				.addCertificateConstrain(certificatePoliciesCertificateConstraint);
+
+		if (CertificateType.NATIONAL_REGISTRY == certificateType) {
+			DistinguishedNameCertificateConstraint nameConstraint = new DistinguishedNameCertificateConstraint(
+					"CN=RRN, O=RRN, C=BE");
+			trustValidator.addCertificateConstrain(nameConstraint);
+		}
 
 		return trustValidator;
 	}

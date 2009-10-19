@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.ocsp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,6 +50,9 @@ import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.SingleResp;
+
+import be.fedict.trust.PublicKeyTrustLinker;
+import be.fedict.trust.TrustLinker;
 
 /**
  * Trust linker based on OCSP revocation information.
