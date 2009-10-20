@@ -1,0 +1,16 @@
+Java X509 Certificate Trust Library
+
+ This Java library allows for PKI validation of X509 certificates.
+ 
+ Usage:
+ 
++--
+List<X509Certificate> certificateChain = ...
+
+TrustValidator trustValidator =
+    BelgianTrustValidatorFactory.createTrustValidator();
+
+trustValidator.isTrusted(certificateChain);
++--
+
+ Note: the BouncyCastle Security provider should be registered in the JCA. 
