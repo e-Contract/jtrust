@@ -166,5 +166,9 @@
 	</reporting>
 	<distributionManagement>
 		<downloadUrl>http://code.google.com/p/jtrust/downloads/list</downloadUrl>
+		<repository>
+			<id>e-contract</id>
+			<url>scp://www.e-contract.be/home/maven2/repository</url>
+		</repository>
 	</distributionManagement>
 </project>
