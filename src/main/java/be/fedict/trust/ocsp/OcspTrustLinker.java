@@ -49,6 +49,7 @@ import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 
 import be.fedict.trust.PublicKeyTrustLinker;
@@ -221,6 +222,7 @@ public class OcspTrustLinker implements TrustLinker {
 				continue;
 			}
 			Date thisUpdate = singleResp.getThisUpdate();
+			LOG.debug("OCSP thisUpdate: " + thisUpdate);
 			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
 			if (dt > this.freshnessInterval) {
 				LOG
@@ -233,6 +235,11 @@ public class OcspTrustLinker implements TrustLinker {
 						+ childCertificate.getSubjectX500Principal());
 				return true;
 			} else {
+				LOG.debug("OCSP certificate status: "
+						+ singleResp.getCertStatus().getClass().getName());
+				if (singleResp.getCertStatus() instanceof RevokedStatus) {
+					LOG.debug("OCSP status revoked");
+				}
 				return false;
 			}
 		}
