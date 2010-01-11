@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
+import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
@@ -218,6 +219,13 @@ public class BelgianTrustValidatorFactory {
 			DistinguishedNameCertificateConstraint nameConstraint = new DistinguishedNameCertificateConstraint(
 					"CN=RRN, O=RRN, C=BE");
 			trustValidator.addCertificateConstrain(nameConstraint);
+		}
+
+		if (CertificateType.SIGN == certificateType) {
+			QCStatementsCertificateConstraint qcStatementsCertificateConstraint = new QCStatementsCertificateConstraint(
+					true);
+			trustValidator
+					.addCertificateConstrain(qcStatementsCertificateConstraint);
 		}
 
 		return trustValidator;
