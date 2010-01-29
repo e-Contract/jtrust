@@ -55,10 +55,14 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
 	 * 
+	 * @param certificateRepository
+	 *            containing the Belgian eID trust points.
+	 * 
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidator() {
-		return createTrustValidator(null);
+	public static TrustValidator createTrustValidator(
+			CertificateRepository certificateRepository) {
+		return createTrustValidator(null, certificateRepository);
 	}
 
 	/**
@@ -67,12 +71,15 @@ public class BelgianTrustValidatorFactory {
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
+	 * @param certificateRepository
+	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig) {
+			NetworkConfig networkConfig,
+			CertificateRepository certificateRepository) {
 		TrustValidator trustValidator = createTrustValidator(networkConfig,
-				null);
+				null, certificateRepository);
 		return trustValidator;
 	}
 
@@ -93,52 +100,68 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
 	 *            the optional external trust linker to be used.
+	 * @param certificateRepository
+	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
+			CertificateRepository certificateRepository) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.AUTHN, networkConfig, externalTrustLinker);
+				CertificateType.AUTHN, networkConfig, externalTrustLinker,
+				certificateRepository);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
+			CertificateRepository certificateRepository) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, externalTrustLinker);
+				CertificateType.SIGN, networkConfig, externalTrustLinker,
+				certificateRepository);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig) {
+			NetworkConfig networkConfig,
+			CertificateRepository certificateRepository) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, null);
+				CertificateType.SIGN, networkConfig, null,
+				certificateRepository);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNationalRegistryTrustValidator(
-			NetworkConfig networkConfig) {
+			NetworkConfig networkConfig,
+			CertificateRepository certificateRepository) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.NATIONAL_REGISTRY, networkConfig, null);
+				CertificateType.NATIONAL_REGISTRY, networkConfig, null,
+				certificateRepository);
 
 		return trustValidator;
 	}
 
 	private static TrustValidator createTrustValidator(
 			CertificateType certificateType, NetworkConfig networkConfig,
-			TrustLinker externalTrustLinker) {
-		// trust points
-		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-		X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
-		certificateRepository.addTrustPoint(rootCaCertificate);
-		X509Certificate rootCa2Certificate = loadCertificate("be/fedict/trust/belgiumrca2.crt");
-		certificateRepository.addTrustPoint(rootCa2Certificate);
+			TrustLinker externalTrustLinker,
+			CertificateRepository certificateRepository) {
 
-		TrustValidator trustValidator = new TrustValidator(
-				certificateRepository);
+		TrustValidator trustValidator;
+		if (null == certificateRepository) {
+			// trust points
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
+			memoryCertificateRepository.addTrustPoint(rootCaCertificate);
+			X509Certificate rootCa2Certificate = loadCertificate("be/fedict/trust/belgiumrca2.crt");
+			memoryCertificateRepository.addTrustPoint(rootCa2Certificate);
+
+			trustValidator = new TrustValidator(memoryCertificateRepository);
+		} else {
+			trustValidator = new TrustValidator(certificateRepository);
+		}
 
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
 
