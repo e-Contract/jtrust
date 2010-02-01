@@ -55,14 +55,10 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
 	 * 
-	 * @param certificateRepository
-	 *            containing the Belgian eID trust points.
-	 * 
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidator(
-			CertificateRepository certificateRepository) {
-		return createTrustValidator(null, certificateRepository);
+	public static TrustValidator createTrustValidator() {
+		return createTrustValidator(null);
 	}
 
 	/**
@@ -71,15 +67,12 @@ public class BelgianTrustValidatorFactory {
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
-	 * @param certificateRepository
-	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig,
-			CertificateRepository certificateRepository) {
+			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(networkConfig,
-				null, certificateRepository);
+				null);
 		return trustValidator;
 	}
 
@@ -100,48 +93,62 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
 	 *            the optional external trust linker to be used.
-	 * @param certificateRepository
-	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
-			CertificateRepository certificateRepository) {
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.AUTHN, networkConfig, externalTrustLinker,
-				certificateRepository);
+				CertificateType.AUTHN, networkConfig, externalTrustLinker, null);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
-			CertificateRepository certificateRepository) {
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, externalTrustLinker,
-				certificateRepository);
+				CertificateType.SIGN, networkConfig, externalTrustLinker, null);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig,
-			CertificateRepository certificateRepository) {
+			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, null,
-				certificateRepository);
+				CertificateType.SIGN, networkConfig, null, null);
 
 		return trustValidator;
 	}
 
 	public static TrustValidator createNationalRegistryTrustValidator(
-			NetworkConfig networkConfig,
-			CertificateRepository certificateRepository) {
+			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.NATIONAL_REGISTRY, networkConfig, null,
-				certificateRepository);
+				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null);
 
 		return trustValidator;
+	}
+
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * authentication certificates.
+	 * 
+	 * <p>
+	 * Via the external trust linker one can implement a CRL fetcher validation
+	 * architecture based on Java EE.
+	 * </p>
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @param externalTrustLinker
+	 *            the optional external trust linker to be used.
+	 * @param certificateRepository
+	 *            containing the Belgian eID trust points.
+	 * @return a trust validator instance.
+	 */
+	public static TrustValidator createTrustValidatorWithRepo(
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
+			CertificateRepository certificateRepository) {
+		return createTrustValidator(CertificateType.AUTHN, networkConfig,
+				externalTrustLinker, certificateRepository);
 	}
 
 	private static TrustValidator createTrustValidator(
