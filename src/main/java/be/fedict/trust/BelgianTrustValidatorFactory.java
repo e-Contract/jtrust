@@ -144,7 +144,7 @@ public class BelgianTrustValidatorFactory {
 	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidatorWithRepo(
+	public static TrustValidator createTrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
 			CertificateRepository certificateRepository) {
 		return createTrustValidator(CertificateType.AUTHN, networkConfig,
