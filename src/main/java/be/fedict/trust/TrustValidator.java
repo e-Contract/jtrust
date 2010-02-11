@@ -92,7 +92,15 @@ public class TrustValidator {
 		isTrusted(certificatePath, new Date());
 	}
 
-	private boolean isSelfSigned(X509Certificate certificate)
+	/**
+	 * Checks whether the given certificate is self-signed.
+	 * 
+	 * @param certificate
+	 *            the X509 certificate.
+	 * @return <code>true</code> if self-signed, <code>false</code> otherwise.
+	 * @throws CertPathValidatorException
+	 */
+	public static boolean isSelfSigned(X509Certificate certificate)
 			throws CertPathValidatorException {
 		if (false == certificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
