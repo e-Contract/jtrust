@@ -166,12 +166,13 @@
 	<distributionManagement>
 		<downloadUrl>http://code.google.com/p/jtrust/downloads/list</downloadUrl>
 		<repository>
-			<id>e-contract</id>
-			<url>scp://e-contract.be/home/maven2/repository</url>
+			<id>e-contract-deploy</id>
+			<url>scp://e-contract.be/maven2</url>
+			<uniqueVersion>false</uniqueVersion>
 		</repository>
 		<site>
 			<id>e-contract-site</id>
-			<url>scp://e-contract.be/home/dcontract/jtrust</url>
+			<url>scp://e-contract.be/site</url>
 		</site>
 	</distributionManagement>
 </project>
