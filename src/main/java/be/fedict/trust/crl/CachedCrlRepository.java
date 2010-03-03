@@ -21,6 +21,7 @@ package be.fedict.trust.crl;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
-
 
 /**
  * A cached CRL repository implementation. This CRL repository will cache CRLs
@@ -61,22 +61,23 @@ public class CachedCrlRepository implements CrlRepository {
 		this.cacheAgingHours = DEFAULT_CACHE_AGING_HOURS;
 	}
 
-	public X509CRL findCrl(URI crlUri, Date validationDate) {
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate) {
 		SoftReference<X509CRL> crlRef = this.crlCache.get(crlUri);
 		if (null == crlRef) {
 			LOG.debug("no CRL entry found: " + crlUri);
-			return refreshCrl(crlUri, validationDate);
+			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
 		X509CRL crl = crlRef.get();
 		if (null == crl) {
 			LOG.debug("CRL garbage collected: " + crlUri);
-			return refreshCrl(crlUri, validationDate);
+			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
 		if (validationDate.after(crl.getNextUpdate())) {
 			LOG.debug("CRL no longer valid: " + crlUri);
 			LOG.debug("validation date: " + validationDate);
 			LOG.debug("CRL next update: " + crl.getNextUpdate());
-			return refreshCrl(crlUri, validationDate);
+			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
 		/*
 		 * The the Belgian PKI the nextUpdate CRL extension indicates 7 days.
@@ -89,14 +90,16 @@ public class CachedCrlRepository implements CrlRepository {
 				.plusHours(this.cacheAgingHours);
 		if (validationDate.after(cacheMaturityDateTime.toDate())) {
 			LOG.debug("refreshing the CRL cache: " + crlUri);
-			return refreshCrl(crlUri, validationDate);
+			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
 		LOG.debug("using cached CRL: " + crlUri);
 		return crl;
 	}
 
-	private X509CRL refreshCrl(URI crlUri, Date validationDate) {
-		X509CRL crl = this.crlRepository.findCrl(crlUri, validationDate);
+	private X509CRL refreshCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate) {
+		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate,
+				validationDate);
 		this.crlCache.put(crlUri, new SoftReference<X509CRL>(crl));
 		return crl;
 	}

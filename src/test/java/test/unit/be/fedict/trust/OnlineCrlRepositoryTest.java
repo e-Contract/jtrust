@@ -84,7 +84,7 @@ public class OnlineCrlRepositoryTest {
 				.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
 
 		// operate
-		X509CRL crl = this.testedInstance.findCrl(this.crlUri,
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
 				this.validationDate);
 
 		// verify
@@ -97,7 +97,7 @@ public class OnlineCrlRepositoryTest {
 		CrlRepositoryTestServlet.setCrlData("foobar".getBytes());
 
 		// operate
-		X509CRL crl = this.testedInstance.findCrl(this.crlUri,
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
 				this.validationDate);
 
 		// verify
@@ -118,7 +118,7 @@ public class OnlineCrlRepositoryTest {
 		CrlRepositoryTestServlet.setCrlData(crl.getEncoded());
 
 		// operate
-		X509CRL result = this.testedInstance.findCrl(this.crlUri,
+		X509CRL result = this.testedInstance.findCrl(this.crlUri, certificate,
 				this.validationDate);
 
 		// verify
