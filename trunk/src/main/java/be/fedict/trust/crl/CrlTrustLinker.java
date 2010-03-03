@@ -77,7 +77,8 @@ public class CrlTrustLinker implements TrustLinker {
 			return null;
 		}
 		LOG.debug("CRL URI: " + crlUri);
-		X509CRL x509crl = this.crlRepository.findCrl(crlUri, validationDate);
+		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
+				validationDate);
 		if (null == x509crl) {
 			return null;
 		}
@@ -87,6 +88,7 @@ public class CrlTrustLinker implements TrustLinker {
 			return null;
 		}
 
+		// fill up revocation data with this valid CRL
 		try {
 			revocationData.getCrlRevocationData().add(
 					new CRLRevocationData(x509crl.getEncoded()));

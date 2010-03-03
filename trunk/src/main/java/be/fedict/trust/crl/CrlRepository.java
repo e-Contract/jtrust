@@ -20,6 +20,7 @@ package be.fedict.trust.crl;
 
 import java.net.URI;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
@@ -35,9 +36,12 @@ public interface CrlRepository {
 	 * 
 	 * @param crlUri
 	 *            the CRL URI.
+	 * @param issuerCertificate
+	 *            the issuer certificate
 	 * @param validationDate
 	 *            the validation date.
 	 * @return the X509 CRL, or <code>null</code> if not found.
 	 */
-	X509CRL findCrl(URI crlUri, Date validationDate);
+	X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate);
 }

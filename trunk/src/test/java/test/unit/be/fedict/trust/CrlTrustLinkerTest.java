@@ -128,8 +128,8 @@ public class CrlTrustLinkerTest {
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(null);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(null);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -164,8 +164,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -202,8 +202,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore.minusMonths(2), notAfter
 						.minusMonths(2));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -238,8 +238,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				certificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -274,8 +274,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -311,8 +311,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore.plusMonths(2), notAfter
 						.plusMonths(2));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -348,8 +348,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore, notAfter, certificate
 						.getSerialNumber());
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -388,8 +388,8 @@ public class CrlTrustLinkerTest {
 								certificate.getSerialNumber(), notBefore
 										.plusDays(2))));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), validationDate))
-				.andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 

@@ -25,6 +25,7 @@ import java.security.cert.CRLException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -65,7 +66,8 @@ public class OnlineCrlRepository implements CrlRepository {
 		this(null);
 	}
 
-	public X509CRL findCrl(URI crlUri, Date validationDate) {
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate) {
 		try {
 			X509CRL crl = getCrl(crlUri);
 			return crl;
