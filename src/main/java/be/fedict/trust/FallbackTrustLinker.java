@@ -51,10 +51,11 @@ public class FallbackTrustLinker implements TrustLinker {
 	}
 
 	public Boolean hasTrustLink(X509Certificate childCertificate,
-			X509Certificate certificate, Date validationDate) {
+			X509Certificate certificate, Date validationDate,
+			RevocationData revocationData) {
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			Boolean result = trustLinker.hasTrustLink(childCertificate,
-					certificate, validationDate);
+					certificate, validationDate, revocationData);
 			if (null == result) {
 				continue;
 			}

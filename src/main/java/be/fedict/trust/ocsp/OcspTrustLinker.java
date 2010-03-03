@@ -52,7 +52,9 @@ import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 
+import be.fedict.trust.OCSPRevocationData;
 import be.fedict.trust.PublicKeyTrustLinker;
+import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 
 /**
@@ -98,7 +100,8 @@ public class OcspTrustLinker implements TrustLinker {
 	}
 
 	public Boolean hasTrustLink(X509Certificate childCertificate,
-			X509Certificate certificate, Date validationDate) {
+			X509Certificate certificate, Date validationDate,
+			RevocationData revocationData) {
 		URI ocspUri = getOcspUri(childCertificate);
 		if (null == ocspUri) {
 			return null;
@@ -162,7 +165,7 @@ public class OcspTrustLinker implements TrustLinker {
 				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 				Boolean trusted = publicKeyTrustLinker.hasTrustLink(
 						ocspResponderCertificate, issuingCaCertificate,
-						validationDate);
+						validationDate, revocationData);
 				if (null != trusted) {
 					if (false == trusted) {
 						LOG.debug("OCSP responder not trusted");
@@ -233,6 +236,7 @@ public class OcspTrustLinker implements TrustLinker {
 			if (null == singleResp.getCertStatus()) {
 				LOG.debug("OCSP OK for: "
 						+ childCertificate.getSubjectX500Principal());
+				addRevocationData(revocationData, ocspResp);
 				return true;
 			} else {
 				LOG.debug("OCSP certificate status: "
@@ -240,12 +244,24 @@ public class OcspTrustLinker implements TrustLinker {
 				if (singleResp.getCertStatus() instanceof RevokedStatus) {
 					LOG.debug("OCSP status revoked");
 				}
+				addRevocationData(revocationData, ocspResp);
 				return false;
 			}
 		}
 
 		LOG.debug("no matching OCSP response entry");
 		return null;
+	}
+
+	private void addRevocationData(RevocationData revocationData,
+			OCSPResp ocspResp) {
+		try {
+			revocationData.getOcspRevocationData().add(
+					new OCSPRevocationData(ocspResp.getEncoded()));
+		} catch (IOException e) {
+			LOG.error("IOException: " + e.getMessage(), e);
+			throw new RuntimeException("IOException : " + e.getMessage(), e);
+		}
 	}
 
 	private URI getOcspUri(X509Certificate certificate) {

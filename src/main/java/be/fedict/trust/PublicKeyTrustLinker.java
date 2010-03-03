@@ -37,7 +37,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			.getLog(PublicKeyTrustLinker.class);
 
 	public Boolean hasTrustLink(X509Certificate childCertificate,
-			X509Certificate certificate, Date validationDate) {
+			X509Certificate certificate, Date validationDate,
+			RevocationData revocationData) {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
 			LOG

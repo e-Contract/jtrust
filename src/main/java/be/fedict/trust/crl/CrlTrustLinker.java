@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
@@ -41,6 +42,8 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
+import be.fedict.trust.CRLRevocationData;
+import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 
 /**
@@ -66,7 +69,8 @@ public class CrlTrustLinker implements TrustLinker {
 	}
 
 	public Boolean hasTrustLink(X509Certificate childCertificate,
-			X509Certificate certificate, Date validationDate) {
+			X509Certificate certificate, Date validationDate,
+			RevocationData revocationData) {
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
 			LOG.debug("no CRL uri in certificate");
@@ -82,6 +86,15 @@ public class CrlTrustLinker implements TrustLinker {
 		if (false == crlIntegrityResult) {
 			return null;
 		}
+
+		try {
+			revocationData.getCrlRevocationData().add(
+					new CRLRevocationData(x509crl.getEncoded()));
+		} catch (CRLException e) {
+			LOG.error("CRLException: " + e.getMessage(), e);
+			throw new RuntimeException("CRLException : " + e.getMessage(), e);
+		}
+
 		X509CRLEntry crlEntry = x509crl.getRevokedCertificate(childCertificate
 				.getSerialNumber());
 		if (null == crlEntry) {

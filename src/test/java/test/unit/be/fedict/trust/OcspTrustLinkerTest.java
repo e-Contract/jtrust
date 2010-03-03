@@ -36,6 +36,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.RevocationData;
 import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 
@@ -69,7 +70,7 @@ public class OcspTrustLinkerTest {
 		EasyMock.replay(mockOcspRepository);
 
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, null, new RevocationData());
 
 		assertNull(result);
 		EasyMock.verify(mockOcspRepository);
@@ -103,7 +104,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null);
+				rootCertificate, null, new RevocationData());
 
 		// verify
 		assertNull(result);
@@ -143,7 +144,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
@@ -184,7 +185,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
@@ -227,7 +228,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNull(result);
@@ -267,7 +268,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNull(result);
@@ -312,7 +313,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNull(result);
@@ -352,7 +353,7 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate);
+				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
