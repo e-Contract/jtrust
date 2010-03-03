@@ -43,6 +43,8 @@ public class TrustValidator {
 
 	private final List<CertificateConstraint> certificateConstraints;
 
+	private RevocationData revocationData;
+
 	/**
 	 * Main constructor.
 	 * 
@@ -53,6 +55,7 @@ public class TrustValidator {
 		this.certificateRepository = certificateRepository;
 		this.trustLinkers = new LinkedList<TrustLinker>();
 		this.certificateConstraints = new LinkedList<CertificateConstraint>();
+		this.revocationData = new RevocationData();
 	}
 
 	/**
@@ -90,6 +93,17 @@ public class TrustValidator {
 	public void isTrusted(List<X509Certificate> certificatePath)
 			throws CertPathValidatorException {
 		isTrusted(certificatePath, new Date());
+	}
+
+	/**
+	 * Returns the {@link RevocationData} returned by the configured
+	 * {@link TrustLinker}'s.
+	 * 
+	 * @return {@link RevocationData}
+	 */
+	public RevocationData getRevocationData() {
+
+		return this.revocationData;
 	}
 
 	/**
@@ -177,7 +191,7 @@ public class TrustValidator {
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			Boolean trusted = trustLinker.hasTrustLink(childCertificate,
-					certificate, validationDate);
+					certificate, validationDate, this.revocationData);
 			if (null == trusted) {
 				continue;
 			}
