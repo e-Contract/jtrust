@@ -255,12 +255,14 @@ public class OcspTrustLinker implements TrustLinker {
 
 	private void addRevocationData(RevocationData revocationData,
 			OCSPResp ocspResp) {
-		try {
-			revocationData.getOcspRevocationData().add(
-					new OCSPRevocationData(ocspResp.getEncoded()));
-		} catch (IOException e) {
-			LOG.error("IOException: " + e.getMessage(), e);
-			throw new RuntimeException("IOException : " + e.getMessage(), e);
+		if (null != revocationData) {
+			try {
+				revocationData.getOcspRevocationData().add(
+						new OCSPRevocationData(ocspResp.getEncoded()));
+			} catch (IOException e) {
+				LOG.error("IOException: " + e.getMessage(), e);
+				throw new RuntimeException("IOException : " + e.getMessage(), e);
+			}
 		}
 	}
 

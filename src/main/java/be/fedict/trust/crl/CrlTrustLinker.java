@@ -88,13 +88,16 @@ public class CrlTrustLinker implements TrustLinker {
 			return null;
 		}
 
-		// fill up revocation data with this valid CRL
-		try {
-			revocationData.getCrlRevocationData().add(
-					new CRLRevocationData(x509crl.getEncoded()));
-		} catch (CRLException e) {
-			LOG.error("CRLException: " + e.getMessage(), e);
-			throw new RuntimeException("CRLException : " + e.getMessage(), e);
+		// fill up revocation data if not null with this valid CRL
+		if (null != revocationData) {
+			try {
+				revocationData.getCrlRevocationData().add(
+						new CRLRevocationData(x509crl.getEncoded()));
+			} catch (CRLException e) {
+				LOG.error("CRLException: " + e.getMessage(), e);
+				throw new RuntimeException("CRLException : " + e.getMessage(),
+						e);
+			}
 		}
 
 		X509CRLEntry crlEntry = x509crl.getRevokedCertificate(childCertificate
