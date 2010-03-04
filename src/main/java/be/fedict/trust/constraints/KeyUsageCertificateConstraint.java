@@ -63,6 +63,34 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 		this.mask[NON_REPUDIATION_IDX] = flag;
 	}
 
+	public void setKeyEnciphermentFilter(Boolean flag) {
+		this.mask[KEY_ENCIPHERMENT_IDX] = flag;
+	}
+
+	public void setDataEnciphermentFilter(Boolean flag) {
+		this.mask[DATA_ENCIPHERMENT_IDX] = flag;
+	}
+
+	public void setKeyAgreementFilter(Boolean flag) {
+		this.mask[KEY_AGREEMENT_IDX] = flag;
+	}
+
+	public void setKeyCertificateSigningFilter(Boolean flag) {
+		this.mask[KEY_CERT_SIGN_IDX] = flag;
+	}
+
+	public void setCRLSigningFilter(Boolean flag) {
+		this.mask[CRL_SIGN_IDX] = flag;
+	}
+
+	public void setEncipherOnlyFilter(Boolean flag) {
+		this.mask[ENCIPHER_ONLY_IDX] = flag;
+	}
+
+	public void setDecipherOnlyFilter(Boolean flag) {
+		this.mask[DECIPHER_ONLY_IDX] = flag;
+	}
+
 	public boolean check(X509Certificate certificate) {
 		boolean[] keyUsage = certificate.getKeyUsage();
 		if (null == keyUsage) {
