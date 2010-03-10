@@ -18,14 +18,21 @@
 
 package be.fedict.trust.crl;
 
+import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.security.NoSuchProviderException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.util.encoders.Base64;
 
 /**
  * Off line CRL repository. This implementation receives a list of
@@ -45,10 +52,22 @@ public class OfflineCrlRepository implements CrlRepository {
 	 * 
 	 * @param crls
 	 *            the list of {@link X509CRL} objects that can be queried.
+	 * 
+	 * @throws NoSuchProviderException
+	 * @throws CertificateException
+	 * @throws CRLException
 	 */
-	public OfflineCrlRepository(List<X509CRL> crls) {
+	public OfflineCrlRepository(List<byte[]> encodedCrls)
+			throws CertificateException, NoSuchProviderException, CRLException {
 
-		this.crls = crls;
+		CertificateFactory certificateFactory = CertificateFactory.getInstance(
+				"X.509", "BC");
+		this.crls = new LinkedList<X509CRL>();
+		for (byte[] encodedCrl : encodedCrls) {
+			ByteArrayInputStream bais = new ByteArrayInputStream(Base64
+					.decode(encodedCrl));
+			crls.add((X509CRL) certificateFactory.generateCRL(bais));
+		}
 	}
 
 	/**
