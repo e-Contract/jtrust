@@ -18,8 +18,10 @@
 
 package be.fedict.trust.ocsp;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +31,7 @@ import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.SingleResp;
+import org.bouncycastle.util.encoders.Base64;
 
 /**
  * Off line OCSP repository. This implementation receives a list of
@@ -48,10 +51,17 @@ public class OfflineOcspRepository implements OcspRepository {
 	 * 
 	 * @param ocspResponses
 	 *            the list of {@link OCSPResp} objects that can be queried.
+	 * @throws IOException
 	 */
-	public OfflineOcspRepository(List<OCSPResp> ocspResponses) {
+	public OfflineOcspRepository(List<byte[]> encodedOcspResponses)
+			throws IOException {
 
-		this.ocspResponses = ocspResponses;
+		this.ocspResponses = new LinkedList<OCSPResp>();
+		for (byte[] encodedOcspResponse : encodedOcspResponses) {
+			OCSPResp ocspResponse = new OCSPResp(Base64
+					.decode(encodedOcspResponse));
+			ocspResponses.add(ocspResponse);
+		}
 	}
 
 	/**
