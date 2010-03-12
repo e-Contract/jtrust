@@ -45,6 +45,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import be.fedict.trust.CRLRevocationData;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
+import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -68,7 +70,7 @@ public class CrlTrustLinker implements TrustLinker {
 		this.crlRepository = crlRepository;
 	}
 
-	public Boolean hasTrustLink(X509Certificate childCertificate,
+	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData) {
 		URI crlUri = getCrlUri(childCertificate);
@@ -105,16 +107,17 @@ public class CrlTrustLinker implements TrustLinker {
 		if (null == crlEntry) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal());
-			return true;
+			return new TrustLinkerResult(true);
 		}
 		if (crlEntry.getRevocationDate().after(validationDate)) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal() + " at "
 					+ validationDate);
-			return true;
+			return new TrustLinkerResult(true);
 		}
 		// TODO: delta CRL
-		return false;
+		return new TrustLinkerResult(false,
+				TrustLinkerResultReason.INVALID_REVOCATION_STATUS);
 	}
 
 	public static boolean checkCrlIntegrity(X509CRL x509crl,

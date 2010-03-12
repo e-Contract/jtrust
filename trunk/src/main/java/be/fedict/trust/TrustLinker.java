@@ -41,11 +41,11 @@ public interface TrustLinker {
 	 *            the validation date.
 	 * @param revocationData
 	 *            OCSP or CRL revocation data
-	 * @return <code>true</code> is there is a trust link, <code>false</code> in
-	 *         case the child certificate cannot be trusted at all.
-	 *         <code>null</code> if the trust is unknown.
+	 * @return a {@link TrustLinkerResult} object containing the result and
+	 *         optional reason if not valid. Returns <code>null</code> if the
+	 *         trust is unknown.
 	 */
-	Boolean hasTrustLink(X509Certificate childCertificate,
+	TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData);
 }

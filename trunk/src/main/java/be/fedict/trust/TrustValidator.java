@@ -111,9 +111,8 @@ public class TrustValidator {
 	 *             in case the certificate path is invalid.
 	 * @see #isTrusted(List, Date)
 	 */
-	public void isTrusted(List<X509Certificate> certificatePath)
-			throws CertPathValidatorException {
-		isTrusted(certificatePath, new Date());
+	public TrustLinkerResult isTrusted(List<X509Certificate> certificatePath) {
+		return isTrusted(certificatePath, new Date());
 	}
 
 	/**
@@ -133,21 +132,23 @@ public class TrustValidator {
 	 * @param certificate
 	 *            the X509 certificate.
 	 * @return <code>true</code> if self-signed, <code>false</code> otherwise.
-	 * @throws CertPathValidatorException
 	 */
-	public static boolean isSelfSigned(X509Certificate certificate)
-			throws CertPathValidatorException {
+	public static TrustLinkerResult isSelfSigned(X509Certificate certificate) {
 		if (false == certificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST,
+					"root certificate should be self-signed: "
+							+ certificate.getSubjectX500Principal());
 		}
 		try {
 			certificate.verify(certificate.getPublicKey());
 		} catch (Exception e) {
-			throw new CertPathValidatorException(
-					"certificate signature error: " + e.getMessage(), e);
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"certificate signature error: " + e.getMessage());
 		}
-		return true;
+		return new TrustLinkerResult(true);
 	}
 
 	/**
@@ -159,26 +160,28 @@ public class TrustValidator {
 	 * @param validationDate
 	 *            the date at which the certificate path validation should be
 	 *            verified.
-	 * @throws CertPathValidatorException
-	 *             in case of an invalid certificate path.
 	 * @see #isTrusted(List)
 	 */
-	public void isTrusted(List<X509Certificate> certificatePath,
-			Date validationDate) throws CertPathValidatorException {
+	public TrustLinkerResult isTrusted(List<X509Certificate> certificatePath,
+			Date validationDate) {
 		if (certificatePath.isEmpty()) {
-			throw new CertPathValidatorException("certificate path is empty");
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST,
+					"certificate path is empty");
 		}
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
 		LOG.debug("verifying root certificate: "
 				+ certificate.getSubjectX500Principal());
-		if (false == isSelfSigned(certificate)) {
-			throw new CertPathValidatorException(
-					"root certificate should be self-signed: "
-							+ certificate.getSubjectX500Principal());
+		TrustLinkerResult result = isSelfSigned(certificate);
+		if (!result.isValid()) {
+			return result;
 		}
-		checkSelfSignedTrust(certificate, validationDate);
+		result = checkSelfSignedTrust(certificate, validationDate);
+		if (!result.isValid()) {
+			return result;
+		}
 		certIdx--;
 
 		while (certIdx >= 0) {
@@ -186,7 +189,11 @@ public class TrustValidator {
 			LOG.debug("verifying certificate: "
 					+ childCertificate.getSubjectX500Principal());
 			certIdx--;
-			checkTrustLink(childCertificate, certificate, validationDate);
+			result = checkTrustLink(childCertificate, certificate,
+					validationDate);
+			if (!result.isValid()) {
+				return result;
+			}
 			certificate = childCertificate;
 		}
 
@@ -196,53 +203,63 @@ public class TrustValidator {
 			LOG.debug("certificate constraint check: "
 					+ certificateConstraintName);
 			if (false == certificateConstraint.check(certificate)) {
-				throw new CertPathValidatorException(
+				return new TrustLinkerResult(false,
+						TrustLinkerResultReason.INVALID_TRUST,
 						"certificate constraint failure: "
 								+ certificateConstraintName);
 			}
 		}
+		return new TrustLinkerResult(true);
 	}
 
-	private void checkTrustLink(X509Certificate childCertificate,
-			X509Certificate certificate, Date validationDate)
-			throws CertPathValidatorException {
+	private TrustLinkerResult checkTrustLink(X509Certificate childCertificate,
+			X509Certificate certificate, Date validationDate) {
 		if (null == childCertificate) {
-			return;
+			return new TrustLinkerResult(true);
 		}
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
-			Boolean trusted = trustLinker.hasTrustLink(childCertificate,
-					certificate, validationDate, this.revocationData);
-			if (null == trusted) {
+			TrustLinkerResult trustResult = trustLinker.hasTrustLink(
+					childCertificate, certificate, validationDate,
+					this.revocationData);
+			if (null == trustResult) {
 				continue;
 			}
-			if (trusted) {
+			if (trustResult.isValid()) {
 				sometrustLinkerTrusts = true;
 			} else {
-				throw new CertPathValidatorException("untrusted between "
-						+ childCertificate.getSubjectX500Principal() + " and "
-						+ certificate.getSubjectX500Principal());
+				return new TrustLinkerResult(false,
+						TrustLinkerResultReason.INVALID_TRUST,
+						"untrusted between "
+								+ childCertificate.getSubjectX500Principal()
+								+ " and "
+								+ certificate.getSubjectX500Principal());
 			}
 		}
 		if (false == sometrustLinkerTrusts) {
-			throw new CertPathValidatorException("no trust between "
-					+ childCertificate.getSubjectX500Principal() + " and "
-					+ certificate.getSubjectX500Principal());
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST, "no trust between "
+							+ childCertificate.getSubjectX500Principal()
+							+ " and " + certificate.getSubjectX500Principal());
 		}
+		return new TrustLinkerResult(true);
 	}
 
-	private void checkSelfSignedTrust(X509Certificate certificate,
-			Date validationDate) throws CertPathValidatorException {
+	private TrustLinkerResult checkSelfSignedTrust(X509Certificate certificate,
+			Date validationDate) {
 		try {
 			certificate.checkValidity(validationDate);
 		} catch (Exception e) {
-			throw new CertPathValidatorException("certificate validity error: "
-					+ e.getMessage(), e);
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
+					"certificate validity error: " + e.getMessage());
 		}
 		if (this.certificateRepository.isTrustPoint(certificate)) {
-			return;
+			return new TrustLinkerResult(true);
 		}
-		throw new CertPathValidatorException(
+
+		return new TrustLinkerResult(false,
+				TrustLinkerResultReason.INVALID_TRUST,
 				"self-signed certificate not in repository: "
 						+ certificate.getSubjectX500Principal());
 	}
