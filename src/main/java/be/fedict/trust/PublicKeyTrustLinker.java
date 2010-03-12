@@ -36,7 +36,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 	private static final Log LOG = LogFactory
 			.getLog(PublicKeyTrustLinker.class);
 
-	public Boolean hasTrustLink(X509Certificate childCertificate,
+	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData) {
 		if (false == childCertificate.getIssuerX500Principal().equals(
@@ -46,19 +46,22 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			LOG.debug("child certificate: "
 					+ childCertificate.getSubjectX500Principal());
 			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST);
 		}
 		try {
 			childCertificate.verify(certificate.getPublicKey());
 		} catch (Exception e) {
 			LOG.debug("verification error: " + e.getMessage(), e);
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE);
 		}
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
 			LOG
 					.debug("child certificate validity end is before certificate validity end");
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL);
 		}
 		if (true == childCertificate.getNotBefore().before(
 				certificate.getNotBefore())) {
@@ -68,24 +71,29 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					+ childCertificate.getNotBefore());
 			LOG.debug("certificate validity begin: "
 					+ certificate.getNotBefore());
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL);
 		}
 		if (true == validationDate.before(childCertificate.getNotBefore())) {
 			LOG.debug("certificate is not yet valid");
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL);
 		}
 		if (true == validationDate.after(childCertificate.getNotAfter())) {
 			LOG.debug("certificate already expired");
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL);
 		}
 		if (-1 == certificate.getBasicConstraints()) {
 			LOG.debug("certificate not a CA");
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST);
 		}
 		if (0 == certificate.getBasicConstraints()
 				&& -1 != childCertificate.getBasicConstraints()) {
 			LOG.debug("child should not be a CA");
-			return false;
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_TRUST);
 		}
 		/*
 		 * We don't check pathLenConstraint since this one is only there to

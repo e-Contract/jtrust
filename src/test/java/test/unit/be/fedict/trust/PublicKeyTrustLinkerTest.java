@@ -34,6 +34,7 @@ import org.junit.Test;
 
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
+import be.fedict.trust.TrustLinkerResult;
 
 public class PublicKeyTrustLinkerTest {
 
@@ -60,8 +61,9 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
 		assertNull(result);
 	}
 
@@ -85,12 +87,13 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = notAfter.plusDays(1).toDate();
 
 		// operate
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
 
 		// verify
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -113,12 +116,13 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = notBefore.minusDays(1).toDate();
 
 		// operate
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
 
 		// verify
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -139,9 +143,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
-		assertFalse(result);
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
+		assertNotNull(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -162,9 +168,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
-		assertFalse(result);
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
+		assertNotNull(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -185,10 +193,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(root2Certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				root2Certificate, rootCertificate, validationDate,
+				new RevocationData());
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -211,10 +220,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 	}
 
 	@Test
@@ -237,9 +247,10 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		Boolean result = publicKeyTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 	}
 }

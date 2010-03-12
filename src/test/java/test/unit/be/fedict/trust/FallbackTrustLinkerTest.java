@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import be.fedict.trust.FallbackTrustLinker;
 import be.fedict.trust.TrustLinker;
+import be.fedict.trust.TrustLinkerResult;
 
 public class FallbackTrustLinkerTest {
 
@@ -40,7 +41,7 @@ public class FallbackTrustLinkerTest {
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(null, null, validationDate, null))
-				.andReturn(true);
+				.andReturn(new TrustLinkerResult(true));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -48,12 +49,12 @@ public class FallbackTrustLinkerTest {
 		EasyMock.replay(mockTrustLinker);
 
 		// operate
-		Boolean result = fallbackTrustLinker.hasTrustLink(null, null,
+		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
 				validationDate, null);
 
 		// verify
 		assertNotNull(result);
-		assertTrue(result);
+		assertTrue(result.isValid());
 		EasyMock.verify(mockTrustLinker);
 	}
 
@@ -64,7 +65,7 @@ public class FallbackTrustLinkerTest {
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(null, null, validationDate, null))
-				.andReturn(false);
+				.andReturn(new TrustLinkerResult(false));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -72,12 +73,12 @@ public class FallbackTrustLinkerTest {
 		EasyMock.replay(mockTrustLinker);
 
 		// operate
-		Boolean result = fallbackTrustLinker.hasTrustLink(null, null,
+		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
 				validationDate, null);
 
 		// verify
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 		EasyMock.verify(mockTrustLinker);
 	}
 
@@ -87,8 +88,8 @@ public class FallbackTrustLinkerTest {
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 
 		// operate
-		Boolean result = fallbackTrustLinker.hasTrustLink(null, null, null,
-				null);
+		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
+				null, null);
 
 		// verify
 		assertNull(result);
@@ -107,7 +108,8 @@ public class FallbackTrustLinkerTest {
 		EasyMock
 				.expect(
 						mockTrustLinker2.hasTrustLink(null, null,
-								validationDate, null)).andReturn(true);
+								validationDate, null)).andReturn(
+						new TrustLinkerResult(true));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker1);
@@ -116,12 +118,12 @@ public class FallbackTrustLinkerTest {
 		EasyMock.replay(mockTrustLinker1, mockTrustLinker2);
 
 		// operate
-		Boolean result = fallbackTrustLinker.hasTrustLink(null, null,
+		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
 				validationDate, null);
 
 		// verify
 		assertNotNull(result);
-		assertTrue(result);
+		assertTrue(result.isValid());
 		EasyMock.verify(mockTrustLinker1, mockTrustLinker2);
 	}
 }

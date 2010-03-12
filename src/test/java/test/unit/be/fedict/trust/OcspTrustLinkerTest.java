@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.trust.RevocationData;
+import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 
@@ -69,7 +70,7 @@ public class OcspTrustLinkerTest {
 
 		EasyMock.replay(mockOcspRepository);
 
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, null, new RevocationData());
 
 		assertNull(result);
@@ -103,7 +104,7 @@ public class OcspTrustLinkerTest {
 		EasyMock.replay(mockOcspRepository);
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, null, new RevocationData());
 
 		// verify
@@ -143,12 +144,12 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
-		assertTrue(result);
+		assertTrue(result.isValid());
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -184,12 +185,12 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
-		assertTrue(result);
+		assertTrue(result.isValid());
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -227,7 +228,7 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
@@ -267,7 +268,7 @@ public class OcspTrustLinkerTest {
 		Date validationDate = notBefore.plusDays(1).toDate();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
@@ -312,7 +313,7 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
@@ -352,12 +353,12 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		Boolean result = ocspTrustLinker.hasTrustLink(certificate,
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData());
 
 		// verify
 		assertNotNull(result);
-		assertFalse(result);
+		assertFalse(result.isValid());
 		EasyMock.verify(mockOcspRepository);
 	}
 }

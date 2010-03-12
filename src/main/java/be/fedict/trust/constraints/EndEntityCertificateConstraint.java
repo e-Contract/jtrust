@@ -19,15 +19,11 @@
 package be.fedict.trust.constraints;
 
 import java.math.BigInteger;
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import be.fedict.trust.CertificateConstraint;
 import be.fedict.trust.TrustValidator;
@@ -44,9 +40,6 @@ import be.fedict.trust.TrustValidator;
  * 
  */
 public class EndEntityCertificateConstraint implements CertificateConstraint {
-
-	private static final Log LOG = LogFactory
-			.getLog(EndEntityCertificateConstraint.class);
 
 	private Map<String, Set<BigInteger>> endEntities;
 
@@ -88,12 +81,7 @@ public class EndEntityCertificateConstraint implements CertificateConstraint {
 	}
 
 	public boolean check(X509Certificate certificate) {
-		try {
-			if (TrustValidator.isSelfSigned(certificate)) {
-				return true;
-			}
-		} catch (CertPathValidatorException e) {
-			LOG.debug("cert path validator error: " + e.getMessage(), e);
+		if (TrustValidator.isSelfSigned(certificate).isValid()) {
 			return true;
 		}
 		String issuerName = certificate.getIssuerX500Principal().getName();

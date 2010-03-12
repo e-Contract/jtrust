@@ -56,6 +56,8 @@ import be.fedict.trust.OCSPRevocationData;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
+import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * Trust linker based on OCSP revocation information.
@@ -99,7 +101,7 @@ public class OcspTrustLinker implements TrustLinker {
 		this.freshnessInterval = freshnessInterval;
 	}
 
-	public Boolean hasTrustLink(X509Certificate childCertificate,
+	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData) {
 		URI ocspUri = getOcspUri(childCertificate);
@@ -163,11 +165,12 @@ public class OcspTrustLinker implements TrustLinker {
 					return null;
 				}
 				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
-				Boolean trusted = publicKeyTrustLinker.hasTrustLink(
-						ocspResponderCertificate, issuingCaCertificate,
-						validationDate, revocationData);
-				if (null != trusted) {
-					if (false == trusted) {
+				TrustLinkerResult trustResult = publicKeyTrustLinker
+						.hasTrustLink(ocspResponderCertificate,
+								issuingCaCertificate, validationDate,
+								revocationData);
+				if (null != trustResult) {
+					if (!trustResult.isValid()) {
 						LOG.debug("OCSP responder not trusted");
 						return null;
 					}
@@ -237,7 +240,7 @@ public class OcspTrustLinker implements TrustLinker {
 				LOG.debug("OCSP OK for: "
 						+ childCertificate.getSubjectX500Principal());
 				addRevocationData(revocationData, ocspResp);
-				return true;
+				return new TrustLinkerResult(true);
 			} else {
 				LOG.debug("OCSP certificate status: "
 						+ singleResp.getCertStatus().getClass().getName());
@@ -245,7 +248,8 @@ public class OcspTrustLinker implements TrustLinker {
 					LOG.debug("OCSP status revoked");
 				}
 				addRevocationData(revocationData, ocspResp);
-				return false;
+				return new TrustLinkerResult(false,
+						TrustLinkerResultReason.INVALID_REVOCATION_STATUS);
 			}
 		}
 
