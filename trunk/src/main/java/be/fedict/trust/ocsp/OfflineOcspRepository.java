@@ -49,8 +49,8 @@ public class OfflineOcspRepository implements OcspRepository {
 	/**
 	 * Main constructor
 	 * 
-	 * @param ocspResponses
-	 *            the list of {@link OCSPResp} objects that can be queried.
+	 * @param encodedOcspResponses
+	 *            the list of encoded OCSP responses that can be queried.
 	 * @throws IOException
 	 */
 	public OfflineOcspRepository(List<byte[]> encodedOcspResponses)

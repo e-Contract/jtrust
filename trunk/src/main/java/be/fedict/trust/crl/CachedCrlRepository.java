@@ -106,8 +106,6 @@ public class CachedCrlRepository implements CrlRepository {
 
 	/**
 	 * Gives back the CRL cache aging period in hours.
-	 * 
-	 * @return
 	 */
 	public int getCacheAgingHours() {
 		return this.cacheAgingHours;

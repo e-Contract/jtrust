@@ -117,7 +117,8 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 		// TODO: delta CRL
 		return new TrustLinkerResult(false,
-				TrustLinkerResultReason.INVALID_REVOCATION_STATUS);
+				TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+				"certificate revoked by CRL=" + crlEntry.getSerialNumber());
 	}
 
 	public static boolean checkCrlIntegrity(X509CRL x509crl,

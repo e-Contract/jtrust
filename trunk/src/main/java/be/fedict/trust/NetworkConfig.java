@@ -45,8 +45,6 @@ public class NetworkConfig {
 
 	/**
 	 * Gives back the HTTP proxy host.
-	 * 
-	 * @return
 	 */
 	public String getProxyHost() {
 		return this.proxyHost;
@@ -54,8 +52,6 @@ public class NetworkConfig {
 
 	/**
 	 * Gives back the HTTP proxy port.
-	 * 
-	 * @return
 	 */
 	public int getProxyPort() {
 		return this.proxyPort;
