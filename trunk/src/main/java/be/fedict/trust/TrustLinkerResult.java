@@ -22,7 +22,7 @@ public class TrustLinkerResult {
 
 	private final boolean valid;
 	private final TrustLinkerResultReason reason;
-	private String message;
+	private final String message;
 
 	public TrustLinkerResult(boolean valid) {
 

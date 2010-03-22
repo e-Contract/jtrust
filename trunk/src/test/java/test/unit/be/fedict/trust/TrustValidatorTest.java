@@ -18,10 +18,11 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.security.KeyPair;
 import java.security.Security;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
@@ -55,9 +56,12 @@ public class TrustValidatorTest {
 	public void emptyCertPathFails() throws Exception {
 		TrustValidator trustValidator = new TrustValidator(null);
 
-		TrustLinkerResult result = trustValidator
-				.isTrusted(new LinkedList<X509Certificate>());
-		assertFalse(result.isValid());
+		try {
+			trustValidator.isTrusted(new LinkedList<X509Certificate>());
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+		}
 	}
 
 	@Test
@@ -80,8 +84,12 @@ public class TrustValidatorTest {
 		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
 		certificatePath.add(certificate);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+		}
 	}
 
 	@Test
@@ -135,9 +143,13 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository);
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository);
+		}
 	}
 
 	@Test
@@ -192,9 +204,13 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository);
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository);
+		}
 	}
 
 	@Test
@@ -222,9 +238,13 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository);
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository);
+		}
 	}
 
 	@Test
@@ -257,9 +277,13 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository);
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository);
+		}
 	}
 
 	@Test
@@ -404,11 +428,14 @@ public class TrustValidatorTest {
 		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
 				mockTrustLinker);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath,
-				validationDate);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository, mockCertificateConstraint,
-				mockTrustLinker);
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository,
+					mockCertificateConstraint, mockTrustLinker);
+		}
 
 	}
 
@@ -505,10 +532,13 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath,
-				validationDate);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+		}
 	}
 
 	@Test
@@ -558,11 +588,14 @@ public class TrustValidatorTest {
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker,
 				mockTrustLinker2);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath,
-				validationDate);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository, mockTrustLinker,
-				mockTrustLinker2);
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository, mockTrustLinker,
+					mockTrustLinker2);
+		}
 	}
 
 	public void unknownTrustLinkFails() throws Exception {
@@ -597,8 +630,12 @@ public class TrustValidatorTest {
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
 
-		TrustLinkerResult result = trustValidator.isTrusted(certificatePath);
-		assertFalse(result.isValid());
-		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+		try {
+			trustValidator.isTrusted(certificatePath);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+		}
 	}
 }
