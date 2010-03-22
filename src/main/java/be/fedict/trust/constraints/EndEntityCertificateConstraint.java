@@ -81,7 +81,7 @@ public class EndEntityCertificateConstraint implements CertificateConstraint {
 	}
 
 	public boolean check(X509Certificate certificate) {
-		if (TrustValidator.isSelfSigned(certificate).isValid()) {
+		if (TrustValidator.getSelfSignedResult(certificate).isValid()) {
 			return true;
 		}
 		String issuerName = certificate.getIssuerX500Principal().getName();
