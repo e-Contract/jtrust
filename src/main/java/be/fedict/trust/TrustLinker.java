@@ -40,7 +40,8 @@ public interface TrustLinker {
 	 * @param validationDate
 	 *            the validation date.
 	 * @param revocationData
-	 *            OCSP or CRL revocation data
+	 *            optional OCSP or CRL revocation data. Is <code>null</code> if
+	 *            not specified.
 	 * @return a {@link TrustLinkerResult} object containing the result and
 	 *         optional reason if not valid. Returns <code>null</code> if the
 	 *         trust is unknown.

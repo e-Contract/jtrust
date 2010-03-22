@@ -31,13 +31,6 @@ public class TrustLinkerResult {
 		this.message = null;
 	}
 
-	public TrustLinkerResult(boolean valid, TrustLinkerResultReason reason) {
-
-		this.valid = valid;
-		this.reason = reason;
-		this.message = null;
-	}
-
 	public TrustLinkerResult(boolean valid, TrustLinkerResultReason reason,
 			String message) {
 

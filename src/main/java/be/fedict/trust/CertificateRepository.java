@@ -33,7 +33,7 @@ public interface CertificateRepository {
 	 * 
 	 * @param certificate
 	 *            the X509 certificate.
-	 * @return
+	 * @return true or false
 	 */
 	boolean isTrustPoint(X509Certificate certificate);
 }

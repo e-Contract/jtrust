@@ -38,7 +38,8 @@ import be.fedict.trust.CertificateConstraint;
  * QCStatements certificate constraint.
  * 
  * @author Frank Cornelis
- * @see http://www.ietf.org/rfc/rfc3039.txt
+ * 
+ * @see <a href="http://www.ietf.org/rfc/rfc3039.txt">RFC 3039</a>
  */
 public class QCStatementsCertificateConstraint implements CertificateConstraint {
 

@@ -28,9 +28,9 @@ import java.util.List;
  */
 public class RevocationData {
 
-	private List<OCSPRevocationData> ocspRevocationData;
+	private final List<OCSPRevocationData> ocspRevocationData;
 
-	private List<CRLRevocationData> crlRevocationData;
+	private final List<CRLRevocationData> crlRevocationData;
 
 	public RevocationData() {
 

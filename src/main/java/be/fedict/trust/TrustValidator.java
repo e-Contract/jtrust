@@ -52,10 +52,6 @@ public class TrustValidator {
 	 * 
 	 * @param certificateRepository
 	 *            the certificate repository used by this trust validator.
-	 * @param revocationData
-	 *            optional {@link RevocationData} object. If not
-	 *            <code>null</code> the added {@link TrustLinker}'s should fill
-	 *            it up with used revocation data.
 	 */
 	public TrustValidator(CertificateRepository certificateRepository) {
 		this.certificateRepository = certificateRepository;
@@ -71,8 +67,9 @@ public class TrustValidator {
 	 * @param certificateRepository
 	 *            the certificate repository used by this trust validator.
 	 * @param revocationData
-	 *            The added {@link TrustLinker}'s should fill it up with used
-	 *            revocation data.
+	 *            optional {@link RevocationData} object. If not
+	 *            <code>null</code> the added {@link TrustLinker}'s should fill
+	 *            it up with used revocation data.
 	 */
 	public TrustValidator(CertificateRepository certificateRepository,
 			RevocationData revocationData) {
@@ -122,7 +119,8 @@ public class TrustValidator {
 
 	/**
 	 * Returns the {@link RevocationData} returned by the configured
-	 * {@link TrustLinker}'s.
+	 * {@link TrustLinker}'s if a {@link RevocationData} object was specified in
+	 * the constructor.
 	 * 
 	 * @return {@link RevocationData}
 	 */

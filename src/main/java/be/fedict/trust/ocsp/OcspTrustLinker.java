@@ -249,7 +249,8 @@ public class OcspTrustLinker implements TrustLinker {
 				}
 				addRevocationData(revocationData, ocspResp);
 				return new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_REVOCATION_STATUS);
+						TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+						"certificate revoked by OCSP");
 			}
 		}
 

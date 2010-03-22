@@ -50,8 +50,8 @@ public class OfflineCrlRepository implements CrlRepository {
 	/**
 	 * Main constructor
 	 * 
-	 * @param crls
-	 *            the list of {@link X509CRL} objects that can be queried.
+	 * @param encodedCrls
+	 *            the list of encoded CRL's that can be queried.
 	 * 
 	 * @throws NoSuchProviderException
 	 * @throws CertificateException
@@ -66,7 +66,7 @@ public class OfflineCrlRepository implements CrlRepository {
 		for (byte[] encodedCrl : encodedCrls) {
 			ByteArrayInputStream bais = new ByteArrayInputStream(Base64
 					.decode(encodedCrl));
-			crls.add((X509CRL) certificateFactory.generateCRL(bais));
+			this.crls.add((X509CRL) certificateFactory.generateCRL(bais));
 		}
 	}
 
