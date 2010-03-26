@@ -129,7 +129,8 @@ public class TrustTestUtils {
 			NoSuchAlgorithmException, SignatureException, CertificateException {
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
 				subjectDn, notBefore, notAfter, issuerCertificate,
-				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null);
+				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null,
+				"SHA1withRSA");
 		return certificate;
 	}
 
@@ -137,10 +138,10 @@ public class TrustTestUtils {
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
-			String crlUri, String ocspUri, KeyUsage keyUsage)
-			throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
-		String signatureAlgorithm = "SHA1withRSA";
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm) throws IOException, InvalidKeyException,
+			IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException {
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
 		certificateGenerator.setPublicKey(subjectPublicKey);
@@ -271,7 +272,7 @@ public class TrustTestUtils {
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
 				subjectDn, notBefore, notAfter, null, issuerPrivateKey, caFlag,
-				pathLength, crlUri, null, keyUsage);
+				pathLength, crlUri, null, keyUsage, "SHA1withRSA");
 		return certificate;
 	}
 
@@ -328,13 +329,26 @@ public class TrustTestUtils {
 			throws InvalidKeyException, CRLException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException,
 			CertificateParsingException {
+
+		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
+				nextUpdate, "SHA1withRSA", revokedCertificateSerialNumbers);
+	}
+
+	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
+			X509Certificate issuerCertificate, DateTime thisUpdate,
+			DateTime nextUpdate, String signatureAlgorithm,
+			BigInteger... revokedCertificateSerialNumbers)
+			throws InvalidKeyException, CRLException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException,
+			CertificateParsingException {
+
 		List<RevokedCertificate> revokedCertificates = new LinkedList<RevokedCertificate>();
 		for (BigInteger revokedCertificateSerialNumber : revokedCertificateSerialNumbers) {
 			revokedCertificates.add(new RevokedCertificate(
 					revokedCertificateSerialNumber, thisUpdate));
 		}
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
-				nextUpdate, revokedCertificates);
+				nextUpdate, revokedCertificates, signatureAlgorithm);
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
@@ -343,10 +357,22 @@ public class TrustTestUtils {
 			throws InvalidKeyException, CRLException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException,
 			CertificateParsingException {
+
+		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
+				nextUpdate, revokedCertificates, "SHA1withRSA");
+	}
+
+	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
+			X509Certificate issuerCertificate, DateTime thisUpdate,
+			DateTime nextUpdate, List<RevokedCertificate> revokedCertificates,
+			String signatureAlgorithm) throws InvalidKeyException,
+			CRLException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateParsingException {
+
 		X509V2CRLGenerator crlGenerator = new X509V2CRLGenerator();
 		crlGenerator.setThisUpdate(thisUpdate.toDate());
 		crlGenerator.setNextUpdate(nextUpdate.toDate());
-		crlGenerator.setSignatureAlgorithm("SHA1withRSA");
+		crlGenerator.setSignatureAlgorithm(signatureAlgorithm);
 		crlGenerator.setIssuerDN(issuerCertificate.getSubjectX500Principal());
 
 		for (RevokedCertificate revokedCertificate : revokedCertificates) {
@@ -368,6 +394,16 @@ public class TrustTestUtils {
 			boolean revoked, X509Certificate issuerCertificate,
 			X509Certificate ocspResponderCertificate,
 			PrivateKey ocspResponderPrivateKey) throws Exception {
+		return createOcspResp(certificate, revoked, issuerCertificate,
+				ocspResponderCertificate, ocspResponderPrivateKey,
+				"SHA1WITHRSA");
+	}
+
+	public static OCSPResp createOcspResp(X509Certificate certificate,
+			boolean revoked, X509Certificate issuerCertificate,
+			X509Certificate ocspResponderCertificate,
+			PrivateKey ocspResponderPrivateKey, String signatureAlgorithm)
+			throws Exception {
 		// request
 		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
 		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
@@ -395,7 +431,7 @@ public class TrustTestUtils {
 
 		// basic response generation
 		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
-				"SHA1WITHRSA", ocspResponderPrivateKey, null, new Date(),
+				signatureAlgorithm, ocspResponderPrivateKey, null, new Date(),
 				BouncyCastleProvider.PROVIDER_NAME);
 
 		// response generation
