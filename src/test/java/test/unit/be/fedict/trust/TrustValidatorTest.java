@@ -631,6 +631,7 @@ public class TrustValidatorTest {
 		}
 	}
 
+	@Test
 	public void unknownTrustLinkFails() throws Exception {
 
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
@@ -654,17 +655,23 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
-						null, trustValidator.getRevocationData())).andReturn(
-				null);
+						validationDate, trustValidator.getRevocationData()))
+				.andReturn(null);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
 
 		try {
-			trustValidator.isTrusted(certificatePath);
+			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
 		} catch (CertPathValidatorException e) {
 			// expected
@@ -674,4 +681,62 @@ public class TrustValidatorTest {
 			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 		}
 	}
+
+	@Test
+	public void trustLinkerRevocationFails() throws Exception {
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock
+				.expect(
+						mockTrustLinker.hasTrustLink(certificate,
+								rootCertificate, validationDate, trustValidator
+										.getRevocationData()))
+				.andReturn(
+						new TrustLinkerResult(
+								false,
+								TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+								"revoked"));
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
+
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			assertFalse(trustValidator.getResult().isValid());
+			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+					trustValidator.getResult().getReason());
+			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+		}
+	}
+
 }

@@ -18,12 +18,22 @@
 
 package be.fedict.trust;
 
+/**
+ * Used by {@link TrustLinker}'s to return the result of trust validation with
+ * additional info if failed.
+ * 
+ * @author wvdhaute
+ * 
+ */
 public class TrustLinkerResult {
 
 	private final boolean valid;
 	private final TrustLinkerResultReason reason;
 	private final String message;
 
+	/**
+	 * Main constructor
+	 */
 	public TrustLinkerResult(boolean valid) {
 
 		this.valid = valid;
@@ -31,6 +41,16 @@ public class TrustLinkerResult {
 		this.message = null;
 	}
 
+	/**
+	 * Main constructor
+	 * 
+	 * @param valid
+	 *            valid or not
+	 * @param reason
+	 *            XKMS 2.0 reasons URI's for being valid or not
+	 * @param message
+	 *            additional info
+	 */
 	public TrustLinkerResult(boolean valid, TrustLinkerResultReason reason,
 			String message) {
 
@@ -39,16 +59,28 @@ public class TrustLinkerResult {
 		this.message = null;
 	}
 
+	/**
+	 * Whether or not the trust validation was valid or not.
+	 */
 	public boolean isValid() {
 
 		return this.valid;
 	}
 
+	/**
+	 * Returns the optional XKMS 2.0 reason URI's. Returns <code>null</code> if
+	 * no reason set.
+	 */
 	public TrustLinkerResultReason getReason() {
 
 		return this.reason;
 	}
 
+	/**
+	 * Returns an additional information message why the validation failed.
+	 * Returns <code>null</code> if no additional info was specified by the
+	 * {@link TrustLinker}.
+	 */
 	public String getMessage() {
 
 		return this.message;

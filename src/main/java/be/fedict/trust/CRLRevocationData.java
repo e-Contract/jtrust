@@ -18,15 +18,35 @@
 
 package be.fedict.trust;
 
+import java.security.cert.X509CRL;
+
+import be.fedict.trust.crl.CrlTrustLinker;
+
+/**
+ * Used by {@link CrlTrustLinker} to return, if requested, used revocation data.
+ * Contains the encoded {@link X509CRL}.
+ * 
+ * @author wvdhaute
+ * 
+ */
 public class CRLRevocationData {
 
 	private final byte[] data;
 
+	/**
+	 * Main constructor
+	 * 
+	 * @param data
+	 *            the encoded {@link X509CRL}
+	 */
 	public CRLRevocationData(byte[] data) {
 
 		this.data = data;
 	}
 
+	/**
+	 * @return the encoded {@link X509CRL}.
+	 */
 	public byte[] getData() {
 
 		return this.data;
