@@ -18,15 +18,35 @@
 
 package be.fedict.trust;
 
+import org.bouncycastle.ocsp.OCSPResp;
+
+import be.fedict.trust.ocsp.OcspTrustLinker;
+
+/**
+ * Used by {@link OcspTrustLinker} to return, if requested, used revocation
+ * data. Contains the encoded {@link OCSPResp}.
+ * 
+ * @author wvdhaute
+ * 
+ */
 public class OCSPRevocationData {
 
 	private final byte[] data;
 
+	/**
+	 * Main constructor
+	 * 
+	 * @param data
+	 *            the encoded {@link OCSPResp}
+	 */
 	public OCSPRevocationData(byte[] data) {
 
 		this.data = data;
 	}
 
+	/**
+	 * @return the encoded {@link OCSPResp}.
+	 */
 	public byte[] getData() {
 
 		return this.data;
