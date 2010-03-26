@@ -18,6 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -41,6 +42,7 @@ import org.junit.Test;
 
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultReason;
 import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 
@@ -361,6 +363,46 @@ public class CrlTrustLinkerTest {
 
 		assertNotNull(result);
 		assertFalse(result.isValid());
+		EasyMock.verify(mockCrlRepository);
+	}
+
+	@Test
+	public void crlMD5Signature() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter, true, 0);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils
+				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
+						notAfter, rootCertificate, rootKeyPair.getPrivate(),
+						false, -1, "crl-uri");
+
+		Date validationDate = notBefore.plusDays(1).toDate();
+
+		CrlRepository mockCrlRepository = EasyMock
+				.createMock(CrlRepository.class);
+		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
+				rootCertificate, notBefore, notAfter, "MD5withRSA", certificate
+						.getSerialNumber());
+		EasyMock.expect(
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
+
+		EasyMock.replay(mockCrlRepository);
+
+		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+
+		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate, new RevocationData());
+
+		assertNotNull(result);
+		assertFalse(result.isValid());
+		assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE, result
+				.getReason());
 		EasyMock.verify(mockCrlRepository);
 	}
 

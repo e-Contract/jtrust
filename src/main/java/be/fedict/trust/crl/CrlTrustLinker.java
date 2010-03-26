@@ -47,6 +47,7 @@ import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.TrustValidator;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -88,6 +89,13 @@ public class CrlTrustLinker implements TrustLinker {
 				validationDate);
 		if (false == crlIntegrityResult) {
 			return null;
+		}
+
+		// check CRL signature
+		TrustLinkerResult trustResult = TrustValidator
+				.checkSignatureAlgorithm(x509crl.getSigAlgName());
+		if (!trustResult.isValid()) {
+			return trustResult;
 		}
 
 		// fill up revocation data if not null with this valid CRL

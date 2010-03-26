@@ -356,6 +356,57 @@ public class TrustValidatorTest {
 	}
 
 	@Test
+	public void trustLinkMD5Certificate() throws Exception {
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), true, -1, null,
+				null, null, "MD5withRSA");
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+		certificatePath.add(rootCertificate);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
+						validationDate, trustValidator.getRevocationData()))
+				.andReturn(new TrustLinkerResult(true));
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
+
+		try {
+			trustValidator.isTrusted(certificatePath, validationDate);
+			fail();
+		} catch (CertPathValidatorException e) {
+			// expected
+			assertFalse(trustValidator.getResult().isValid());
+			assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE,
+					trustValidator.getResult().getReason());
+		}
+	}
+
+	@Test
 	public void trustWithCertificateConstraint() throws Exception {
 
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();

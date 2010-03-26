@@ -172,6 +172,26 @@ public class TrustValidator {
 	}
 
 	/**
+	 * Checks whether given signature algorithm is allowed. MD5 for example is
+	 * not
+	 * 
+	 * @param signatureAlgorithm
+	 */
+	public static TrustLinkerResult checkSignatureAlgorithm(
+			String signatureAlgorithm) {
+
+		// disallow MD5 certificate signatures
+		if (signatureAlgorithm.contains("MD5")
+				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"Invalid signature algorithm: " + signatureAlgorithm);
+		}
+
+		return new TrustLinkerResult(true);
+	}
+
+	/**
 	 * Validates whether the certificate path was valid at the given validation
 	 * date.
 	 * 
@@ -198,6 +218,11 @@ public class TrustValidator {
 		LOG.debug("verifying root certificate: "
 				+ certificate.getSubjectX500Principal());
 		this.result = getSelfSignedResult(certificate);
+		if (!this.result.isValid()) {
+			throw new CertPathValidatorException(this.result.getMessage());
+		}
+		// check certificate signature
+		this.result = checkSignatureAlgorithm(certificate.getSigAlgName());
 		if (!this.result.isValid()) {
 			throw new CertPathValidatorException(this.result.getMessage());
 		}
@@ -237,18 +262,23 @@ public class TrustValidator {
 		if (null == childCertificate) {
 			return;
 		}
+		// check certificate signature
+		this.result = checkSignatureAlgorithm(childCertificate.getSigAlgName());
+		if (!this.result.isValid()) {
+			throw new CertPathValidatorException(this.result.getMessage());
+		}
+
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
-			TrustLinkerResult trustResult = trustLinker.hasTrustLink(
-					childCertificate, certificate, validationDate,
-					this.revocationData);
-			if (null == trustResult) {
+
+			this.result = trustLinker.hasTrustLink(childCertificate,
+					certificate, validationDate, this.revocationData);
+			if (null == this.result) {
 				continue;
 			}
-			if (trustResult.isValid()) {
+			if (this.result.isValid()) {
 				sometrustLinkerTrusts = true;
 			} else {
-				this.result = trustResult;
 				throw new CertPathValidatorException(this.result.getMessage());
 			}
 		}

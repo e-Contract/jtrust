@@ -18,6 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -38,6 +39,7 @@ import org.junit.Test;
 
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultReason;
 import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 
@@ -233,6 +235,50 @@ public class OcspTrustLinkerTest {
 
 		// verify
 		assertNull(result);
+		EasyMock.verify(mockOcspRepository);
+	}
+
+	@Test
+	public void ocspResponseMD5Signature() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
+				"ocsp-uri", null, "MD5withRSA");
+
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+				rootCertificate, rootCertificate, rootKeyPair.getPrivate(),
+				"MD5WITHRSA");
+
+		OcspRepository mockOcspRepository = EasyMock
+				.createMock(OcspRepository.class);
+		EasyMock.expect(
+				mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate)).andReturn(ocspResp);
+
+		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
+				mockOcspRepository);
+
+		EasyMock.replay(mockOcspRepository);
+
+		Date validationDate = new Date();
+
+		// operate
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate, new RevocationData());
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result.isValid());
+		assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE, result
+				.getReason());
 		EasyMock.verify(mockOcspRepository);
 	}
 

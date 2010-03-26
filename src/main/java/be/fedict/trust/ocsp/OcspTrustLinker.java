@@ -58,6 +58,7 @@ import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.TrustValidator;
 
 /**
  * Trust linker based on OCSP revocation information.
@@ -135,6 +136,12 @@ public class OcspTrustLinker implements TrustLinker {
 		try {
 			X509Certificate[] responseCertificates = basicOCSPResp
 					.getCerts(BouncyCastleProvider.PROVIDER_NAME);
+			TrustLinkerResult trustResult = TrustValidator
+					.checkSignatureAlgorithm(basicOCSPResp
+							.getSignatureAlgName());
+			if (!trustResult.isValid())
+				return trustResult;
+
 			if (0 == responseCertificates.length) {
 				/*
 				 * This means that the OCSP response has been signed by the
@@ -146,11 +153,13 @@ public class OcspTrustLinker implements TrustLinker {
 					LOG.debug("OCSP response signature invalid");
 					return null;
 				}
+
 			} else {
 				/*
 				 * We're dealing with a dedicated authorized OCSP Responder
 				 * certificate.
 				 */
+
 				X509Certificate ocspResponderCertificate = responseCertificates[0];
 				boolean verificationResult = basicOCSPResp.verify(
 						ocspResponderCertificate.getPublicKey(),
@@ -159,16 +168,31 @@ public class OcspTrustLinker implements TrustLinker {
 					LOG.debug("OCSP Responser response signature invalid");
 					return null;
 				}
+				// check certificate signature
+				trustResult = TrustValidator
+						.checkSignatureAlgorithm(ocspResponderCertificate
+								.getSigAlgName());
+				if (!trustResult.isValid()) {
+					return trustResult;
+				}
+
 				X509Certificate issuingCaCertificate = responseCertificates[1];
 				if (false == certificate.equals(issuingCaCertificate)) {
 					LOG.debug("OCSP responder certificate not issued by CA");
 					return null;
 				}
+				// check certificate signature
+				trustResult = TrustValidator
+						.checkSignatureAlgorithm(issuingCaCertificate
+								.getSigAlgName());
+				if (!trustResult.isValid()) {
+					return trustResult;
+				}
+
 				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
-				TrustLinkerResult trustResult = publicKeyTrustLinker
-						.hasTrustLink(ocspResponderCertificate,
-								issuingCaCertificate, validationDate,
-								revocationData);
+				trustResult = publicKeyTrustLinker.hasTrustLink(
+						ocspResponderCertificate, issuingCaCertificate,
+						validationDate, revocationData);
 				if (null != trustResult) {
 					if (!trustResult.isValid()) {
 						LOG.debug("OCSP responder not trusted");
