@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
@@ -47,6 +48,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -348,7 +350,8 @@ public class TrustTestUtils {
 					revokedCertificateSerialNumber, thisUpdate));
 		}
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
-				nextUpdate, revokedCertificates, signatureAlgorithm);
+				nextUpdate, null, false, revokedCertificates,
+				signatureAlgorithm);
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
@@ -359,12 +362,39 @@ public class TrustTestUtils {
 			CertificateParsingException {
 
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
-				nextUpdate, revokedCertificates, "SHA1withRSA");
+				nextUpdate, null, false, revokedCertificates, "SHA1withRSA");
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
 			X509Certificate issuerCertificate, DateTime thisUpdate,
-			DateTime nextUpdate, List<RevokedCertificate> revokedCertificates,
+			DateTime nextUpdate, List<String> deltaCrlUris,
+			List<RevokedCertificate> revokedCertificates)
+			throws InvalidKeyException, CRLException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException,
+			CertificateParsingException {
+
+		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
+				nextUpdate, deltaCrlUris, false, revokedCertificates,
+				"SHA1withRSA");
+	}
+
+	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
+			X509Certificate issuerCertificate, DateTime thisUpdate,
+			DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+			List<RevokedCertificate> revokedCertificates)
+			throws InvalidKeyException, CRLException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException,
+			CertificateParsingException {
+
+		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
+				nextUpdate, deltaCrlUris, deltaCrl, revokedCertificates,
+				"SHA1withRSA");
+	}
+
+	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
+			X509Certificate issuerCertificate, DateTime thisUpdate,
+			DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+			List<RevokedCertificate> revokedCertificates,
 			String signatureAlgorithm) throws InvalidKeyException,
 			CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateParsingException {
@@ -386,8 +416,35 @@ public class TrustTestUtils {
 		crlGenerator.addExtension(X509Extensions.CRLNumber, false,
 				new CRLNumber(BigInteger.ONE));
 
+		if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
+			DistributionPoint[] deltaCrlDps = new DistributionPoint[deltaCrlUris
+					.size()];
+			for (int i = 0; i < deltaCrlUris.size(); i++) {
+				deltaCrlDps[i] = getDistributionPoint(deltaCrlUris.get(i));
+			}
+			CRLDistPoint crlDistPoint = new CRLDistPoint(
+					(DistributionPoint[]) deltaCrlDps);
+			crlGenerator.addExtension(X509Extensions.FreshestCRL, false,
+					crlDistPoint);
+		}
+
+		if (deltaCrl) {
+			crlGenerator.addExtension(X509Extensions.DeltaCRLIndicator, true,
+					new CRLNumber(BigInteger.ONE));
+		}
+
 		X509CRL x509Crl = crlGenerator.generate(issuerPrivateKey);
 		return x509Crl;
+	}
+
+	public static DistributionPoint getDistributionPoint(String uri) {
+		GeneralName gn = new GeneralName(GeneralName.uniformResourceIdentifier,
+				new DERIA5String(uri));
+		ASN1EncodableVector vec = new ASN1EncodableVector();
+		vec.add(gn);
+		GeneralNames gns = new GeneralNames(new DERSequence(vec));
+		DistributionPointName dpn = new DistributionPointName(0, gns);
+		return new DistributionPoint(dpn, null, null);
 	}
 
 	public static OCSPResp createOcspResp(X509Certificate certificate,

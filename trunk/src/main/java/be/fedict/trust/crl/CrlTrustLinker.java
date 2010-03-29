@@ -20,6 +20,7 @@ package be.fedict.trust.crl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
@@ -28,12 +29,15 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -74,17 +78,30 @@ public class CrlTrustLinker implements TrustLinker {
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData) {
+
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
 			LOG.debug("no CRL uri in certificate");
 			return null;
 		}
+
+		return processCrl(crlUri, childCertificate, certificate,
+				validationDate, revocationData, null);
+	}
+
+	private TrustLinkerResult processCrl(URI crlUri,
+			X509Certificate childCertificate, X509Certificate certificate,
+			Date validationDate, RevocationData revocationData,
+			BigInteger baseCrlNumber) {
+
 		LOG.debug("CRL URI: " + crlUri);
 		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
 				validationDate);
 		if (null == x509crl) {
 			return null;
 		}
+
+		// check CRL integrity
 		boolean crlIntegrityResult = checkCrlIntegrity(x509crl, certificate,
 				validationDate);
 		if (false == crlIntegrityResult) {
@@ -96,6 +113,18 @@ public class CrlTrustLinker implements TrustLinker {
 				.checkSignatureAlgorithm(x509crl.getSigAlgName());
 		if (!trustResult.isValid()) {
 			return trustResult;
+		}
+
+		// check delta CRL indicator against completeCrlNuber
+		if (null != baseCrlNumber) {
+			BigInteger crlNumber = getDeltaCrlIndicator(x509crl);
+			if (!baseCrlNumber.equals(crlNumber)) {
+				LOG
+						.error("Delta CRL indicator (" + crlNumber
+								+ ") not equals base CRL number("
+								+ baseCrlNumber + ")");
+				return null;
+			}
 		}
 
 		// fill up revocation data if not null with this valid CRL
@@ -110,23 +139,48 @@ public class CrlTrustLinker implements TrustLinker {
 			}
 		}
 
+		boolean revoked = true;
 		X509CRLEntry crlEntry = x509crl.getRevokedCertificate(childCertificate
 				.getSerialNumber());
 		if (null == crlEntry) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal());
-			return new TrustLinkerResult(true);
-		}
-		if (crlEntry.getRevocationDate().after(validationDate)) {
+			revoked = false;
+		} else if (crlEntry.getRevocationDate().after(validationDate)) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal() + " at "
 					+ validationDate);
-			return new TrustLinkerResult(true);
+			revoked = false;
 		}
-		// TODO: delta CRL
+
+		if (null != x509crl.getExtensionValue(X509Extensions.DeltaCRLIndicator
+				.getId())) {
+			// Delta CRL
+			if (!revoked)
+				return null;
+
+		} else {
+			// Complete CRL, look for delta's
+			List<URI> deltaCrlUris = getDeltaCrlUris(x509crl);
+			if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
+				for (URI deltaCrlUri : deltaCrlUris) {
+					LOG.debug("delta CRL: " + deltaCrlUri.toString());
+					TrustLinkerResult result = processCrl(deltaCrlUri,
+							childCertificate, certificate, validationDate,
+							revocationData, getCrlNumber(x509crl));
+					if (null != result)
+						return result;
+				}
+			}
+		}
+
+		if (!revoked)
+			return new TrustLinkerResult(true);
+
 		return new TrustLinkerResult(false,
 				TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
 				"certificate revoked by CRL=" + crlEntry.getSerialNumber());
+
 	}
 
 	public static boolean checkCrlIntegrity(X509CRL x509crl,
@@ -198,6 +252,94 @@ public class CrlTrustLinker implements TrustLinker {
 			}
 		}
 		return null;
+	}
+
+	private List<URI> getDeltaCrlUris(X509CRL x509crl) {
+
+		byte[] freshestCrlValue = x509crl
+				.getExtensionValue(X509Extensions.FreshestCRL.getId());
+		if (null == freshestCrlValue)
+			return null;
+		ASN1Sequence seq;
+		try {
+			DEROctetString oct;
+			oct = (DEROctetString) (new ASN1InputStream(
+					new ByteArrayInputStream(freshestCrlValue)).readObject());
+			seq = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
+					.readObject();
+		} catch (IOException e) {
+			throw new RuntimeException("IO error: " + e.getMessage(), e);
+		}
+
+		List<URI> deltaCrlUris = new LinkedList<URI>();
+		CRLDistPoint distPoint = CRLDistPoint.getInstance(seq);
+		DistributionPoint[] distributionPoints = distPoint
+				.getDistributionPoints();
+		for (DistributionPoint distributionPoint : distributionPoints) {
+			DistributionPointName distributionPointName = distributionPoint
+					.getDistributionPoint();
+			if (DistributionPointName.FULL_NAME != distributionPointName
+					.getType()) {
+				continue;
+			}
+			GeneralNames generalNames = (GeneralNames) distributionPointName
+					.getName();
+			GeneralName[] names = generalNames.getNames();
+			for (GeneralName name : names) {
+				if (name.getTagNo() != GeneralName.uniformResourceIdentifier) {
+					LOG.debug("not a uniform resource identifier");
+					continue;
+				}
+				DERIA5String derStr = DERIA5String.getInstance(name
+						.getDERObject());
+				String str = derStr.getString();
+				URI uri = toURI(str);
+				deltaCrlUris.add(uri);
+			}
+		}
+		return deltaCrlUris;
+	}
+
+	private BigInteger getDeltaCrlIndicator(X509CRL deltaCrl) {
+
+		byte[] deltaCrlIndicatorValue = deltaCrl
+				.getExtensionValue(X509Extensions.DeltaCRLIndicator.getId());
+		if (null == deltaCrlIndicatorValue)
+			return null;
+
+		try {
+			DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
+					new ByteArrayInputStream(deltaCrlIndicatorValue))
+					.readObject());
+			byte[] octets = octetString.getOctets();
+			DERInteger integer = (DERInteger) new ASN1InputStream(octets)
+					.readObject();
+			BigInteger crlNumber = integer.getPositiveValue();
+			return crlNumber;
+		} catch (IOException e) {
+			throw new RuntimeException("IO error: " + e.getMessage(), e);
+		}
+
+	}
+
+	private BigInteger getCrlNumber(X509CRL crl) {
+		byte[] crlNumberExtensionValue = crl
+				.getExtensionValue(X509Extensions.CRLNumber.getId());
+		if (null == crlNumberExtensionValue) {
+			return null;
+		}
+		try {
+			DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
+					new ByteArrayInputStream(crlNumberExtensionValue))
+					.readObject());
+			byte[] octets = octetString.getOctets();
+			DERInteger integer = (DERInteger) new ASN1InputStream(octets)
+					.readObject();
+			BigInteger crlNumber = integer.getPositiveValue();
+			return crlNumber;
+		} catch (IOException e) {
+			throw new RuntimeException("IO error: " + e.getMessage(), e);
+		}
 	}
 
 	private static URI toURI(String str) {
