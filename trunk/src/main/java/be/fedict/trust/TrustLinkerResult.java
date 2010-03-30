@@ -56,7 +56,7 @@ public class TrustLinkerResult {
 
 		this.valid = valid;
 		this.reason = reason;
-		this.message = null;
+		this.message = message;
 	}
 
 	/**
