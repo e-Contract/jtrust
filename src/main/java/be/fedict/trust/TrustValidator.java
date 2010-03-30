@@ -18,14 +18,28 @@
 
 package be.fedict.trust;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TSPUtil;
+import org.bouncycastle.tsp.TSPValidationException;
+import org.bouncycastle.tsp.TimeStampToken;
 
 /**
  * Trust Validator.
@@ -115,6 +129,107 @@ public class TrustValidator {
 	public void isTrusted(List<X509Certificate> certificatePath)
 			throws CertPathValidatorException {
 		isTrusted(certificatePath, new Date());
+	}
+
+	/**
+	 * Validates whether the specified encoded {@link TimeStampToken}'s
+	 * certificate path is valid according to the configured trust linkers.
+	 * 
+	 * @param encodedTimestampToken
+	 * @throws CertPathValidatorException
+	 */
+	public void isTrusted(byte[] encodedTimestampToken)
+			throws CertPathValidatorException {
+
+		isTrusted(encodedTimestampToken, new Date());
+	}
+
+	/**
+	 * Validates whether the specified encoded {@link TimeStampToken}'s
+	 * certificate path is valid according to the configured trust linkers.
+	 * 
+	 * @param encodedTimestampToken
+	 * @param validationDate
+	 * @throws CertPathValidatorException
+	 */
+	public void isTrusted(byte[] encodedTimestampToken, Date validationDate)
+			throws CertPathValidatorException {
+
+		try {
+			List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+			TimeStampToken timestampToken = new TimeStampToken(
+					new CMSSignedData(encodedTimestampToken));
+			CertStore certStore = timestampToken.getCertificatesAndCRLs(
+					"Collection", "BC");
+
+			Collection<? extends Certificate> certificates = certStore
+					.getCertificates(null);
+
+			// reconstruct certificate path
+			for (Certificate certificate : certificates) {
+				X509Certificate x509Certificate = (X509Certificate) certificate;
+
+				LOG.debug("certificate issuer : "
+						+ x509Certificate.getIssuerX500Principal().toString());
+				LOG.debug("certificate subject: "
+						+ x509Certificate.getSubjectX500Principal().toString());
+
+				certificateChain.add(x509Certificate);
+			}
+			if (isSelfSigned(certificateChain.get(0))) {
+				Collections.reverse(certificateChain);
+			}
+
+			// check ExtendedKeyUsage extension: id-kp-timeStamping
+			X509Certificate tsaCertificate = certificateChain.get(0);
+			LOG.debug("check ExtendedKeyUsage for: "
+					+ tsaCertificate.getSubjectX500Principal());
+			TSPUtil.validateCertificate(tsaCertificate);
+
+			// check certificate chain
+			isTrusted(certificateChain, validationDate);
+
+		} catch (TSPValidationException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"Invalid ExtendedKeyUsage extension for timestamping certificate");
+			LOG.error(this.result.getMessage(), e);
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (IOException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"IOException reading certificate chain: " + e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (TSPException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"TSPException reading certificate chain: " + e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (CMSException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"CMSException reading certificate chain: " + e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (NoSuchAlgorithmException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"NoSuchAlgorithmException reading certificate chain: "
+							+ e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (NoSuchProviderException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"NoSuchProviderException reading certificate chain: "
+							+ e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		} catch (CertStoreException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"CertStoreException reading certificate chain: "
+							+ e.getMessage());
+			throw new CertPathValidatorException(this.result.getMessage());
+		}
+
 	}
 
 	/**

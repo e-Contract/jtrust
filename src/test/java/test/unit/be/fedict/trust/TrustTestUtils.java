@@ -30,12 +30,15 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
+import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
+import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,8 +56,10 @@ import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -72,6 +77,11 @@ import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.OCSPRespGenerator;
 import org.bouncycastle.ocsp.Req;
 import org.bouncycastle.ocsp.RevokedStatus;
+import org.bouncycastle.tsp.TSPAlgorithms;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -144,6 +154,21 @@ public class TrustTestUtils {
 			String signatureAlgorithm) throws IOException, InvalidKeyException,
 			IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException {
+
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm,
+				false);
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa) throws IOException,
+			InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
 		certificateGenerator.setPublicKey(subjectPublicKey);
@@ -207,6 +232,13 @@ public class TrustTestUtils {
 		if (null != keyUsage) {
 			certificateGenerator.addExtension(X509Extensions.KeyUsage, true,
 					keyUsage);
+		}
+
+		if (tsa) {
+			certificateGenerator
+					.addExtension(X509Extensions.ExtendedKeyUsage, true,
+							new ExtendedKeyUsage(
+									KeyPurposeId.id_kp_timeStamping));
 		}
 
 		X509Certificate certificate;
@@ -497,5 +529,43 @@ public class TrustTestUtils {
 				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
 
 		return ocspResp;
+	}
+
+	public static TimeStampToken createTimeStampToken(PrivateKey privateKey,
+			List<X509Certificate> certificateChain) throws Exception {
+
+		OrderedCollectionCertStoreParameters collectionCertStoreParameters = new OrderedCollectionCertStoreParameters(
+				certificateChain);
+		CertStore certStore = CertStore.getInstance("Collection",
+				collectionCertStoreParameters);
+
+		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
+		requestGen.setCertReq(true);
+		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1,
+				new byte[20], BigInteger.valueOf(100));
+
+		TimeStampTokenGenerator tstGen = new TimeStampTokenGenerator(
+				privateKey, certificateChain.get(0), TSPAlgorithms.SHA1, "1.2");
+		tstGen.setCertificatesAndCRLs(certStore);
+		return tstGen.generate(request, BigInteger.ONE, new Date(), "BC");
+	}
+
+	public static class OrderedCollectionCertStoreParameters extends
+			CollectionCertStoreParameters {
+
+		private List<X509Certificate> certificates;
+
+		public OrderedCollectionCertStoreParameters(
+				List<X509Certificate> certificates) {
+
+			this.certificates = certificates;
+		}
+
+		@Override
+		public Collection<?> getCollection() {
+
+			return this.certificates;
+		}
+
 	}
 }
