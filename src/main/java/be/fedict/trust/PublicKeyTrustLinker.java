@@ -61,7 +61,10 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
 			LOG
-					.debug("child certificate validity end is before certificate validity end");
+					.debug("child certificate validity end is before certificate validity end: "
+							+ childCertificate.getNotAfter().toString()
+							+ " - "
+							+ certificate.getNotAfter().toString());
 			return new TrustLinkerResult(false,
 					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"child certificate validity end is before certificate validity end");

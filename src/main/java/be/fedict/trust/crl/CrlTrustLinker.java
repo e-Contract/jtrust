@@ -160,7 +160,7 @@ public class CrlTrustLinker implements TrustLinker {
 				return null;
 
 		} else {
-			// Complete CRL, look for delta's
+			// Base CRL, look for delta's
 			List<URI> deltaCrlUris = getDeltaCrlUris(x509crl);
 			if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
 				for (URI deltaCrlUri : deltaCrlUris) {

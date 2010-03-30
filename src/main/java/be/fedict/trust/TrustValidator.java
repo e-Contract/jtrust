@@ -180,6 +180,7 @@ public class TrustValidator {
 	public static TrustLinkerResult checkSignatureAlgorithm(
 			String signatureAlgorithm) {
 
+		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		// disallow MD5 certificate signatures
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
@@ -219,11 +220,13 @@ public class TrustValidator {
 				+ certificate.getSubjectX500Principal());
 		this.result = getSelfSignedResult(certificate);
 		if (!this.result.isValid()) {
+			LOG.debug("result: " + this.result.getMessage());
 			throw new CertPathValidatorException(this.result.getMessage());
 		}
 		// check certificate signature
 		this.result = checkSignatureAlgorithm(certificate.getSigAlgName());
 		if (!this.result.isValid()) {
+			LOG.debug("result: " + this.result.getMessage());
 			throw new CertPathValidatorException(this.result.getMessage());
 		}
 		checkSelfSignedTrust(certificate, validationDate);
