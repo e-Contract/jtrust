@@ -162,7 +162,7 @@ public class CrlTrustLinker implements TrustLinker {
 		} else {
 			// Base CRL, look for delta's
 			List<URI> deltaCrlUris = getDeltaCrlUris(x509crl);
-			if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
+			if (null != deltaCrlUris) {
 				for (URI deltaCrlUri : deltaCrlUris) {
 					LOG.debug("delta CRL: " + deltaCrlUri.toString());
 					TrustLinkerResult result = processCrl(deltaCrlUri,
