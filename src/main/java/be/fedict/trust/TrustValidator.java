@@ -19,15 +19,18 @@
 package be.fedict.trust;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +43,7 @@ import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TSPValidationException;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
  * Trust Validator.
@@ -134,9 +138,6 @@ public class TrustValidator {
 	/**
 	 * Validates whether the specified encoded {@link TimeStampToken}'s
 	 * certificate path is valid according to the configured trust linkers.
-	 * 
-	 * @param encodedTimestampToken
-	 * @throws CertPathValidatorException
 	 */
 	public void isTrusted(byte[] encodedTimestampToken)
 			throws CertPathValidatorException {
@@ -147,10 +148,6 @@ public class TrustValidator {
 	/**
 	 * Validates whether the specified encoded {@link TimeStampToken}'s
 	 * certificate path is valid according to the configured trust linkers.
-	 * 
-	 * @param encodedTimestampToken
-	 * @param validationDate
-	 * @throws CertPathValidatorException
 	 */
 	public void isTrusted(byte[] encodedTimestampToken, Date validationDate)
 			throws CertPathValidatorException {
@@ -169,15 +166,31 @@ public class TrustValidator {
 			for (Certificate certificate : certificates) {
 				X509Certificate x509Certificate = (X509Certificate) certificate;
 
-				LOG.debug("certificate issuer : "
-						+ x509Certificate.getIssuerX500Principal().toString());
-				LOG.debug("certificate subject: "
-						+ x509Certificate.getSubjectX500Principal().toString());
-
-				certificateChain.add(x509Certificate);
+				if (isSelfSigned(x509Certificate)) {
+					certificateChain.add(x509Certificate);
+				} else {
+					int index = 0;
+					for (X509Certificate c : certificateChain) {
+						if (c.getSubjectX500Principal().equals(
+								x509Certificate.getIssuerX500Principal())) {
+							index = certificateChain.indexOf(c);
+						} else if (c.getIssuerX500Principal().equals(
+								x509Certificate.getSubjectX500Principal())) {
+							index = certificateChain.indexOf(c) - 1;
+						}
+					}
+					if (-1 == index)
+						certificateChain.add(0, x509Certificate);
+					else
+						certificateChain.add(index, x509Certificate);
+				}
 			}
-			if (isSelfSigned(certificateChain.get(0))) {
-				Collections.reverse(certificateChain);
+
+			for (X509Certificate certificate : certificateChain) {
+				LOG.debug("subject="
+						+ certificate.getSubjectX500Principal().toString()
+						+ " issuer="
+						+ certificate.getIssuerX500Principal().toString());
 			}
 
 			// check ExtendedKeyUsage extension: id-kp-timeStamping
@@ -229,7 +242,109 @@ public class TrustValidator {
 							+ e.getMessage());
 			throw new CertPathValidatorException(this.result.getMessage());
 		}
+	}
 
+	/**
+	 * @see #isTrusted(List, List, Date)
+	 */
+	public void isTrusted(List<byte[]> encodedAttributeCertificates,
+			List<X509Certificate> certificatePath)
+			throws CertPathValidatorException {
+
+		isTrusted(encodedAttributeCertificates, certificatePath, new Date());
+	}
+
+	/**
+	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The
+	 * supplied certificate path will also be validated and used to validate the
+	 * attribute certificates.
+	 */
+	public void isTrusted(List<byte[]> encodedAttributeCertificates,
+			List<X509Certificate> certificatePath, Date validationDate)
+			throws CertPathValidatorException {
+
+		try {
+
+			/*
+			 * Validate the supplied certificate path
+			 */
+			isTrusted(certificatePath, validationDate);
+
+			/*
+			 * Validate the attribute certificates
+			 */
+			for (byte[] encodedAttributeCertificate : encodedAttributeCertificates) {
+				X509V2AttributeCertificate attributeCertificate = new X509V2AttributeCertificate(
+						encodedAttributeCertificate);
+
+				// check validity
+				attributeCertificate.checkValidity();
+
+				if (certificatePath.size() < 2) {
+					this.result = new TrustLinkerResult(false,
+							TrustLinkerResultReason.INVALID_TRUST,
+							"Certificate path should at least contain 2 certificates");
+					throw new CertPathValidatorException(this.result
+							.getMessage());
+				}
+
+				// match the issuer and holder of the attribute certificate
+				X509Certificate holderCertificate = certificatePath.get(0);
+				X509Certificate issuerCertificate = certificatePath.get(1);
+
+				boolean match = attributeCertificate.getHolder().match(
+						holderCertificate);
+				if (!match) {
+					this.result = new TrustLinkerResult(false,
+							TrustLinkerResultReason.INVALID_TRUST,
+							"Holder certificate does not match");
+					throw new CertPathValidatorException(this.result
+							.getMessage());
+				}
+				match = attributeCertificate.getIssuer().match(
+						issuerCertificate);
+				if (!match) {
+					this.result = new TrustLinkerResult(false,
+							TrustLinkerResultReason.INVALID_TRUST,
+							"Issuer certificate does not match");
+					throw new CertPathValidatorException(this.result
+							.getMessage());
+				}
+
+				// validate the signature on the attribute certificate against
+				// the attribute certificate's holder
+				attributeCertificate.verify(issuerCertificate.getPublicKey(),
+						"BC");
+			}
+		} catch (CertificateExpiredException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
+					"CertificateExpiredException: " + e.getMessage());
+		} catch (InvalidKeyException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"InvalidKeyException: " + e.getMessage());
+		} catch (CertificateException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"CertificateException: " + e.getMessage());
+		} catch (NoSuchAlgorithmException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"NoSuchAlgorithmException: " + e.getMessage());
+		} catch (NoSuchProviderException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"NoSuchProviderException: " + e.getMessage());
+		} catch (SignatureException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"SignatureException: " + e.getMessage());
+		} catch (IOException e) {
+			this.result = new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE, "IOException: "
+							+ e.getMessage());
+		}
 	}
 
 	/**

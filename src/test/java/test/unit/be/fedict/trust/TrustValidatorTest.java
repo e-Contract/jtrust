@@ -27,12 +27,14 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -792,7 +794,7 @@ public class TrustValidatorTest {
 	}
 
 	@Test
-	public void trustLinkTimestampToken() throws Exception {
+	public void validTimestampToken() throws Exception {
 
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
@@ -851,4 +853,77 @@ public class TrustValidatorTest {
 		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 	}
 
+	@Test
+	public void validAttributeCertificate() throws Exception {
+
+		// setup: create certificate chain
+		DateTime now = new DateTime();
+		DateTime notBefore = now.minusHours(1);
+		DateTime notAfter = now.plusHours(1);
+
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=Root",
+						notBefore, notAfter);
+
+		KeyPair issuerKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate issuerCertificate = TrustTestUtils
+				.generateCertificate(issuerKeyPair.getPublic(), "CN=Issuer",
+						notBefore, notAfter, rootCertificate, rootKeyPair
+								.getPrivate(), true, -1, null, null);
+
+		KeyPair holderKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate holderCertificate = TrustTestUtils.generateCertificate(
+				holderKeyPair.getPublic(), "CN=Issuer", notBefore, notAfter,
+				issuerCertificate, issuerKeyPair.getPrivate(), true, -1, null,
+				null);
+
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		certificateChain.add(holderCertificate);
+		certificateChain.add(issuerCertificate);
+		certificateChain.add(rootCertificate);
+
+		// setup: create attribute certificate
+		X509V2AttributeCertificate attributeCertificate = TrustTestUtils
+				.createAttributeCertificate(holderCertificate,
+						issuerCertificate, issuerKeyPair.getPrivate(),
+						notBefore.toDate(), notAfter.toDate());
+		List<byte[]> encodedAttributeCertificates = Collections
+				.singletonList(attributeCertificate.getEncoded());
+
+		// Setup: Trust Validator
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		EasyMock
+				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+				.andReturn(true);
+
+		Date validationDate = new Date();
+
+		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(issuerCertificate,
+						rootCertificate, validationDate, trustValidator
+								.getRevocationData())).andReturn(
+				new TrustLinkerResult(true));
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(holderCertificate,
+						issuerCertificate, validationDate, trustValidator
+								.getRevocationData())).andReturn(
+				new TrustLinkerResult(true));
+		trustValidator.addTrustLinker(mockTrustLinker);
+
+		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
+
+		// operate
+		trustValidator
+				.isTrusted(encodedAttributeCertificates, certificateChain);
+
+		assertTrue(trustValidator.getResult().isValid());
+
+		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
+	}
 }
