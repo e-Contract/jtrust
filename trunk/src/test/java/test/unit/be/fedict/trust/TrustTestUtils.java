@@ -38,7 +38,6 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,6 +81,11 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
+import org.bouncycastle.x509.AttributeCertificateHolder;
+import org.bouncycastle.x509.AttributeCertificateIssuer;
+import org.bouncycastle.x509.X509Attribute;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
+import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
@@ -534,7 +538,7 @@ public class TrustTestUtils {
 	public static TimeStampToken createTimeStampToken(PrivateKey privateKey,
 			List<X509Certificate> certificateChain) throws Exception {
 
-		OrderedCollectionCertStoreParameters collectionCertStoreParameters = new OrderedCollectionCertStoreParameters(
+		CollectionCertStoreParameters collectionCertStoreParameters = new CollectionCertStoreParameters(
 				certificateChain);
 		CertStore certStore = CertStore.getInstance("Collection",
 				collectionCertStoreParameters);
@@ -550,22 +554,30 @@ public class TrustTestUtils {
 		return tstGen.generate(request, BigInteger.ONE, new Date(), "BC");
 	}
 
-	public static class OrderedCollectionCertStoreParameters extends
-			CollectionCertStoreParameters {
+	public static X509V2AttributeCertificate createAttributeCertificate(
+			X509Certificate holderCertificate,
+			X509Certificate issuerCertificate, PrivateKey issuerPrivateKey,
+			Date notBefore, Date notAfter) throws Exception {
 
-		private List<X509Certificate> certificates;
+		X509V2AttributeCertificateGenerator acGen = new X509V2AttributeCertificateGenerator();
+		acGen.reset();
+		acGen.setHolder(new AttributeCertificateHolder(holderCertificate));
+		acGen.setIssuer(new AttributeCertificateIssuer(issuerCertificate
+				.getSubjectX500Principal()));
+		acGen.setSerialNumber(new BigInteger("1"));
+		acGen.setNotBefore(notBefore);
+		acGen.setNotAfter(notAfter);
+		acGen.setSignatureAlgorithm("SHA512WithRSAEncryption");
+		GeneralName roleName = new GeneralName(GeneralName.rfc822Name,
+				"RoleName");
+		ASN1EncodableVector roleSyntax = new ASN1EncodableVector();
+		roleSyntax.add(roleName);
+		X509Attribute attributes = new X509Attribute("2.5.24.72",
+				new DERSequence(roleSyntax));
+		acGen.addAttribute(attributes);
 
-		public OrderedCollectionCertStoreParameters(
-				List<X509Certificate> certificates) {
-
-			this.certificates = certificates;
-		}
-
-		@Override
-		public Collection<?> getCollection() {
-
-			return this.certificates;
-		}
+		return (X509V2AttributeCertificate) acGen.generate(issuerPrivateKey,
+				"BC");
 
 	}
 }
