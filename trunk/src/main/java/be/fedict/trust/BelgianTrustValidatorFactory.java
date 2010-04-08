@@ -30,6 +30,7 @@ import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
+import be.fedict.trust.constraints.TSACertificateConstraint;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
@@ -123,6 +124,53 @@ public class BelgianTrustValidatorFactory {
 			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
 				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null);
+
+		return trustValidator;
+	}
+
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for TSA
+	 * certificates.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @param externalTrustLinker
+	 *            the optional external trust linker to be used.
+	 * @return a trust validator instance.
+	 */
+	public static TrustValidator createTSATrustValidator(
+			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		X509Certificate rootTsaCertificate = loadCertificate("be/fedict/trust/belgiumtsa.crt");
+		memoryCertificateRepository.addTrustPoint(rootTsaCertificate);
+
+		TrustValidator trustValidator = new TrustValidator(
+				memoryCertificateRepository);
+
+		// add trust linkers
+		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
+
+		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
+				networkConfig);
+
+		OnlineCrlRepository crlRepository = new OnlineCrlRepository(
+				networkConfig);
+		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(
+				crlRepository);
+
+		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
+		if (null != externalTrustLinker) {
+			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
+		}
+		fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
+		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
+				cachedCrlRepository));
+
+		trustValidator.addTrustLinker(fallbackTrustLinker);
+
+		// add certificate constraints
+		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
 
 		return trustValidator;
 	}
