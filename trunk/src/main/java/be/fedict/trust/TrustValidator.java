@@ -24,25 +24,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.tsp.TSPException;
-import org.bouncycastle.tsp.TSPUtil;
-import org.bouncycastle.tsp.TSPValidationException;
-import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
@@ -133,115 +123,6 @@ public class TrustValidator {
 	public void isTrusted(List<X509Certificate> certificatePath)
 			throws CertPathValidatorException {
 		isTrusted(certificatePath, new Date());
-	}
-
-	/**
-	 * Validates whether the specified encoded {@link TimeStampToken}'s
-	 * certificate path is valid according to the configured trust linkers.
-	 */
-	public void isTrusted(byte[] encodedTimestampToken)
-			throws CertPathValidatorException {
-
-		isTrusted(encodedTimestampToken, new Date());
-	}
-
-	/**
-	 * Validates whether the specified encoded {@link TimeStampToken}'s
-	 * certificate path is valid according to the configured trust linkers.
-	 */
-	public void isTrusted(byte[] encodedTimestampToken, Date validationDate)
-			throws CertPathValidatorException {
-
-		try {
-			List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
-			TimeStampToken timestampToken = new TimeStampToken(
-					new CMSSignedData(encodedTimestampToken));
-			CertStore certStore = timestampToken.getCertificatesAndCRLs(
-					"Collection", "BC");
-
-			Collection<? extends Certificate> certificates = certStore
-					.getCertificates(null);
-
-			// reconstruct certificate path
-			for (Certificate certificate : certificates) {
-				X509Certificate x509Certificate = (X509Certificate) certificate;
-
-				if (isSelfSigned(x509Certificate)) {
-					certificateChain.add(x509Certificate);
-				} else {
-					int index = 0;
-					for (X509Certificate c : certificateChain) {
-						if (c.getSubjectX500Principal().equals(
-								x509Certificate.getIssuerX500Principal())) {
-							index = certificateChain.indexOf(c);
-						} else if (c.getIssuerX500Principal().equals(
-								x509Certificate.getSubjectX500Principal())) {
-							index = certificateChain.indexOf(c) - 1;
-						}
-					}
-					if (-1 == index)
-						certificateChain.add(0, x509Certificate);
-					else
-						certificateChain.add(index, x509Certificate);
-				}
-			}
-
-			for (X509Certificate certificate : certificateChain) {
-				LOG.debug("subject="
-						+ certificate.getSubjectX500Principal().toString()
-						+ " issuer="
-						+ certificate.getIssuerX500Principal().toString());
-			}
-
-			// check ExtendedKeyUsage extension: id-kp-timeStamping
-			X509Certificate tsaCertificate = certificateChain.get(0);
-			LOG.debug("check ExtendedKeyUsage for: "
-					+ tsaCertificate.getSubjectX500Principal());
-			TSPUtil.validateCertificate(tsaCertificate);
-
-			// check certificate chain
-			isTrusted(certificateChain, validationDate);
-
-		} catch (TSPValidationException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"Invalid ExtendedKeyUsage extension for timestamping certificate");
-			LOG.error(this.result.getMessage(), e);
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (IOException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"IOException reading certificate chain: " + e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (TSPException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"TSPException reading certificate chain: " + e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (CMSException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"CMSException reading certificate chain: " + e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (NoSuchAlgorithmException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"NoSuchAlgorithmException reading certificate chain: "
-							+ e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (NoSuchProviderException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"NoSuchProviderException reading certificate chain: "
-							+ e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		} catch (CertStoreException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"CertStoreException reading certificate chain: "
-							+ e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		}
 	}
 
 	/**
