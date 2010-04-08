@@ -170,27 +170,7 @@ public class TrustValidator {
 				}
 
 				// match the issuer and holder of the attribute certificate
-				X509Certificate holderCertificate = certificatePath.get(0);
 				X509Certificate issuerCertificate = certificatePath.get(1);
-
-				boolean match = attributeCertificate.getHolder().match(
-						holderCertificate);
-				if (!match) {
-					this.result = new TrustLinkerResult(false,
-							TrustLinkerResultReason.INVALID_TRUST,
-							"Holder certificate does not match");
-					throw new CertPathValidatorException(this.result
-							.getMessage());
-				}
-				match = attributeCertificate.getIssuer().match(
-						issuerCertificate);
-				if (!match) {
-					this.result = new TrustLinkerResult(false,
-							TrustLinkerResultReason.INVALID_TRUST,
-							"Issuer certificate does not match");
-					throw new CertPathValidatorException(this.result
-							.getMessage());
-				}
 
 				// validate the signature on the attribute certificate against
 				// the attribute certificate's holder
