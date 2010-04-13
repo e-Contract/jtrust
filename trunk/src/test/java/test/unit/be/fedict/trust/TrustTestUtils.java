@@ -316,6 +316,20 @@ public class TrustTestUtils {
 
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
+			DateTime notAfter, boolean caFlag, int pathLength, String crlUri,
+			KeyUsage keyUsage, String signatureAlgorithm) throws IOException,
+			InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
+		PublicKey subjectPublicKey = keyPair.getPublic();
+		PrivateKey issuerPrivateKey = keyPair.getPrivate();
+		X509Certificate certificate = generateCertificate(subjectPublicKey,
+				subjectDn, notBefore, notAfter, null, issuerPrivateKey, caFlag,
+				pathLength, crlUri, null, keyUsage, signatureAlgorithm);
+		return certificate;
+	}
+
+	public static X509Certificate generateSelfSignedCertificate(
+			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag, int pathLength)
 			throws IOException, InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {

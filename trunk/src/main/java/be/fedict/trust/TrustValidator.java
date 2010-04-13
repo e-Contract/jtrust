@@ -169,11 +169,9 @@ public class TrustValidator {
 							.getMessage());
 				}
 
-				// match the issuer and holder of the attribute certificate
-				X509Certificate issuerCertificate = certificatePath.get(1);
-
 				// validate the signature on the attribute certificate against
 				// the attribute certificate's holder
+				X509Certificate issuerCertificate = certificatePath.get(1);
 				attributeCertificate.verify(issuerCertificate.getPublicKey(),
 						"BC");
 			}
