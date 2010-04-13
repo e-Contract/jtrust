@@ -134,6 +134,35 @@ public class TrustValidatorTest {
 	}
 
 	@Test
+	public void trustKnownCertificateSHA256WithRSA() throws Exception {
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=test", notBefore,
+						notAfter, true, -1, null, null, "SHA256WithRSA");
+
+		CertificateRepository mockCertificateRepository = EasyMock
+				.createMock(CertificateRepository.class);
+		TrustValidator trustValidator = new TrustValidator(
+				mockCertificateRepository);
+
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
+				.andReturn(true);
+
+		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		certificatePath.add(certificate);
+
+		EasyMock.replay(mockCertificateRepository);
+
+		trustValidator.isTrusted(certificatePath);
+
+		assertTrue(trustValidator.getResult().isValid());
+		EasyMock.verify(mockCertificateRepository);
+	}
+
+	@Test
 	public void doNotTrustExpiredCertificate() throws Exception {
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
