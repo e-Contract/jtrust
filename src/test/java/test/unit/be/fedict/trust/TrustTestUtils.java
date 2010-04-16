@@ -173,6 +173,39 @@ public class TrustTestUtils {
 			String signatureAlgorithm, boolean tsa) throws IOException,
 			InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {
+
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa,
+				true, true);
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa, boolean includeSKID,
+			boolean includeAKID) throws IOException, InvalidKeyException,
+			IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException {
+
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa,
+				includeSKID, includeAKID, null);
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa, boolean includeSKID,
+			boolean includeAKID, PublicKey akidPublicKey) throws IOException,
+			InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
+
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
 		certificateGenerator.setPublicKey(subjectPublicKey);
@@ -191,13 +224,25 @@ public class TrustTestUtils {
 		certificateGenerator.setSerialNumber(new BigInteger(128,
 				new SecureRandom()));
 
-		certificateGenerator.addExtension(X509Extensions.SubjectKeyIdentifier,
-				false, createSubjectKeyId(subjectPublicKey));
-		PublicKey issuerPublicKey;
-		issuerPublicKey = subjectPublicKey;
-		certificateGenerator.addExtension(
-				X509Extensions.AuthorityKeyIdentifier, false,
-				createAuthorityKeyId(issuerPublicKey));
+		if (includeSKID) {
+			certificateGenerator.addExtension(
+					X509Extensions.SubjectKeyIdentifier, false,
+					createSubjectKeyId(subjectPublicKey));
+		}
+
+		if (includeAKID) {
+			PublicKey issuerPublicKey;
+			if (null != akidPublicKey) {
+				issuerPublicKey = akidPublicKey;
+			} else if (null != issuerCertificate) {
+				issuerPublicKey = issuerCertificate.getPublicKey();
+			} else {
+				issuerPublicKey = subjectPublicKey;
+			}
+			certificateGenerator.addExtension(
+					X509Extensions.AuthorityKeyIdentifier, false,
+					createAuthorityKeyId(issuerPublicKey));
+		}
 
 		if (caFlag) {
 			if (-1 == pathLength) {

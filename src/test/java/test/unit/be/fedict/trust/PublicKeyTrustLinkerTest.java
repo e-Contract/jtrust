@@ -253,4 +253,85 @@ public class PublicKeyTrustLinkerTest {
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
+
+	@Test
+	public void testCACertificateNoSKID() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils.generateCertificate(
+				rootKeyPair.getPublic(), "CN=TestRoot", notBefore, notAfter,
+				null, rootKeyPair.getPrivate(), true, -1, null, null, null,
+				"SHA1withRSA", false, false, true);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate());
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
+		assertNotNull(result);
+		assertFalse(result.isValid());
+	}
+
+	@Test
+	public void testChildCACertificateNoAKIDNotSelfSigned() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), true, -1, null,
+				null, null, "SHA1withRSA", false, true, false);
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
+		assertNotNull(result);
+		assertFalse(result.isValid());
+	}
+
+	@Test
+	public void testAKIDMisMatchSKID() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair akidKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), true, -1, null,
+				null, null, "SHA1withRSA", false, true, true, akidKeyPair
+						.getPublic());
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+				certificate, rootCertificate, validationDate,
+				new RevocationData());
+		assertNotNull(result);
+		assertFalse(result.isValid());
+	}
+
 }
