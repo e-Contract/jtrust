@@ -206,6 +206,18 @@ public class CrlTrustLinker implements TrustLinker {
 			LOG.debug("CRL too old");
 			return false;
 		}
+
+		// assert cRLSign KeyUsage bit
+		if (null == issuerCertificate.getKeyUsage()) {
+			LOG.debug("No KeyUsage extension for CRL issuing certificate");
+			return false;
+		}
+
+		if (false == issuerCertificate.getKeyUsage()[6]) {
+			LOG.debug("cRLSign bit not set for CRL issuing certificate");
+			return false;
+		}
+
 		return true;
 	}
 
