@@ -188,13 +188,50 @@ public class CrlTrustLinkerTest {
 	}
 
 	@Test
-	public void crlMissingCRLSignKeyUsage() throws Exception {
+	public void crlMissingKeyUsage() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = TrustTestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
+
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils
+				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
+						notAfter, rootCertificate, rootKeyPair.getPrivate(),
+						false, -1, "crl-uri");
+
+		Date validationDate = notBefore.plusDays(1).toDate();
+
+		CrlRepository mockCrlRepository = EasyMock
+				.createMock(CrlRepository.class);
+		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
+				rootCertificate, notBefore, notAfter);
+		EasyMock.expect(
+				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
+						validationDate)).andReturn(x509crl);
+
+		EasyMock.replay(mockCrlRepository);
+
+		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+
+		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate, new RevocationData());
+
+		assertNull(result);
+		EasyMock.verify(mockCrlRepository);
+	}
+
+	@Test
+	public void crlMissingCRLSignKeyUsage() throws Exception {
+		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter, true, 0, null, new KeyUsage(
+								KeyUsage.dataEncipherment));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate certificate = TrustTestUtils

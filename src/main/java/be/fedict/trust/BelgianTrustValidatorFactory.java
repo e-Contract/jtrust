@@ -48,10 +48,6 @@ public class BelgianTrustValidatorFactory {
 	private static final Log LOG = LogFactory
 			.getLog(BelgianTrustValidatorFactory.class);
 
-	private BelgianTrustValidatorFactory() {
-		super();
-	}
-
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.

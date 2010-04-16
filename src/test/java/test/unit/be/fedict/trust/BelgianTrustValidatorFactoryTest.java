@@ -30,8 +30,70 @@ public class BelgianTrustValidatorFactoryTest {
 	@Test
 	public void testCreateTrustValidator() throws Exception {
 		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTrustValidator();
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateTrustValidatorNoNetworkConfig() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
 				.createTrustValidator(null);
 
 		assertNotNull(trustValidator);
 	}
+
+	@Test
+	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinker()
+			throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTrustValidator(null, null);
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinkerNoRepo()
+			throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTrustValidator(null, null, null);
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateNonRepudiationTrustValidatorNoNetworkConfig()
+			throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createNonRepudiationTrustValidator(null);
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateNonRepudiationTrustValidatorNoNetworkConfigNoExternalTrustLinker()
+			throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createNonRepudiationTrustValidator(null, null);
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateNationalRegistryTrustValidatorNoNetworkConfig()
+			throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createNationalRegistryTrustValidator(null);
+
+		assertNotNull(trustValidator);
+	}
+
+	@Test
+	public void testCreateTSATrustValidator() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTSATrustValidator(null, null);
+
+		assertNotNull(trustValidator);
+	}
+
 }
