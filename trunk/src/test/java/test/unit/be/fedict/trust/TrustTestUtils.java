@@ -46,13 +46,16 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
@@ -64,6 +67,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.ocsp.BasicOCSPResp;
@@ -206,6 +210,61 @@ public class TrustTestUtils {
 			InvalidKeyException, IllegalStateException,
 			NoSuchAlgorithmException, SignatureException, CertificateException {
 
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa,
+				includeSKID, includeAKID, akidPublicKey, null);
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa, boolean includeSKID,
+			boolean includeAKID, PublicKey akidPublicKey,
+			String certificatePolicy) throws IOException, InvalidKeyException,
+			IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException {
+
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa,
+				includeSKID, includeAKID, akidPublicKey, certificatePolicy,
+				null);
+	}
+
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa, boolean includeSKID,
+			boolean includeAKID, PublicKey akidPublicKey,
+			String certificatePolicy, Boolean qcCompliance) throws IOException,
+			InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException {
+
+		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
+				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
+				pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa,
+				includeSKID, includeAKID, akidPublicKey, certificatePolicy,
+				qcCompliance, false);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static X509Certificate generateCertificate(
+			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
+			DateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
+			String crlUri, String ocspUri, KeyUsage keyUsage,
+			String signatureAlgorithm, boolean tsa, boolean includeSKID,
+			boolean includeAKID, PublicKey akidPublicKey,
+			String certificatePolicy, Boolean qcCompliance,
+			boolean ocspResponder) throws IOException, InvalidKeyException,
+			IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException {
+
 		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
 		certificateGenerator.reset();
 		certificateGenerator.setPublicKey(subjectPublicKey);
@@ -283,11 +342,41 @@ public class TrustTestUtils {
 					keyUsage);
 		}
 
+		if (null != certificatePolicy) {
+			certificateGenerator.addExtension(
+					X509Extensions.CertificatePolicies, true,
+					new CertificatePolicies(certificatePolicy) {
+					});
+		}
+
+		if (null != qcCompliance) {
+			ASN1EncodableVector vec = new ASN1EncodableVector();
+			if (qcCompliance) {
+				vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcCompliance));
+			} else {
+				vec
+						.add(new QCStatement(
+								QCStatement.id_etsi_qcs_RetentionPeriod));
+			}
+			certificateGenerator.addExtension(X509Extensions.QCStatements,
+					true, new DERSequence(vec));
+
+		}
+
 		if (tsa) {
 			certificateGenerator
 					.addExtension(X509Extensions.ExtendedKeyUsage, true,
 							new ExtendedKeyUsage(
 									KeyPurposeId.id_kp_timeStamping));
+		}
+
+		if (ocspResponder) {
+			certificateGenerator.addExtension(
+					OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false,
+					new DERNull());
+
+			certificateGenerator.addExtension(X509Extensions.ExtendedKeyUsage,
+					true, new ExtendedKeyUsage(KeyPurposeId.id_kp_OCSPSigning));
 		}
 
 		X509Certificate certificate;
@@ -582,8 +671,14 @@ public class TrustTestUtils {
 		}
 
 		// basic response generation
+		X509Certificate[] chain = null;
+		if (!ocspResponderCertificate.equals(issuerCertificate)) {
+			chain = new X509Certificate[] { ocspResponderCertificate,
+					issuerCertificate };
+		}
+
 		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
-				signatureAlgorithm, ocspResponderPrivateKey, null, new Date(),
+				signatureAlgorithm, ocspResponderPrivateKey, chain, new Date(),
 				BouncyCastleProvider.PROVIDER_NAME);
 
 		// response generation

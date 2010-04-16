@@ -25,47 +25,48 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.constraints.TSACertificateConstraint;
+import be.fedict.trust.MemoryCertificateRepository;
 
-public class TSACertificateConstraintTest {
+public class MemoryCertificateRepositoryTest {
 
-	private TSACertificateConstraint testedInstance;
+	@Test
+	public void trustPointFound() throws Exception {
 
-	@Before
-	public void setUp() throws Exception {
-		this.testedInstance = new TSACertificateConstraint();
+		// setup
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
+
+		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();
+		testedInstance.addTrustPoint(certificate);
+
+		// operate
+		assertTrue(testedInstance.isTrustPoint(certificate));
 	}
 
 	@Test
-	public void testValidTSAConstraint() throws Exception {
+	public void trustPointNotFound() throws Exception {
+
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
-				keyPair.getPublic(), "CN=TestTSA", notBefore, notAfter, null,
-				keyPair.getPrivate(), true, -1, null, null, null,
-				"SHA1withRSA", true);
-
-		// operate
-		assertTrue(this.testedInstance.check(certificate));
-	}
-
-	@Test
-	public void testInvalidTSAConstraint() throws Exception {
-		// setup
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
-				keyPair.getPublic(), "CN=TestTSA", notBefore, notAfter, null,
-				keyPair.getPrivate(), true, -1, null, null, null,
-				"SHA1withRSA", false);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
+		X509Certificate certificate2 = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test2", notBefore,
+						notAfter);
+
+		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();
+		testedInstance.addTrustPoint(certificate);
 
 		// operate
-		assertFalse(this.testedInstance.check(certificate));
+		assertFalse(testedInstance.isTrustPoint(certificate2));
 	}
 }

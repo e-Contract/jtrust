@@ -80,10 +80,10 @@ public class CachedCrlRepository implements CrlRepository {
 			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
 		/*
-		 * The the Belgian PKI the nextUpdate CRL extension indicates 7 days.
-		 * The actual CRL refresh rate is every 3 hours. So it's a bit dangerous
-		 * to only base the CRL cache refresh strategy on the nextUpdate field
-		 * as indicated by the CRL.
+		 * The Belgian PKI the nextUpdate CRL extension indicates 7 days. The
+		 * actual CRL refresh rate is every 3 hours. So it's a bit dangerous to
+		 * only base the CRL cache refresh strategy on the nextUpdate field as
+		 * indicated by the CRL.
 		 */
 		Date thisUpdate = crl.getThisUpdate();
 		DateTime cacheMaturityDateTime = new DateTime(thisUpdate)

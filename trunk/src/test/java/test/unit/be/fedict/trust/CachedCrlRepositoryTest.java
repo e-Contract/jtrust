@@ -121,15 +121,34 @@ public class CachedCrlRepositoryTest {
 	@Test
 	public void cacheRefreshing() throws Exception {
 		// setup
+		DateTime thisUpdate = new DateTime();
+		DateTime nextUpdate = thisUpdate.plusDays(7);
+		DateTime nextNextUpdate = nextUpdate.plusDays(7);
+		this.testCrl = TrustTestUtils.generateCrl(
+				this.testKeyPair.getPrivate(), this.testCertificate,
+				thisUpdate, nextUpdate);
+		this.testCrl2 = TrustTestUtils.generateCrl(this.testKeyPair
+				.getPrivate(), this.testCertificate, thisUpdate, nextUpdate);
+		X509CRL testCrl3 = TrustTestUtils
+				.generateCrl(this.testKeyPair.getPrivate(),
+						this.testCertificate, nextUpdate, nextNextUpdate);
+
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
 		Date validationDate2 = new DateTime(validationDate).plusHours(2)
 				.toDate();
+		Date validationDate3 = new DateTime(validationDate).plusHours(4)
+				.toDate();
+		Date validationDate4 = nextUpdate.plusHours(1).toDate();
 
 		CachedCrlRepository testedInstance = new CachedCrlRepository(
 				mockCrlRepository);
+		testedInstance.setCacheAgingHours(3);
+
+		// verify
+		assertEquals(3, testedInstance.getCacheAgingHours());
 
 		// expectations
 		EasyMock.expect(
@@ -137,7 +156,10 @@ public class CachedCrlRepositoryTest {
 						validationDate)).andReturn(this.testCrl);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate2)).andReturn(this.testCrl2);
+						validationDate3)).andReturn(this.testCrl2);
+		EasyMock.expect(
+				mockCrlRepository.findCrl(crlUri, this.testCertificate,
+						validationDate4)).andReturn(testCrl3);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
@@ -147,10 +169,56 @@ public class CachedCrlRepositoryTest {
 				this.testCertificate, validationDate);
 		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
 				this.testCertificate, validationDate2);
+		X509CRL resultCrl3 = testedInstance.findCrl(crlUri,
+				this.testCertificate, validationDate3);
+		X509CRL resultCrl4 = testedInstance.findCrl(crlUri,
+				this.testCertificate, validationDate4);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
 		assertEquals(this.testCrl, resultCrl);
-		assertEquals(this.testCrl2, resultCrl2);
+		assertEquals(this.testCrl, resultCrl2);
+		assertEquals(this.testCrl2, resultCrl3);
+		assertEquals(testCrl3, resultCrl4);
+	}
+
+	@Test
+	public void cacheExpiredCacheValidationDateRefreshing() throws Exception {
+		// setup
+		DateTime thisUpdate = new DateTime();
+		DateTime nextUpdate = thisUpdate.plusDays(7);
+		this.testCrl = TrustTestUtils.generateCrl(
+				this.testKeyPair.getPrivate(), this.testCertificate,
+				thisUpdate, nextUpdate);
+
+		CrlRepository mockCrlRepository = EasyMock
+				.createMock(CrlRepository.class);
+		URI crlUri = new URI("urn:test:crl");
+		Date validationDate = new Date();
+		Date expiredCacheValidationDate = new DateTime(validationDate)
+				.plusHours(4).toDate();
+
+		CachedCrlRepository testedInstance = new CachedCrlRepository(
+				mockCrlRepository);
+
+		// expectations
+		EasyMock.expect(
+				mockCrlRepository.findCrl(crlUri, this.testCertificate,
+						expiredCacheValidationDate)).andReturn(this.testCrl)
+				.times(2);
+
+		// prepare
+		EasyMock.replay(mockCrlRepository);
+
+		// operate
+		X509CRL resultCrl = testedInstance.findCrl(crlUri,
+				this.testCertificate, expiredCacheValidationDate);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
+				this.testCertificate, expiredCacheValidationDate);
+
+		// verify
+		EasyMock.verify(mockCrlRepository);
+		assertEquals(this.testCrl, resultCrl);
+		assertEquals(this.testCrl, resultCrl2);
 	}
 }
