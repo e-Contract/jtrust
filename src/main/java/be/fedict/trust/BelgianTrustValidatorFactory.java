@@ -100,6 +100,16 @@ public class BelgianTrustValidatorFactory {
 		return trustValidator;
 	}
 
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * non-repudiation certificates.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @param externalTrustLinker
+	 *            the optional external trust linker to be used.
+	 * @return a trust validator instance.
+	 */
 	public static TrustValidator createNonRepudiationTrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		TrustValidator trustValidator = createTrustValidator(
@@ -108,6 +118,14 @@ public class BelgianTrustValidatorFactory {
 		return trustValidator;
 	}
 
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for
+	 * non-repudiation certificates.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @return a trust validator instance.
+	 */
 	public static TrustValidator createNonRepudiationTrustValidator(
 			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
@@ -116,6 +134,14 @@ public class BelgianTrustValidatorFactory {
 		return trustValidator;
 	}
 
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for the national
+	 * registry certificate.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @return a trust validator instance.
+	 */
 	public static TrustValidator createNationalRegistryTrustValidator(
 			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(

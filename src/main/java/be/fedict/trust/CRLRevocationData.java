@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2009-2010 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -45,6 +45,8 @@ public class CRLRevocationData {
 	}
 
 	/**
+	 * Return the encoded X509 CRL.
+	 * 
 	 * @return the encoded {@link X509CRL}.
 	 */
 	public byte[] getData() {

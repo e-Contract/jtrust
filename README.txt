@@ -10,8 +10,8 @@ The source code is hosted at: http://code.google.com/p/jtrust/
 === 2. Requirements
 
 The following is required for compiling the eID Applet software:
-* Sun Java 1.6.0_16
-* Apache Maven 2.0.10
+* Sun Java 1.6.0_16+
+* Apache Maven 2.0.10/2.2.1
 
 
 === 3. Build

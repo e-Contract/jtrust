@@ -126,6 +126,10 @@ public class TrustValidator {
 	}
 
 	/**
+	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The
+	 * supplied certificate path will also be validated and used to validate the
+	 * attribute certificates.
+	 * 
 	 * @see #isTrusted(List, List, Date)
 	 */
 	public void isTrusted(List<byte[]> encodedAttributeCertificates,
@@ -139,6 +143,15 @@ public class TrustValidator {
 	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The
 	 * supplied certificate path will also be validated and used to validate the
 	 * attribute certificates.
+	 * 
+	 * @param encodedAttributeCertificates
+	 *            the encoded X509V2 attribute certificate.
+	 * 
+	 * @param certificatePath
+	 *            the certificate path.
+	 * @param validationDate
+	 *            the validation date.
+	 * @throws CertPathValidatorException
 	 */
 	public void isTrusted(List<byte[]> encodedAttributeCertificates,
 			List<X509Certificate> certificatePath, Date validationDate)
@@ -240,6 +253,14 @@ public class TrustValidator {
 		return getSelfSignedResult(certificate).isValid();
 	}
 
+	/**
+	 * Gives back the trust linker result of a verification of a self-signed
+	 * X509 certificate.
+	 * 
+	 * @param certificate
+	 *            the self-signed certificate to validate.
+	 * @return the validation result.
+	 */
 	public static TrustLinkerResult getSelfSignedResult(
 			X509Certificate certificate) {
 

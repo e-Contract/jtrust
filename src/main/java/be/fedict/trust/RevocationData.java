@@ -32,17 +32,30 @@ public class RevocationData {
 
 	private final List<CRLRevocationData> crlRevocationData;
 
+	/**
+	 * Main constructor.
+	 */
 	public RevocationData() {
 
 		this.ocspRevocationData = new LinkedList<OCSPRevocationData>();
 		this.crlRevocationData = new LinkedList<CRLRevocationData>();
 	}
 
+	/**
+	 * Gives back a list of OCSP revocation data.
+	 * 
+	 * @return a list of OCSP revocation data.
+	 */
 	public List<OCSPRevocationData> getOcspRevocationData() {
 
 		return this.ocspRevocationData;
 	}
 
+	/**
+	 * Gives back a list of CRL revocation data.
+	 * 
+	 * @return a list of CRL revocation data.
+	 */
 	public List<CRLRevocationData> getCrlRevocationData() {
 
 		return this.crlRevocationData;

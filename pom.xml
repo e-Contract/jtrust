@@ -168,6 +168,13 @@
 						<link>http://java.sun.com/javaee/5/docs/api/</link>
 					</links>
 				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

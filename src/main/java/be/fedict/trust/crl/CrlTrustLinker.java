@@ -183,6 +183,18 @@ public class CrlTrustLinker implements TrustLinker {
 
 	}
 
+	/**
+	 * Checks the integrity of the given X509 CRL.
+	 * 
+	 * @param x509crl
+	 *            the X509 CRL to verify the integrity.
+	 * @param issuerCertificate
+	 *            the assumed issuer of the given X509 CRL.
+	 * @param validationDate
+	 *            the validate date.
+	 * @return <code>true</code> if integrity is OK, <code>false</code>
+	 *         otherwise.
+	 */
 	public static boolean checkCrlIntegrity(X509CRL x509crl,
 			X509Certificate issuerCertificate, Date validationDate) {
 		if (false == x509crl.getIssuerX500Principal().equals(
@@ -221,6 +233,14 @@ public class CrlTrustLinker implements TrustLinker {
 		return true;
 	}
 
+	/**
+	 * Gives back the CRL URI meta-data found within the given X509 certificate.
+	 * 
+	 * @param certificate
+	 *            the X509 certificate.
+	 * @return the CRL URI, or <code>null</code> if the extension is not
+	 *         present.
+	 */
 	public static URI getCrlUri(X509Certificate certificate) {
 		byte[] crlDistributionPointsValue = certificate
 				.getExtensionValue(X509Extensions.CRLDistributionPoints.getId());
