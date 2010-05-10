@@ -45,6 +45,7 @@ public class FallbackTrustLinker implements TrustLinker {
 	 * determine the runtime fallback strategy.
 	 * 
 	 * @param trustLinker
+	 *            a trust linker instance.
 	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);

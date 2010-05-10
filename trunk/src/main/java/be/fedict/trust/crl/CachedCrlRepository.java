@@ -115,6 +115,7 @@ public class CachedCrlRepository implements CrlRepository {
 	 * Sets the CRL cache aging period in hours.
 	 * 
 	 * @param cacheAgingHours
+	 *            the CRL cache aging period in hours.
 	 */
 	public void setCacheAgingHours(int cacheAgingHours) {
 		this.cacheAgingHours = cacheAgingHours;

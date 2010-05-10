@@ -45,6 +45,8 @@ public class OCSPRevocationData {
 	}
 
 	/**
+	 * Gives back the encoded OCSP response.
+	 * 
 	 * @return the encoded {@link OCSPResp}.
 	 */
 	public byte[] getData() {
