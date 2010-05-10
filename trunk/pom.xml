@@ -185,8 +185,8 @@
 			<uniqueVersion>false</uniqueVersion>
 		</repository>
 		<site>
-			<id>e-contract-site</id>
-			<url>scp://e-contract.be/site</url>
+			<id>e-contract-jtrust-site</id>
+			<url>scp://e-contract.be/jtrust-site</url>
 		</site>
 	</distributionManagement>
 	<issueManagement>
