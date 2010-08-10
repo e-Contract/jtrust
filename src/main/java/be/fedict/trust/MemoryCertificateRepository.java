@@ -18,9 +18,13 @@
 
 package be.fedict.trust;
 
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * In-Memory Certificate Repository implementation.
@@ -30,13 +34,13 @@ import java.util.Set;
  */
 public class MemoryCertificateRepository implements CertificateRepository {
 
-	private final Set<X509Certificate> trustPoints;
+	private final Map<String, X509Certificate> trustPoints;
 
 	/**
 	 * Default constructor.
 	 */
 	public MemoryCertificateRepository() {
-		this.trustPoints = new HashSet<X509Certificate>();
+		this.trustPoints = new HashMap<String, X509Certificate>();
 	}
 
 	/**
@@ -46,10 +50,38 @@ public class MemoryCertificateRepository implements CertificateRepository {
 	 *            the X509 trust point certificate.
 	 */
 	public void addTrustPoint(X509Certificate certificate) {
-		this.trustPoints.add(certificate);
+		String fingerprint = getFingerprint(certificate);
+		this.trustPoints.put(fingerprint, certificate);
 	}
 
 	public boolean isTrustPoint(X509Certificate certificate) {
-		return this.trustPoints.contains(certificate);
+		String fingerprint = getFingerprint(certificate);
+		X509Certificate trustPoint = this.trustPoints.get(fingerprint);
+		if (null == trustPoint) {
+			return false;
+		}
+		try {
+			/*
+			 * We cannot used certificate.equals(trustPoint) here as the
+			 * certificates might be loaded by different security providers.
+			 */
+			return Arrays.equals(certificate.getEncoded(), trustPoint
+					.getEncoded());
+		} catch (CertificateEncodingException e) {
+			throw new IllegalArgumentException("certificate encoding error: "
+					+ e.getMessage(), e);
+		}
+	}
+
+	private String getFingerprint(X509Certificate certificate) {
+		byte[] encodedCertificate;
+		try {
+			encodedCertificate = certificate.getEncoded();
+		} catch (CertificateEncodingException e) {
+			throw new IllegalArgumentException("certificate encoding error: "
+					+ e.getMessage(), e);
+		}
+		String fingerprint = DigestUtils.shaHex(encodedCertificate);
+		return fingerprint;
 	}
 }

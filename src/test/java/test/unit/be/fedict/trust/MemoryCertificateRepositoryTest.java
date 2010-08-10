@@ -21,15 +21,23 @@ package test.unit.be.fedict.trust;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
 import be.fedict.trust.MemoryCertificateRepository;
 
 public class MemoryCertificateRepositoryTest {
+
+	private static final Log LOG = LogFactory
+			.getLog(MemoryCertificateRepositoryTest.class);
 
 	@Test
 	public void trustPointFound() throws Exception {
@@ -68,5 +76,35 @@ public class MemoryCertificateRepositoryTest {
 
 		// operate
 		assertFalse(testedInstance.isTrustPoint(certificate2));
+	}
+
+	@Test
+	public void trustPointFoundByDifferentCryptoProvider() throws Exception {
+
+		// setup
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate trustPoint = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
+		LOG.debug("trust point certificate impl class: "
+				+ trustPoint.getClass().getName());
+
+		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();
+		testedInstance.addTrustPoint(trustPoint);
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance(
+				"X.509", new BouncyCastleProvider());
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(trustPoint
+						.getEncoded()));
+		LOG
+				.debug("certificate impl class: "
+						+ certificate.getClass().getName());
+
+		// operate
+		assertFalse(certificate.getClass().equals(trustPoint.getClass()));
+		assertTrue(testedInstance.isTrustPoint(certificate));
 	}
 }
