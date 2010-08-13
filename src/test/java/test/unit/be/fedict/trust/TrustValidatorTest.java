@@ -50,7 +50,9 @@ public class TrustValidatorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
+		if (null == Security.getProvider(BouncyCastleProvider.PROVIDER_NAME)) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
 	}
 
 	@Test
