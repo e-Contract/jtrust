@@ -60,8 +60,9 @@ public class CachedCrlRepository implements CrlRepository {
         this.cacheAgingHours = DEFAULT_CACHE_AGING_HOURS;
     }
 
-    public synchronized X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-                                        Date validationDate) {
+    public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+                           Date validationDate) {
+
         SoftReference<X509CRL> crlRef = this.crlCache.get(crlUri);
         if (null == crlRef) {
             LOG.debug("no CRL entry found: " + crlUri);
@@ -115,7 +116,7 @@ public class CachedCrlRepository implements CrlRepository {
      *
      * @param cacheAgingHours the CRL cache aging period in hours.
      */
-    public synchronized void setCacheAgingHours(int cacheAgingHours) {
+    public void setCacheAgingHours(int cacheAgingHours) {
         this.cacheAgingHours = cacheAgingHours;
     }
 }
