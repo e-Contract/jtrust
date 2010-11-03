@@ -47,7 +47,7 @@ public class TrustLinkerResult {
 	 * @param valid
 	 *            valid or not
 	 * @param reason
-	 *            XKMS 2.0 reasons URI's for being valid or not
+	 *            the reason for being valid or not
 	 * @param message
 	 *            additional info
 	 */
@@ -68,8 +68,7 @@ public class TrustLinkerResult {
 	}
 
 	/**
-	 * Returns the optional XKMS 2.0 reason URI's. Returns <code>null</code> if
-	 * no reason set.
+	 * Returns the optional reason. Returns <code>null</code> if no reason set.
 	 */
 	public TrustLinkerResultReason getReason() {
 

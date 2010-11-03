@@ -19,10 +19,7 @@
 package be.fedict.trust;
 
 /**
- * The reason codes returned by an XKMS2 ValidateRequest, specifying a reason
- * for a particular key binding status of that request.
- * 
- * @see <a href="http://www.w3.org/TR/xkms2/#XKMS_2_0_Section_5_1">XKMS 2.0</a>
+ * The reason codes returned by a trust linker.
  * 
  * @author wvdhaute
  */
