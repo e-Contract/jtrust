@@ -39,9 +39,9 @@ import be.fedict.trust.ocsp.OnlineOcspRepository;
 
 /**
  * Trust Validator Factory for Belgian (eID) PKI.
- *
+ * 
  * @author Frank Cornelis
- *
+ * 
  */
 public class BelgianTrustValidatorFactory {
 
@@ -51,7 +51,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
-	 *
+	 * 
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator() {
@@ -61,7 +61,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
@@ -80,12 +80,12 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
-	 *
+	 * 
 	 * <p>
 	 * Via the external trust linker one can implement a CRL fetcher validation
 	 * architecture based on Java EE.
 	 * </p>
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
@@ -103,7 +103,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * non-repudiation certificates.
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
@@ -121,7 +121,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * non-repudiation certificates.
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
@@ -137,7 +137,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for the national
 	 * registry certificate.
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
@@ -153,7 +153,7 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for TSA
 	 * certificates.
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
@@ -200,12 +200,12 @@ public class BelgianTrustValidatorFactory {
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for
 	 * authentication certificates.
-	 *
+	 * 
 	 * <p>
 	 * Via the external trust linker one can implement a CRL fetcher validation
 	 * architecture based on Java EE.
 	 * </p>
-	 *
+	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @param externalTrustLinker
@@ -310,8 +310,8 @@ public class BelgianTrustValidatorFactory {
 		case NATIONAL_REGISTRY:
 			certificatePoliciesCertificateConstraint
 					.addCertificatePolicy("2.16.56.1.1.1.4");
-            certificatePoliciesCertificateConstraint
-                    .addCertificatePolicy("2.16.56.9.1.1.4");
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.9.1.1.4");
 			break;
 		}
 		trustValidator

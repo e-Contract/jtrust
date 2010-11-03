@@ -266,8 +266,8 @@ public class PublicKeyTrustLinkerTest {
 		X509Certificate certificate = TrustTestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), true, -1, null,
-				null, null, "SHA1withRSA", false, true, true, akidKeyPair
-						.getPublic());
+				null, null, "SHA1withRSA", false, true, true,
+				akidKeyPair.getPublic());
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 

@@ -65,8 +65,8 @@ public class MemoryCertificateRepository implements CertificateRepository {
 			 * We cannot used certificate.equals(trustPoint) here as the
 			 * certificates might be loaded by different security providers.
 			 */
-			return Arrays.equals(certificate.getEncoded(), trustPoint
-					.getEncoded());
+			return Arrays.equals(certificate.getEncoded(),
+					trustPoint.getEncoded());
 		} catch (CertificateEncodingException e) {
 			throw new IllegalArgumentException("certificate encoding error: "
 					+ e.getMessage(), e);

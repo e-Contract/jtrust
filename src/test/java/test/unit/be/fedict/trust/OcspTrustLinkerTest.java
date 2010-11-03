@@ -213,8 +213,8 @@ public class OcspTrustLinkerTest {
 
 		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
 		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
-				rootCertificate, rootCertificate, ocspResponderKeyPair
-						.getPrivate());
+				rootCertificate, rootCertificate,
+				ocspResponderKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -277,8 +277,8 @@ public class OcspTrustLinkerTest {
 		// verify
 		assertNotNull(result);
 		assertFalse(result.isValid());
-		assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE, result
-				.getReason());
+		assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE,
+				result.getReason());
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -434,8 +434,8 @@ public class OcspTrustLinkerTest {
 				"ocsp-uri");
 
 		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
-				rootCertificate, ocspResponderCertificate, ocspResponderKeyPair
-						.getPrivate());
+				rootCertificate, ocspResponderCertificate,
+				ocspResponderKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
@@ -486,8 +486,8 @@ public class OcspTrustLinkerTest {
 				"ocsp-uri");
 
 		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
-				rootCertificate, ocspResponderCertificate, ocspResponderKeyPair
-						.getPrivate());
+				rootCertificate, ocspResponderCertificate,
+				ocspResponderKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);

@@ -354,9 +354,7 @@ public class TrustTestUtils {
 			if (qcCompliance) {
 				vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcCompliance));
 			} else {
-				vec
-						.add(new QCStatement(
-								QCStatement.id_etsi_qcs_RetentionPeriod));
+				vec.add(new QCStatement(QCStatement.id_etsi_qcs_RetentionPeriod));
 			}
 			certificateGenerator.addExtension(X509Extensions.QCStatements,
 					true, new DERSequence(vec));
@@ -407,8 +405,8 @@ public class TrustTestUtils {
 
 	private static SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
 			throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
+		ByteArrayInputStream bais = new ByteArrayInputStream(
+				publicKey.getEncoded());
 		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
 				(ASN1Sequence) new ASN1InputStream(bais).readObject());
 		return new SubjectKeyIdentifier(info);
@@ -417,8 +415,8 @@ public class TrustTestUtils {
 	private static AuthorityKeyIdentifier createAuthorityKeyId(
 			PublicKey publicKey) throws IOException {
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(publicKey
-				.getEncoded());
+		ByteArrayInputStream bais = new ByteArrayInputStream(
+				publicKey.getEncoded());
 		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
 				(ASN1Sequence) new ASN1InputStream(bais).readObject());
 

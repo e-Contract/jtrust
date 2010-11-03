@@ -35,66 +35,70 @@ import static org.junit.Assert.*;
 
 public class OfflineCrlRepositoryTest {
 
-    private Date validationDate;
+	private Date validationDate;
 
-    @Before
-    public void setUp() throws Exception {
-        this.validationDate = new Date();
-    }
+	@Before
+	public void setUp() throws Exception {
+		this.validationDate = new Date();
+	}
 
-    @After
-    public void tearDown() throws Exception {
-    }
+	@After
+	public void tearDown() throws Exception {
+	}
 
-    @Test
-    public void testCrlFound() throws Exception {
+	@Test
+	public void testCrlFound() throws Exception {
 
-        // setup
-        KeyPair keyPair = TrustTestUtils.generateKeyPair();
-        DateTime notBefore = new DateTime();
-        DateTime notAfter = notBefore.plusMonths(1);
-        X509Certificate certificate = TrustTestUtils
-                .generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-                        notAfter);
-        X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
-                certificate, notBefore, notAfter);
+		// setup
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
+		X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
+				certificate, notBefore, notAfter);
 
-        OfflineCrlRepository testedInstance = new OfflineCrlRepository(Collections.singletonList(crl.getEncoded()));
+		OfflineCrlRepository testedInstance = new OfflineCrlRepository(
+				Collections.singletonList(crl.getEncoded()));
 
-        // operate
-        X509CRL resultCrl = testedInstance.findCrl(new URI("http://foo.org/bar"), certificate, validationDate);
+		// operate
+		X509CRL resultCrl = testedInstance.findCrl(
+				new URI("http://foo.org/bar"), certificate, validationDate);
 
-        // verify
-        assertNotNull(resultCrl);
-        assertEquals(crl, resultCrl);
-    }
+		// verify
+		assertNotNull(resultCrl);
+		assertEquals(crl, resultCrl);
+	}
 
-    @Test
-    public void testCrlNotFound() throws Exception {
+	@Test
+	public void testCrlNotFound() throws Exception {
 
-        // setup
-        DateTime notBefore = new DateTime();
-        DateTime notAfter = notBefore.plusMonths(1);
+		// setup
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
 
-        KeyPair keyPair = TrustTestUtils.generateKeyPair();
-        X509Certificate certificate = TrustTestUtils
-                .generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-                        notAfter);
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
 
-        KeyPair otherKeyPair = TrustTestUtils.generateKeyPair();
-        X509Certificate otherCertificate = TrustTestUtils
-                .generateSelfSignedCertificate(otherKeyPair, "CN=TestOther", notBefore,
-                        notAfter);
+		KeyPair otherKeyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate otherCertificate = TrustTestUtils
+				.generateSelfSignedCertificate(otherKeyPair, "CN=TestOther",
+						notBefore, notAfter);
 
-        X509CRL crl = TrustTestUtils.generateCrl(otherKeyPair.getPrivate(),
-                otherCertificate, notBefore, notAfter);
+		X509CRL crl = TrustTestUtils.generateCrl(otherKeyPair.getPrivate(),
+				otherCertificate, notBefore, notAfter);
 
-        OfflineCrlRepository testedInstance = new OfflineCrlRepository(Collections.singletonList(crl.getEncoded()));
+		OfflineCrlRepository testedInstance = new OfflineCrlRepository(
+				Collections.singletonList(crl.getEncoded()));
 
-        // operate
-        X509CRL resultCrl = testedInstance.findCrl(new URI("http://foo.org/bar"), certificate, validationDate);
+		// operate
+		X509CRL resultCrl = testedInstance.findCrl(
+				new URI("http://foo.org/bar"), certificate, validationDate);
 
-        // verify
-        assertNull(resultCrl);
-    }
+		// verify
+		assertNull(resultCrl);
+	}
 }

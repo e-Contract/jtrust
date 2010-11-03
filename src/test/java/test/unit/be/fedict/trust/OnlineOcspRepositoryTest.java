@@ -81,8 +81,8 @@ public class OnlineOcspRepositoryTest {
 				this.rootKeyPair, "CN=TestRoot", notBefore, notAfter);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		this.certificate = TrustTestUtils.generateCertificate(keyPair
-				.getPublic(), "CN=Test", notBefore, notAfter,
+		this.certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				this.rootCertificate, this.rootKeyPair.getPrivate());
 
 		// required for org.bouncycastle.ocsp.CertificateID

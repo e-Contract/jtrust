@@ -32,54 +32,55 @@ import java.util.List;
 /**
  * Off line CRL repository. This implementation receives a list of
  * {@link X509CRL} objects.
- *
+ * 
  * @author wvdhaute
  */
 public class OfflineCrlRepository implements CrlRepository {
 
-    private static final Log LOG = LogFactory
-            .getLog(OfflineCrlRepository.class);
+	private static final Log LOG = LogFactory
+			.getLog(OfflineCrlRepository.class);
 
-    private final List<X509CRL> crls;
+	private final List<X509CRL> crls;
 
-    /**
-     * Main constructor
-     *
-     * @param encodedCrls the list of encoded CRL's that can be queried.
-     * @throws NoSuchProviderException
-     * @throws CertificateException
-     * @throws CRLException
-     */
-    public OfflineCrlRepository(List<byte[]> encodedCrls)
-            throws CertificateException, NoSuchProviderException, CRLException {
+	/**
+	 * Main constructor
+	 * 
+	 * @param encodedCrls
+	 *            the list of encoded CRL's that can be queried.
+	 * @throws NoSuchProviderException
+	 * @throws CertificateException
+	 * @throws CRLException
+	 */
+	public OfflineCrlRepository(List<byte[]> encodedCrls)
+			throws CertificateException, NoSuchProviderException, CRLException {
 
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(
-                "X.509", "BC");
-        this.crls = new LinkedList<X509CRL>();
-        for (byte[] encodedCrl : encodedCrls) {
-            ByteArrayInputStream bais = new ByteArrayInputStream(encodedCrl);
-            this.crls.add((X509CRL) certificateFactory.generateCRL(bais));
-        }
-    }
+		CertificateFactory certificateFactory = CertificateFactory.getInstance(
+				"X.509", "BC");
+		this.crls = new LinkedList<X509CRL>();
+		for (byte[] encodedCrl : encodedCrls) {
+			ByteArrayInputStream bais = new ByteArrayInputStream(encodedCrl);
+			this.crls.add((X509CRL) certificateFactory.generateCRL(bais));
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-                           Date validationDate) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate) {
 
-        for (X509CRL crl : this.crls) {
-            if (crl.getIssuerX500Principal().equals(
-                    issuerCertificate.getSubjectX500Principal())) {
-                LOG.debug("CRL found for issuer "
-                        + issuerCertificate.getSubjectX500Principal()
-                        .toString());
-                return crl;
-            }
-        }
+		for (X509CRL crl : this.crls) {
+			if (crl.getIssuerX500Principal().equals(
+					issuerCertificate.getSubjectX500Principal())) {
+				LOG.debug("CRL found for issuer "
+						+ issuerCertificate.getSubjectX500Principal()
+								.toString());
+				return crl;
+			}
+		}
 
-        LOG.debug("CRL not found for issuer "
-                + issuerCertificate.getSubjectX500Principal().toString());
+		LOG.debug("CRL not found for issuer "
+				+ issuerCertificate.getSubjectX500Principal().toString());
 		return null;
 	}
 }

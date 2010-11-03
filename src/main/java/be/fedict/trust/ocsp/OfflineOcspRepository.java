@@ -31,62 +31,63 @@ import java.util.List;
 /**
  * Off line OCSP repository. This implementation receives a list of
  * {@link OCSPResp} objects.
- *
+ * 
  * @author wvdhaute
  */
 public class OfflineOcspRepository implements OcspRepository {
 
-    private static final Log LOG = LogFactory
-            .getLog(OfflineOcspRepository.class);
+	private static final Log LOG = LogFactory
+			.getLog(OfflineOcspRepository.class);
 
-    private final List<OCSPResp> ocspResponses;
+	private final List<OCSPResp> ocspResponses;
 
-    /**
-     * Main constructor
-     *
-     * @param encodedOcspResponses the list of encoded OCSP responses that can be queried.
-     * @throws IOException
-     */
-    public OfflineOcspRepository(List<byte[]> encodedOcspResponses)
-            throws IOException {
+	/**
+	 * Main constructor
+	 * 
+	 * @param encodedOcspResponses
+	 *            the list of encoded OCSP responses that can be queried.
+	 * @throws IOException
+	 */
+	public OfflineOcspRepository(List<byte[]> encodedOcspResponses)
+			throws IOException {
 
-        this.ocspResponses = new LinkedList<OCSPResp>();
-        for (byte[] encodedOcspResponse : encodedOcspResponses) {
-            OCSPResp ocspResponse = new OCSPResp(encodedOcspResponse);
-            ocspResponses.add(ocspResponse);
-        }
-    }
+		this.ocspResponses = new LinkedList<OCSPResp>();
+		for (byte[] encodedOcspResponse : encodedOcspResponses) {
+			OCSPResp ocspResponse = new OCSPResp(encodedOcspResponse);
+			ocspResponses.add(ocspResponse);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-                                     X509Certificate issuerCertificate) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
+			X509Certificate issuerCertificate) {
 
-        LOG.debug("find OCSP response");
+		LOG.debug("find OCSP response");
 
-        try {
-            for (OCSPResp ocspResp : this.ocspResponses) {
+		try {
+			for (OCSPResp ocspResp : this.ocspResponses) {
 
-                CertificateID certId = new CertificateID(
-                        CertificateID.HASH_SHA1, issuerCertificate, certificate
-                                .getSerialNumber());
-                BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
-                        .getResponseObject();
-                for (SingleResp singleResp : basicOCSPResp.getResponses()) {
-                    if (singleResp.getCertID().equals(certId)) {
-                        LOG.debug("OCSP response found");
-                        return ocspResp;
-                    }
-                }
-            }
-        } catch (OCSPException e) {
-            LOG.error("OCSPException: " + e.getMessage(), e);
-            return null;
-        }
+				CertificateID certId = new CertificateID(
+						CertificateID.HASH_SHA1, issuerCertificate,
+						certificate.getSerialNumber());
+				BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
+						.getResponseObject();
+				for (SingleResp singleResp : basicOCSPResp.getResponses()) {
+					if (singleResp.getCertID().equals(certId)) {
+						LOG.debug("OCSP response found");
+						return ocspResp;
+					}
+				}
+			}
+		} catch (OCSPException e) {
+			LOG.error("OCSPException: " + e.getMessage(), e);
+			return null;
+		}
 
-        LOG.debug("OCSP response not found");
-        return null;
+		LOG.debug("OCSP response not found");
+		return null;
 	}
 
 }

@@ -55,8 +55,9 @@ public class CachedCrlRepositoryTest {
 		this.testCrl = TrustTestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
-		this.testCrl2 = TrustTestUtils.generateCrl(this.testKeyPair
-				.getPrivate(), this.testCertificate, thisUpdate, nextUpdate);
+		this.testCrl2 = TrustTestUtils.generateCrl(
+				this.testKeyPair.getPrivate(), this.testCertificate,
+				thisUpdate, nextUpdate);
 	}
 
 	@Test
@@ -127,11 +128,12 @@ public class CachedCrlRepositoryTest {
 		this.testCrl = TrustTestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
-		this.testCrl2 = TrustTestUtils.generateCrl(this.testKeyPair
-				.getPrivate(), this.testCertificate, thisUpdate, nextUpdate);
-		X509CRL testCrl3 = TrustTestUtils
-				.generateCrl(this.testKeyPair.getPrivate(),
-						this.testCertificate, nextUpdate, nextNextUpdate);
+		this.testCrl2 = TrustTestUtils.generateCrl(
+				this.testKeyPair.getPrivate(), this.testCertificate,
+				thisUpdate, nextUpdate);
+		X509CRL testCrl3 = TrustTestUtils.generateCrl(
+				this.testKeyPair.getPrivate(), this.testCertificate,
+				nextUpdate, nextNextUpdate);
 
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
