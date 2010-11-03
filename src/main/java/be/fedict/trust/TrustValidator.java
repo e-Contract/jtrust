@@ -383,7 +383,8 @@ public class TrustValidator {
 
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
-
+			LOG.debug("trying trust linker: "
+					+ trustLinker.getClass().getSimpleName());
 			this.result = trustLinker.hasTrustLink(childCertificate,
 					certificate, validationDate, this.revocationData);
 			if (null == this.result) {

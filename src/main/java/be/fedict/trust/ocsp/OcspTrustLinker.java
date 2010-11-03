@@ -24,8 +24,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -164,7 +166,8 @@ public class OcspTrustLinker implements TrustLinker {
 			} else {
 				/*
 				 * We're dealing with a dedicated authorized OCSP Responder
-				 * certificate.
+				 * certificate, or of course with a CA that issues the OCSP
+				 * Responses itself.
 				 */
 
 				X509Certificate ocspResponderCertificate = responseCertificates[0];
@@ -175,78 +178,83 @@ public class OcspTrustLinker implements TrustLinker {
 					LOG.debug("OCSP Responser response signature invalid");
 					return null;
 				}
-				// check certificate signature
-				trustResult = TrustValidator
-						.checkSignatureAlgorithm(ocspResponderCertificate
-								.getSigAlgName());
-				if (!trustResult.isValid()) {
-					return trustResult;
-				}
-
-				X509Certificate issuingCaCertificate;
-				if (responseCertificates.length < 2) {
-					LOG.debug("OCSP responder complete certificate chain missing");
-					/*
-					 * Here we assume that the OCSP Responder is directly signed
-					 * by the CA.
-					 */
-					issuingCaCertificate = certificate;
-				} else {
-					issuingCaCertificate = responseCertificates[1];
-					/*
-					 * Is next check really required?
-					 */
-					if (false == certificate.equals(issuingCaCertificate)) {
-						LOG.debug("OCSP responder certificate not issued by CA");
-						return null;
-					}
-				}
-				// check certificate signature
-				trustResult = TrustValidator
-						.checkSignatureAlgorithm(issuingCaCertificate
-								.getSigAlgName());
-				if (!trustResult.isValid()) {
-					return trustResult;
-				}
-
-				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
-				trustResult = publicKeyTrustLinker.hasTrustLink(
-						ocspResponderCertificate, issuingCaCertificate,
-						validationDate, revocationData);
-				if (null != trustResult) {
+				if (false == Arrays.equals(certificate.getEncoded(),
+						ocspResponderCertificate.getEncoded())) {
+					// check certificate signature
+					trustResult = TrustValidator
+							.checkSignatureAlgorithm(ocspResponderCertificate
+									.getSigAlgName());
 					if (!trustResult.isValid()) {
-						LOG.debug("OCSP responder not trusted");
+						return trustResult;
+					}
+
+					X509Certificate issuingCaCertificate;
+					if (responseCertificates.length < 2) {
+						LOG.debug("OCSP responder complete certificate chain missing");
+						/*
+						 * Here we assume that the OCSP Responder is directly
+						 * signed by the CA.
+						 */
+						issuingCaCertificate = certificate;
+					} else {
+						issuingCaCertificate = responseCertificates[1];
+						/*
+						 * Is next check really required?
+						 */
+						if (false == certificate.equals(issuingCaCertificate)) {
+							LOG.debug("OCSP responder certificate not issued by CA");
+							return null;
+						}
+					}
+					// check certificate signature
+					trustResult = TrustValidator
+							.checkSignatureAlgorithm(issuingCaCertificate
+									.getSigAlgName());
+					if (!trustResult.isValid()) {
+						return trustResult;
+					}
+
+					PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+					trustResult = publicKeyTrustLinker.hasTrustLink(
+							ocspResponderCertificate, issuingCaCertificate,
+							validationDate, revocationData);
+					if (null != trustResult) {
+						if (!trustResult.isValid()) {
+							LOG.debug("OCSP responder not trusted");
+							return null;
+						}
+					}
+					if (null == ocspResponderCertificate
+							.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck
+									.getId())) {
+						LOG.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
+						/*
+						 * TODO: perform CRL validation on the OCSP Responder
+						 * certificate.
+						 */
 						return null;
 					}
-				}
-				if (null == ocspResponderCertificate
-						.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck
-								.getId())) {
-					LOG.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
-					/*
-					 * TODO: perform CRL validation on the OCSP Responder
-					 * certificate.
-					 */
-					return null;
-				}
-				List<String> extendedKeyUsage;
-				try {
-					extendedKeyUsage = ocspResponderCertificate
-							.getExtendedKeyUsage();
-				} catch (CertificateParsingException e) {
-					LOG.debug(
-							"OCSP Responder parsing error: " + e.getMessage(),
-							e);
-					return null;
-				}
-				if (null == extendedKeyUsage) {
-					LOG.debug("OCSP Responder certificate has no extended key usage extension");
-					return null;
-				}
-				if (false == extendedKeyUsage
-						.contains(KeyPurposeId.id_kp_OCSPSigning.getId())) {
-					LOG.debug("OCSP Responder certificate should have a OCSPSigning extended key usage");
-					return null;
+					List<String> extendedKeyUsage;
+					try {
+						extendedKeyUsage = ocspResponderCertificate
+								.getExtendedKeyUsage();
+					} catch (CertificateParsingException e) {
+						LOG.debug(
+								"OCSP Responder parsing error: "
+										+ e.getMessage(), e);
+						return null;
+					}
+					if (null == extendedKeyUsage) {
+						LOG.debug("OCSP Responder certificate has no extended key usage extension");
+						return null;
+					}
+					if (false == extendedKeyUsage
+							.contains(KeyPurposeId.id_kp_OCSPSigning.getId())) {
+						LOG.debug("OCSP Responder certificate should have a OCSPSigning extended key usage");
+						return null;
+					}
+				} else {
+					LOG.debug("OCSP Responder certificate equals the CA certificate");
 				}
 			}
 		} catch (NoSuchProviderException e) {
@@ -254,6 +262,9 @@ public class OcspTrustLinker implements TrustLinker {
 			return null;
 		} catch (OCSPException e) {
 			LOG.debug("OCSP exception: " + e.getMessage(), e);
+			return null;
+		} catch (CertificateEncodingException e) {
+			LOG.debug("certificate encoding error: " + e.getMessage(), e);
 			return null;
 		}
 
