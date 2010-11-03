@@ -26,6 +26,7 @@ import java.security.cert.X509Certificate;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
@@ -37,6 +38,7 @@ import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
 
+import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
 
 /**
@@ -52,6 +54,8 @@ public class OnlineOcspRepository implements OcspRepository {
 			.getLog(OnlineOcspRepository.class);
 
 	private final NetworkConfig networkConfig;
+
+	private Credentials credentials;
 
 	/**
 	 * Main construtor.
@@ -69,6 +73,15 @@ public class OnlineOcspRepository implements OcspRepository {
 	 */
 	public OnlineOcspRepository() {
 		this(null);
+	}
+
+	/**
+	 * Sets the credentials to use to access protected OCSP services.
+	 * 
+	 * @param credentials
+	 */
+	public void setCredentials(Credentials credentials) {
+		this.credentials = credentials;
 	}
 
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
@@ -108,6 +121,10 @@ public class OnlineOcspRepository implements OcspRepository {
 			httpClient.getHostConfiguration().setProxy(
 					this.networkConfig.getProxyHost(),
 					this.networkConfig.getProxyPort());
+		}
+		if (null != this.credentials) {
+			HttpState httpState = httpClient.getState();
+			this.credentials.init(httpState);
 		}
 
 		int responseCode;
