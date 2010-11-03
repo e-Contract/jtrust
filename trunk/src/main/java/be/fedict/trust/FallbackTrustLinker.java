@@ -23,6 +23,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Fallback trust linker. Implements a trust linker fallback strategy.
  * 
@@ -30,6 +33,8 @@ import java.util.List;
  * 
  */
 public class FallbackTrustLinker implements TrustLinker {
+
+	private static final Log LOG = LogFactory.getLog(FallbackTrustLinker.class);
 
 	private List<TrustLinker> trustLinkers;
 
@@ -55,6 +60,8 @@ public class FallbackTrustLinker implements TrustLinker {
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData) {
 		for (TrustLinker trustLinker : this.trustLinkers) {
+			LOG.debug("trying trust linker: "
+					+ trustLinker.getClass().getSimpleName());
 			TrustLinkerResult result = trustLinker.hasTrustLink(
 					childCertificate, certificate, validationDate,
 					revocationData);

@@ -687,6 +687,59 @@ public class TrustTestUtils {
 		return ocspResp;
 	}
 
+	public static OCSPResp createOcspResp(X509Certificate certificate,
+			boolean revoked, X509Certificate issuerCertificate,
+			X509Certificate ocspResponderCertificate,
+			PrivateKey ocspResponderPrivateKey, String signatureAlgorithm,
+			List<X509Certificate> ocspResponderCertificateChain)
+			throws Exception {
+		// request
+		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
+		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
+				issuerCertificate, certificate.getSerialNumber());
+		ocspReqGenerator.addRequest(certId);
+		OCSPReq ocspReq = ocspReqGenerator.generate();
+
+		BasicOCSPRespGenerator basicOCSPRespGenerator = new BasicOCSPRespGenerator(
+				ocspResponderCertificate.getPublicKey());
+
+		// request processing
+		Req[] requestList = ocspReq.getRequestList();
+		for (Req ocspRequest : requestList) {
+			CertificateID certificateID = ocspRequest.getCertID();
+			CertificateStatus certificateStatus;
+			if (revoked) {
+				certificateStatus = new RevokedStatus(new Date(),
+						CRLReason.unspecified);
+			} else {
+				certificateStatus = CertificateStatus.GOOD;
+			}
+			basicOCSPRespGenerator
+					.addResponse(certificateID, certificateStatus);
+		}
+
+		// basic response generation
+		X509Certificate[] chain;
+		if (ocspResponderCertificateChain.isEmpty()) {
+			chain = null;
+		} else {
+			chain = ocspResponderCertificateChain
+					.toArray(new X509Certificate[ocspResponderCertificateChain
+							.size()]);
+		}
+
+		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
+				signatureAlgorithm, ocspResponderPrivateKey, chain, new Date(),
+				BouncyCastleProvider.PROVIDER_NAME);
+
+		// response generation
+		OCSPRespGenerator ocspRespGenerator = new OCSPRespGenerator();
+		OCSPResp ocspResp = ocspRespGenerator.generate(
+				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
+
+		return ocspResp;
+	}
+
 	public static TimeStampToken createTimeStampToken(PrivateKey privateKey,
 			List<X509Certificate> certificateChain) throws Exception {
 
