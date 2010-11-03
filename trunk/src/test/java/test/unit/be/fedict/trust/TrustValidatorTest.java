@@ -325,8 +325,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andStubReturn(true);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -367,8 +366,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -413,8 +411,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -463,8 +460,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -516,8 +512,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -582,8 +577,7 @@ public class TrustValidatorTest {
 		certificatePath.add(interCertificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -632,8 +626,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -681,8 +674,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -739,8 +731,7 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -790,18 +781,15 @@ public class TrustValidatorTest {
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
 
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
-		EasyMock
-				.expect(
-						mockTrustLinker.hasTrustLink(certificate,
-								rootCertificate, validationDate, trustValidator
-										.getRevocationData()))
+		EasyMock.expect(
+				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
+						validationDate, trustValidator.getRevocationData()))
 				.andReturn(
 						new TrustLinkerResult(
 								false,
@@ -839,8 +827,8 @@ public class TrustValidatorTest {
 		KeyPair issuerKeyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate issuerCertificate = TrustTestUtils
 				.generateCertificate(issuerKeyPair.getPublic(), "CN=Issuer",
-						notBefore, notAfter, rootCertificate, rootKeyPair
-								.getPrivate(), true, -1, null, null);
+						notBefore, notAfter, rootCertificate,
+						rootKeyPair.getPrivate(), true, -1, null, null);
 
 		KeyPair holderKeyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate holderCertificate = TrustTestUtils.generateCertificate(
@@ -867,8 +855,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -876,13 +863,13 @@ public class TrustValidatorTest {
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(issuerCertificate,
-						rootCertificate, validationDate, trustValidator
-								.getRevocationData())).andReturn(
+						rootCertificate, validationDate,
+						trustValidator.getRevocationData())).andReturn(
 				new TrustLinkerResult(true));
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(holderCertificate,
-						issuerCertificate, validationDate, trustValidator
-								.getRevocationData())).andReturn(
+						issuerCertificate, validationDate,
+						trustValidator.getRevocationData())).andReturn(
 				new TrustLinkerResult(true));
 		trustValidator.addTrustLinker(mockTrustLinker);
 
@@ -913,14 +900,14 @@ public class TrustValidatorTest {
 		KeyPair issuerKeyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate issuerCertificate = TrustTestUtils
 				.generateCertificate(issuerKeyPair.getPublic(), "CN=Issuer",
-						notBefore, notAfter, rootCertificate, rootKeyPair
-								.getPrivate(), true, -1, null, null);
+						notBefore, notAfter, rootCertificate,
+						rootKeyPair.getPrivate(), true, -1, null, null);
 
 		KeyPair issuer2KeyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate issuer2Certificate = TrustTestUtils
 				.generateCertificate(issuer2KeyPair.getPublic(), "CN=Issuer2",
-						notBefore, notAfter, rootCertificate, rootKeyPair
-								.getPrivate(), true, -1, null, null);
+						notBefore, notAfter, rootCertificate,
+						rootKeyPair.getPrivate(), true, -1, null, null);
 
 		KeyPair holderKeyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate holderCertificate = TrustTestUtils.generateCertificate(
@@ -947,8 +934,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		EasyMock
-				.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
+		EasyMock.expect(mockCertificateRepository.isTrustPoint(rootCertificate))
 				.andReturn(true);
 
 		Date validationDate = new Date();
@@ -956,13 +942,13 @@ public class TrustValidatorTest {
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(issuerCertificate,
-						rootCertificate, validationDate, trustValidator
-								.getRevocationData())).andReturn(
+						rootCertificate, validationDate,
+						trustValidator.getRevocationData())).andReturn(
 				new TrustLinkerResult(true));
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(holderCertificate,
-						issuerCertificate, validationDate, trustValidator
-								.getRevocationData())).andReturn(
+						issuerCertificate, validationDate,
+						trustValidator.getRevocationData())).andReturn(
 				new TrustLinkerResult(true));
 		trustValidator.addTrustLinker(mockTrustLinker);
 

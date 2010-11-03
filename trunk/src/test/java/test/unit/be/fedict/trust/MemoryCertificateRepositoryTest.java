@@ -99,9 +99,7 @@ public class MemoryCertificateRepositoryTest {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(trustPoint
 						.getEncoded()));
-		LOG
-				.debug("certificate impl class: "
-						+ certificate.getClass().getName());
+		LOG.debug("certificate impl class: " + certificate.getClass().getName());
 
 		// operate
 		assertFalse(certificate.getClass().equals(trustPoint.getClass()));

@@ -178,8 +178,8 @@ public class TrustValidator {
 					this.result = new TrustLinkerResult(false,
 							TrustLinkerResultReason.INVALID_TRUST,
 							"Certificate path should at least contain 2 certificates");
-					throw new CertPathValidatorException(this.result
-							.getMessage());
+					throw new CertPathValidatorException(
+							this.result.getMessage());
 				}
 
 				// validate the signature on the attribute certificate against

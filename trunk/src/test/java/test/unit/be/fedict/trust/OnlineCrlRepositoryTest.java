@@ -47,126 +47,126 @@ import static org.junit.Assert.*;
 
 public class OnlineCrlRepositoryTest {
 
-    private ServletTester servletTester;
+	private ServletTester servletTester;
 
-    private URI crlUri;
+	private URI crlUri;
 
-    private Date validationDate;
+	private Date validationDate;
 
-    private OnlineCrlRepository testedInstance;
+	private OnlineCrlRepository testedInstance;
 
-    @BeforeClass
-    public static void oneTimeSetUp() throws Exception {
+	@BeforeClass
+	public static void oneTimeSetUp() throws Exception {
 
-        Security.addProvider(new BouncyCastleProvider());
-    }
+		Security.addProvider(new BouncyCastleProvider());
+	}
 
-    @Before
-    public void setUp() throws Exception {
-        this.servletTester = new ServletTester();
-        String pathSpec = "/test.crl";
-        this.servletTester.addServlet(CrlRepositoryTestServlet.class, pathSpec);
-        this.servletTester.start();
+	@Before
+	public void setUp() throws Exception {
+		this.servletTester = new ServletTester();
+		String pathSpec = "/test.crl";
+		this.servletTester.addServlet(CrlRepositoryTestServlet.class, pathSpec);
+		this.servletTester.start();
 
-        String servletUrl = this.servletTester.createSocketConnector(true);
-        this.crlUri = new URI(servletUrl + pathSpec);
-        this.validationDate = new Date();
+		String servletUrl = this.servletTester.createSocketConnector(true);
+		this.crlUri = new URI(servletUrl + pathSpec);
+		this.validationDate = new Date();
 
-        this.testedInstance = new OnlineCrlRepository();
+		this.testedInstance = new OnlineCrlRepository();
 
-        CrlRepositoryTestServlet.reset();
-    }
+		CrlRepositoryTestServlet.reset();
+	}
 
-    @After
-    public void tearDown() throws Exception {
-        this.servletTester.stop();
-    }
+	@After
+	public void tearDown() throws Exception {
+		this.servletTester.stop();
+	}
 
-    @Test
-    public void testCrlNotFound() throws Exception {
-        // setup
-        CrlRepositoryTestServlet
-                .setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
+	@Test
+	public void testCrlNotFound() throws Exception {
+		// setup
+		CrlRepositoryTestServlet
+				.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
 
-        // operate
-        X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
-                this.validationDate);
+		// operate
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
+				this.validationDate);
 
-        // verify
-        assertNull(crl);
-    }
+		// verify
+		assertNull(crl);
+	}
 
-    @Test
-    public void testInvalidCrl() throws Exception {
-        // setup
-        CrlRepositoryTestServlet.setCrlData("foobar".getBytes());
+	@Test
+	public void testInvalidCrl() throws Exception {
+		// setup
+		CrlRepositoryTestServlet.setCrlData("foobar".getBytes());
 
-        // operate
-        X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
-                this.validationDate);
+		// operate
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
+				this.validationDate);
 
-        // verify
-        assertNull(crl);
-    }
+		// verify
+		assertNull(crl);
+	}
 
-    @Test
-    public void testDownloadCrl() throws Exception {
-        // setup
-        KeyPair keyPair = TrustTestUtils.generateKeyPair();
-        DateTime notBefore = new DateTime();
-        DateTime notAfter = notBefore.plusMonths(1);
-        X509Certificate certificate = TrustTestUtils
-                .generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-                        notAfter);
-        X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
-                certificate, notBefore, notAfter);
-        CrlRepositoryTestServlet.setCrlData(crl.getEncoded());
+	@Test
+	public void testDownloadCrl() throws Exception {
+		// setup
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate certificate = TrustTestUtils
+				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+						notAfter);
+		X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
+				certificate, notBefore, notAfter);
+		CrlRepositoryTestServlet.setCrlData(crl.getEncoded());
 
-        // operate
-        X509CRL result = this.testedInstance.findCrl(this.crlUri, certificate,
-                this.validationDate);
+		// operate
+		X509CRL result = this.testedInstance.findCrl(this.crlUri, certificate,
+				this.validationDate);
 
-        // verify
-        assertNotNull(result);
-        assertArrayEquals(crl.getEncoded(), result.getEncoded());
-    }
+		// verify
+		assertNotNull(result);
+		assertArrayEquals(crl.getEncoded(), result.getEncoded());
+	}
 
-    public static class CrlRepositoryTestServlet extends HttpServlet {
+	public static class CrlRepositoryTestServlet extends HttpServlet {
 
-        private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-        private static final Log LOG = LogFactory
-                .getLog(CrlRepositoryTestServlet.class);
+		private static final Log LOG = LogFactory
+				.getLog(CrlRepositoryTestServlet.class);
 
-        private static int responseStatus;
+		private static int responseStatus;
 
-        private static byte[] crlData;
+		private static byte[] crlData;
 
-        public static void reset() {
-            CrlRepositoryTestServlet.responseStatus = 0;
-            CrlRepositoryTestServlet.crlData = null;
-        }
+		public static void reset() {
+			CrlRepositoryTestServlet.responseStatus = 0;
+			CrlRepositoryTestServlet.crlData = null;
+		}
 
-        public static void setResponseStatus(int responseStatus) {
-            CrlRepositoryTestServlet.responseStatus = responseStatus;
-        }
+		public static void setResponseStatus(int responseStatus) {
+			CrlRepositoryTestServlet.responseStatus = responseStatus;
+		}
 
-        public static void setCrlData(byte[] crlData) {
-            CrlRepositoryTestServlet.crlData = crlData;
-        }
+		public static void setCrlData(byte[] crlData) {
+			CrlRepositoryTestServlet.crlData = crlData;
+		}
 
-        @Override
-        protected void doGet(HttpServletRequest request,
-                             HttpServletResponse response) throws ServletException,
-                IOException {
-            LOG.debug("doGet");
-            if (null != CrlRepositoryTestServlet.crlData) {
-                OutputStream outputStream = response.getOutputStream();
-                IOUtils.write(CrlRepositoryTestServlet.crlData, outputStream);
-            }
-            if (0 != CrlRepositoryTestServlet.responseStatus) {
-                response.setStatus(CrlRepositoryTestServlet.responseStatus);
-            }
-        }
-    }
+		@Override
+		protected void doGet(HttpServletRequest request,
+				HttpServletResponse response) throws ServletException,
+				IOException {
+			LOG.debug("doGet");
+			if (null != CrlRepositoryTestServlet.crlData) {
+				OutputStream outputStream = response.getOutputStream();
+				IOUtils.write(CrlRepositoryTestServlet.crlData, outputStream);
+			}
+			if (0 != CrlRepositoryTestServlet.responseStatus) {
+				response.setStatus(CrlRepositoryTestServlet.responseStatus);
+			}
+		}
+	}
 }

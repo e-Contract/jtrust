@@ -54,8 +54,7 @@ public class TSACertificateConstraint implements CertificateConstraint {
 		try {
 			TSPUtil.validateCertificate(certificate);
 		} catch (TSPValidationException e) {
-			LOG
-					.error("ExtendedKeyUsage extension with value \"id-kp-timeStamping\" not present.");
+			LOG.error("ExtendedKeyUsage extension with value \"id-kp-timeStamping\" not present.");
 			return false;
 		}
 

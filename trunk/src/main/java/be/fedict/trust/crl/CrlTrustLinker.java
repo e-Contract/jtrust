@@ -119,10 +119,8 @@ public class CrlTrustLinker implements TrustLinker {
 		if (null != baseCrlNumber) {
 			BigInteger crlNumber = getDeltaCrlIndicator(x509crl);
 			if (!baseCrlNumber.equals(crlNumber)) {
-				LOG
-						.error("Delta CRL indicator (" + crlNumber
-								+ ") not equals base CRL number("
-								+ baseCrlNumber + ")");
+				LOG.error("Delta CRL indicator (" + crlNumber
+						+ ") not equals base CRL number(" + baseCrlNumber + ")");
 				return null;
 			}
 		}

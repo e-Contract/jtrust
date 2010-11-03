@@ -36,76 +36,78 @@ import static org.junit.Assert.*;
 
 public class OfflineOcspRepositoryTest {
 
-    private X509Certificate rootCertificate;
+	private X509Certificate rootCertificate;
 
-    private X509Certificate certificate;
+	private X509Certificate certificate;
 
-    private KeyPair rootKeyPair;
+	private KeyPair rootKeyPair;
 
-    @Before
-    public void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 
-        this.rootKeyPair = TrustTestUtils.generateKeyPair();
-        DateTime notBefore = new DateTime();
-        DateTime notAfter = notBefore.plusMonths(1);
-        this.rootCertificate = TrustTestUtils.generateSelfSignedCertificate(
-                this.rootKeyPair, "CN=TestRoot", notBefore, notAfter);
+		this.rootKeyPair = TrustTestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		this.rootCertificate = TrustTestUtils.generateSelfSignedCertificate(
+				this.rootKeyPair, "CN=TestRoot", notBefore, notAfter);
 
-        KeyPair keyPair = TrustTestUtils.generateKeyPair();
-        this.certificate = TrustTestUtils.generateCertificate(keyPair
-                .getPublic(), "CN=Test", notBefore, notAfter,
-                this.rootCertificate, this.rootKeyPair.getPrivate());
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		this.certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				this.rootCertificate, this.rootKeyPair.getPrivate());
 
-        // required for org.bouncycastle.ocsp.CertificateID
-        Security.addProvider(new BouncyCastleProvider());
+		// required for org.bouncycastle.ocsp.CertificateID
+		Security.addProvider(new BouncyCastleProvider());
 
-    }
+	}
 
-    @After
-    public void tearDown() throws Exception {
-    }
+	@After
+	public void tearDown() throws Exception {
+	}
 
-    @Test
-    public void testOcspResponseFound() throws Exception {
+	@Test
+	public void testOcspResponseFound() throws Exception {
 
-        // setup
-        OCSPResp ocspResp = TrustTestUtils.createOcspResp(this.certificate,
-                false, this.rootCertificate, this.rootCertificate,
-                this.rootKeyPair.getPrivate());
+		// setup
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(this.certificate,
+				false, this.rootCertificate, this.rootCertificate,
+				this.rootKeyPair.getPrivate());
 
-        OfflineOcspRepository testedInstance = new OfflineOcspRepository(Collections.singletonList(ocspResp.getEncoded()));
+		OfflineOcspRepository testedInstance = new OfflineOcspRepository(
+				Collections.singletonList(ocspResp.getEncoded()));
 
-        // operate
-        OCSPResp resultOcspResp = testedInstance.findOcspResponse(
-                new URI("htpp://foo.org/bar"), this.certificate, this.rootCertificate);
+		// operate
+		OCSPResp resultOcspResp = testedInstance.findOcspResponse(new URI(
+				"htpp://foo.org/bar"), this.certificate, this.rootCertificate);
 
-        // verify
-        assertNotNull(resultOcspResp);
-        assertEquals(ocspResp, resultOcspResp);
-    }
+		// verify
+		assertNotNull(resultOcspResp);
+		assertEquals(ocspResp, resultOcspResp);
+	}
 
-    @Test
-    public void testOcspResponseNotFound() throws Exception {
+	@Test
+	public void testOcspResponseNotFound() throws Exception {
 
-        // setup
-        DateTime notBefore = new DateTime();
-        DateTime notAfter = notBefore.plusMonths(1);
-        KeyPair keyPair = TrustTestUtils.generateKeyPair();
-        X509Certificate otherCertificate = TrustTestUtils.generateCertificate(keyPair
-                .getPublic(), "CN=TestOther", notBefore, notAfter,
-                this.rootCertificate, this.rootKeyPair.getPrivate());
+		// setup
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		X509Certificate otherCertificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=TestOther", notBefore, notAfter,
+				this.rootCertificate, this.rootKeyPair.getPrivate());
 
-        OCSPResp ocspResp = TrustTestUtils.createOcspResp(otherCertificate,
-                false, this.rootCertificate, this.rootCertificate,
-                this.rootKeyPair.getPrivate());
+		OCSPResp ocspResp = TrustTestUtils.createOcspResp(otherCertificate,
+				false, this.rootCertificate, this.rootCertificate,
+				this.rootKeyPair.getPrivate());
 
-        OfflineOcspRepository testedInstance = new OfflineOcspRepository(Collections.singletonList(ocspResp.getEncoded()));
+		OfflineOcspRepository testedInstance = new OfflineOcspRepository(
+				Collections.singletonList(ocspResp.getEncoded()));
 
-        // operate
-        OCSPResp resultOcspResp = testedInstance.findOcspResponse(
-                new URI("htpp://foo.org/bar"), this.certificate, this.rootCertificate);
+		// operate
+		OCSPResp resultOcspResp = testedInstance.findOcspResponse(new URI(
+				"htpp://foo.org/bar"), this.certificate, this.rootCertificate);
 
-        // verify
-        assertNull(resultOcspResp);
-    }
+		// verify
+		assertNull(resultOcspResp);
+	}
 }
