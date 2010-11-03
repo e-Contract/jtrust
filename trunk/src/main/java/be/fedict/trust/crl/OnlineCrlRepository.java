@@ -18,8 +18,10 @@
 
 package be.fedict.trust.crl;
 
+import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,67 +38,84 @@ import java.util.Date;
 /**
  * Online CRL repository. This CRL repository implementation will download the
  * CRLs from the given CRL URIs.
- *
+ * 
  * @author Frank Cornelis
  */
 public class OnlineCrlRepository implements CrlRepository {
 
-    private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
+	private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
 
-    private final NetworkConfig networkConfig;
+	private final NetworkConfig networkConfig;
 
-    /**
-     * Main construtor.
-     *
-     * @param networkConfig the optional network configuration used for downloading CRLs.
-     */
-    public OnlineCrlRepository(NetworkConfig networkConfig) {
-        this.networkConfig = networkConfig;
-    }
+	private Credentials credentials;
 
-    /**
-     * Default constructor.
-     */
-    public OnlineCrlRepository() {
-        this(null);
-    }
+	/**
+	 * Main construtor.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration used for downloading CRLs.
+	 */
+	public OnlineCrlRepository(NetworkConfig networkConfig) {
+		this.networkConfig = networkConfig;
+	}
 
-    public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-                           Date validationDate) {
-        try {
-            return getCrl(crlUri);
-        } catch (CRLException e) {
-            LOG.debug("error parsing CRL: " + e.getMessage(), e);
-            return null;
-        } catch (Exception e) {
-            LOG.error("find CRL error: " + e.getMessage(), e);
-            return null;
-        }
-    }
+	/**
+	 * Default constructor.
+	 */
+	public OnlineCrlRepository() {
+		this(null);
+	}
 
-    private X509CRL getCrl(URI crlUri) throws IOException,
-            CertificateException, CRLException, NoSuchProviderException,
-            NoSuchParserException, StreamParsingException {
-        HttpClient httpClient = new HttpClient();
-        if (null != this.networkConfig) {
-            httpClient.getHostConfiguration().setProxy(
-                    this.networkConfig.getProxyHost(),
-                    this.networkConfig.getProxyPort());
-        }
-        String downloadUrl = crlUri.toURL().toString();
-        LOG.debug("downloading CRL from: " + downloadUrl);
-        GetMethod getMethod = new GetMethod(downloadUrl);
-        int statusCode = httpClient.executeMethod(getMethod);
-        if (HttpURLConnection.HTTP_OK != statusCode) {
-            LOG.debug("HTTP status code: " + statusCode);
-            return null;
-        }
+	/**
+	 * Sets the credentials to use to access protected CRL services.
+	 * 
+	 * @param credentials
+	 */
+	public void setCredentials(Credentials credentials) {
+		this.credentials = credentials;
+	}
 
-        CertificateFactory certificateFactory = CertificateFactory
-                .getInstance("X.509", "BC");
-        X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
-                .getResponseBodyAsStream());
-        LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
-        return crl;
-    }
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
+			Date validationDate) {
+		try {
+			return getCrl(crlUri);
+		} catch (CRLException e) {
+			LOG.debug("error parsing CRL: " + e.getMessage(), e);
+			return null;
+		} catch (Exception e) {
+			LOG.error("find CRL error: " + e.getMessage(), e);
+			return null;
+		}
+	}
+
+	private X509CRL getCrl(URI crlUri) throws IOException,
+			CertificateException, CRLException, NoSuchProviderException,
+			NoSuchParserException, StreamParsingException {
+		HttpClient httpClient = new HttpClient();
+		if (null != this.networkConfig) {
+			httpClient.getHostConfiguration().setProxy(
+					this.networkConfig.getProxyHost(),
+					this.networkConfig.getProxyPort());
+		}
+		if (null != this.credentials) {
+			HttpState httpState = httpClient.getState();
+			this.credentials.init(httpState);
+		}
+		String downloadUrl = crlUri.toURL().toString();
+		LOG.debug("downloading CRL from: " + downloadUrl);
+		GetMethod getMethod = new GetMethod(downloadUrl);
+		getMethod.addRequestHeader("User-Agent", "jTrust CRL Client");
+		int statusCode = httpClient.executeMethod(getMethod);
+		if (HttpURLConnection.HTTP_OK != statusCode) {
+			LOG.debug("HTTP status code: " + statusCode);
+			return null;
+		}
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance(
+				"X.509", "BC");
+		X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
+				.getResponseBodyAsStream());
+		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
+		return crl;
+	}
 }

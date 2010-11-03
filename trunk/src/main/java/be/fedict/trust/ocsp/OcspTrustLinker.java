@@ -136,6 +136,12 @@ public class OcspTrustLinker implements TrustLinker {
 		try {
 			X509Certificate[] responseCertificates = basicOCSPResp
 					.getCerts(BouncyCastleProvider.PROVIDER_NAME);
+			for (X509Certificate responseCertificate : responseCertificates) {
+				LOG.debug("OCSP response cert: "
+						+ responseCertificate.getSubjectX500Principal());
+				LOG.debug("OCSP response cert issuer: "
+						+ responseCertificate.getIssuerX500Principal());
+			}
 			TrustLinkerResult trustResult = TrustValidator
 					.checkSignatureAlgorithm(basicOCSPResp
 							.getSignatureAlgName());
@@ -147,8 +153,9 @@ public class OcspTrustLinker implements TrustLinker {
 				 * This means that the OCSP response has been signed by the
 				 * issuing CA itself.
 				 */
-				boolean verificationResult = basicOCSPResp.verify(certificate
-						.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
+				boolean verificationResult = basicOCSPResp.verify(
+						certificate.getPublicKey(),
+						BouncyCastleProvider.PROVIDER_NAME);
 				if (false == verificationResult) {
 					LOG.debug("OCSP response signature invalid");
 					return null;
@@ -176,10 +183,23 @@ public class OcspTrustLinker implements TrustLinker {
 					return trustResult;
 				}
 
-				X509Certificate issuingCaCertificate = responseCertificates[1];
-				if (false == certificate.equals(issuingCaCertificate)) {
-					LOG.debug("OCSP responder certificate not issued by CA");
-					return null;
+				X509Certificate issuingCaCertificate;
+				if (responseCertificates.length < 2) {
+					LOG.debug("OCSP responder complete certificate chain missing");
+					/*
+					 * Here we assume that the OCSP Responder is directly signed
+					 * by the CA.
+					 */
+					issuingCaCertificate = certificate;
+				} else {
+					issuingCaCertificate = responseCertificates[1];
+					/*
+					 * Is next check really required?
+					 */
+					if (false == certificate.equals(issuingCaCertificate)) {
+						LOG.debug("OCSP responder certificate not issued by CA");
+						return null;
+					}
 				}
 				// check certificate signature
 				trustResult = TrustValidator
@@ -202,8 +222,11 @@ public class OcspTrustLinker implements TrustLinker {
 				if (null == ocspResponderCertificate
 						.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck
 								.getId())) {
-					LOG
-							.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
+					LOG.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
+					/*
+					 * TODO: perform CRL validation on the OCSP Responder
+					 * certificate.
+					 */
 					return null;
 				}
 				List<String> extendedKeyUsage;
@@ -217,14 +240,12 @@ public class OcspTrustLinker implements TrustLinker {
 					return null;
 				}
 				if (null == extendedKeyUsage) {
-					LOG
-							.debug("OCSP Responder certificate has no extended key usage extension");
+					LOG.debug("OCSP Responder certificate has no extended key usage extension");
 					return null;
 				}
 				if (false == extendedKeyUsage
 						.contains(KeyPurposeId.id_kp_OCSPSigning.getId())) {
-					LOG
-							.debug("OCSP Responder certificate should have a OCSPSigning extended key usage");
+					LOG.debug("OCSP Responder certificate should have a OCSPSigning extended key usage");
 					return null;
 				}
 			}
@@ -255,9 +276,7 @@ public class OcspTrustLinker implements TrustLinker {
 			LOG.debug("OCSP thisUpdate: " + thisUpdate);
 			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
 			if (dt > this.freshnessInterval) {
-				LOG
-						.warn("freshness interval exceeded: " + dt
-								+ " milliseconds");
+				LOG.warn("freshness interval exceeded: " + dt + " milliseconds");
 				continue;
 			}
 			if (null == singleResp.getCertStatus()) {
