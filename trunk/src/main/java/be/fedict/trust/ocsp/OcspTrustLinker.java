@@ -230,7 +230,8 @@ public class OcspTrustLinker implements TrustLinker {
 						LOG.debug("OCSP Responder certificate should have id-pkix-ocsp-nocheck");
 						/*
 						 * TODO: perform CRL validation on the OCSP Responder
-						 * certificate.
+						 * certificate. On the other hand, do we really want to
+						 * check the checker?
 						 */
 						return null;
 					}
