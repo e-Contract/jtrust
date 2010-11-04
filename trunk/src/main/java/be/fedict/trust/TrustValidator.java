@@ -425,4 +425,14 @@ public class TrustValidator {
 						+ certificate.getSubjectX500Principal());
 		throw new CertPathValidatorException(this.result.getMessage());
 	}
+
+	/**
+	 * Sets the revocation data container used by this trust validator while
+	 * validating certificate chains.
+	 * 
+	 * @param revocationData
+	 */
+	public void setRevocationData(RevocationData revocationData) {
+		this.revocationData = revocationData;
+	}
 }
