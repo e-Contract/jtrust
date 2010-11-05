@@ -115,6 +115,7 @@ public class CrlTrustLinker implements TrustLinker {
 			return trustResult;
 		}
 
+		LOG.debug("CRL number: " + getCrlNumber(x509crl));
 		// check delta CRL indicator against completeCrlNuber
 		if (null != baseCrlNumber) {
 			BigInteger crlNumber = getDeltaCrlIndicator(x509crl);
@@ -288,8 +289,10 @@ public class CrlTrustLinker implements TrustLinker {
 
 		byte[] freshestCrlValue = x509crl
 				.getExtensionValue(X509Extensions.FreshestCRL.getId());
-		if (null == freshestCrlValue)
+		if (null == freshestCrlValue) {
+			LOG.debug("no freshestCRL extension");
 			return null;
+		}
 		ASN1Sequence seq;
 		try {
 			DEROctetString oct;
