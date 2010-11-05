@@ -29,6 +29,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -286,6 +287,7 @@ public class OcspTrustLinker implements TrustLinker {
 			}
 			Date thisUpdate = singleResp.getThisUpdate();
 			LOG.debug("OCSP thisUpdate: " + thisUpdate);
+			LOG.debug("OCSP nextUpdate: " + singleResp.getNextUpdate());
 			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
 			if (dt > this.freshnessInterval) {
 				LOG.warn("freshness interval exceeded: " + dt + " milliseconds");
