@@ -44,6 +44,7 @@ import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 import be.fedict.trust.CRLRevocationData;
@@ -113,6 +114,12 @@ public class CrlTrustLinker implements TrustLinker {
 				.checkSignatureAlgorithm(x509crl.getSigAlgName());
 		if (!trustResult.isValid()) {
 			return trustResult;
+		}
+
+		// we don't support indirect CRLs
+		if (isIndirectCRL(x509crl)) {
+			LOG.debug("indirect CRL detected");
+			return null;
 		}
 
 		LOG.debug("CRL number: " + getCrlNumber(x509crl));
@@ -373,6 +380,19 @@ public class CrlTrustLinker implements TrustLinker {
 		} catch (IOException e) {
 			throw new RuntimeException("IO error: " + e.getMessage(), e);
 		}
+	}
+
+	private boolean isIndirectCRL(X509CRL crl) {
+		byte[] idp = crl
+				.getExtensionValue(X509Extensions.IssuingDistributionPoint
+						.getId());
+		boolean isIndirect = false;
+		if (idp != null) {
+			isIndirect = IssuingDistributionPoint.getInstance(idp)
+					.isIndirectCRL();
+		}
+
+		return isIndirect;
 	}
 
 	private static URI toURI(String str) {
