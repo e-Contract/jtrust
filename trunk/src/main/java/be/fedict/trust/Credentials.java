@@ -54,7 +54,7 @@ public class Credentials {
 	/**
 	 * Gives back the list of credentials.
 	 * 
-	 * @return
+	 * @return the list of credentials.
 	 */
 	public List<Credential> getCredentials() {
 		return this.credentials;
