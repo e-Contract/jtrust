@@ -16,13 +16,34 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<schemaIncludes>
+								<schemaInclude>ts_102231v030102_sie_xsd.xsd</schemaInclude>
+								<schemaInclude>ts_102231v030102_additionaltypes_xsd.xsd</schemaInclude>
+							</schemaIncludes>
+							<debug>true</debug>
+							<verbose>true</verbose>
+							<catalog>src/main/resources/catalog.cat</catalog>
+							<bindingIncludes>
+								<include>bindings.xjb.xml</include>
+							</bindingIncludes>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>2.1.13</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
