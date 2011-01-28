@@ -33,6 +33,7 @@
 	</scm>
 	<modules>
 		<module>jtrust-lib</module>
+		<module>jtrust-tsl</module>
 	</modules>
 	<build>
 		<plugins>
