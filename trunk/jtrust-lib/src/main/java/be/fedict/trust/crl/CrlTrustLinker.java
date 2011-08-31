@@ -283,7 +283,7 @@ public class CrlTrustLinker implements TrustLinker {
 					continue;
 				}
 				DERIA5String derStr = DERIA5String.getInstance(name
-						.getDERObject());
+						.getName());
 				String str = derStr.getString();
 				URI uri = toURI(str);
 				return uri;
@@ -331,7 +331,7 @@ public class CrlTrustLinker implements TrustLinker {
 					continue;
 				}
 				DERIA5String derStr = DERIA5String.getInstance(name
-						.getDERObject());
+						.getName());
 				String str = derStr.getString();
 				URI uri = toURI(str);
 				deltaCrlUris.add(uri);

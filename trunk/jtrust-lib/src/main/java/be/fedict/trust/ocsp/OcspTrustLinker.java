@@ -365,7 +365,7 @@ public class OcspTrustLinker implements TrustLinker {
 				LOG.debug("not a uniform resource identifier");
 				continue;
 			}
-			DERIA5String str = DERIA5String.getInstance(gn.getDERObject());
+			DERIA5String str = DERIA5String.getInstance(gn.getName());
 			String accessLocation = str.getString();
 			LOG.debug("access location: " + accessLocation);
 			URI uri = toURI(accessLocation);
