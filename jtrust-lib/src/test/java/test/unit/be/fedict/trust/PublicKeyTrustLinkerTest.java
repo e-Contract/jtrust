@@ -32,6 +32,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.DefaultAlgorithmPolicy;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
@@ -63,7 +64,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNull(result);
 	}
 
@@ -89,7 +90,7 @@ public class PublicKeyTrustLinkerTest {
 		// operate
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -118,7 +119,7 @@ public class PublicKeyTrustLinkerTest {
 		// operate
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -145,7 +146,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
@@ -170,7 +171,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
@@ -195,7 +196,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				root2Certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
@@ -221,7 +222,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
@@ -247,7 +248,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}
@@ -275,7 +276,7 @@ public class PublicKeyTrustLinkerTest {
 
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
-				new RevocationData());
+				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
 		assertFalse(result.isValid());
 	}

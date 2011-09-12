@@ -42,11 +42,14 @@ public interface TrustLinker {
 	 * @param revocationData
 	 *            optional OCSP or CRL revocation data. Is <code>null</code> if
 	 *            not specified.
+	 * @param algorithmPolicy
+	 *            the algorithm policy to be used to validate used signature
+	 *            algorithms.
 	 * @return a {@link TrustLinkerResult} object containing the result and
 	 *         optional reason if not valid. Returns <code>null</code> if the
 	 *         trust is unknown.
 	 */
 	TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData);
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy);
 }

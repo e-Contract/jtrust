@@ -18,6 +18,8 @@
 
 package test.integ.be.fedict.trust;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -40,12 +42,15 @@ public class SSLTrustValidatorTest {
 
 	@Test
 	public void test() throws Exception {
-		// URL url = new URL("https://www.fortisbanking.be");
-		//URL url = new URL("https://www.facebook.com");
-		//URL url = new URL("https://www.twitter.com");
-		URL url = new URL("https://www.mozilla.org");
+		URL url = new URL("https://www.fortisbanking.be");
+		// Proxy proxy = Proxy.NO_PROXY;
+		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
+				"proxy.yourict.net", 8080));
+		// URL url = new URL("https://www.facebook.com");
+		// URL url = new URL("https://www.twitter.com");
+		// URL url = new URL("https://www.mozilla.org");
 		HttpsURLConnection connection = (HttpsURLConnection) url
-				.openConnection();
+				.openConnection(proxy);
 		connection.connect();
 		Certificate[] serverCertificates = connection.getServerCertificates();
 		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();

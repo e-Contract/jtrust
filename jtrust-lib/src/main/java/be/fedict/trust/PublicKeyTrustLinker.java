@@ -30,6 +30,7 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.IOException;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -46,7 +47,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData) {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
 			LOG.debug("child certificate issuer not the same as the issuer certificate subject");
@@ -67,6 +68,16 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					TrustLinkerResultReason.INVALID_SIGNATURE,
 					"verification error: " + e.getMessage());
 		}
+
+		try {
+			algorithmPolicy.checkSignatureAlgorithm(childCertificate
+					.getSigAlgOID());
+		} catch (SignatureException e) {
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"algorithm error: " + e.getMessage());
+		}
+
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
 			LOG.warn("child certificate validity end is after certificate validity end");

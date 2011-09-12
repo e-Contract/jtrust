@@ -44,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils.RevokedCertificate;
+import be.fedict.trust.DefaultAlgorithmPolicy;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultReason;
@@ -78,7 +79,8 @@ public class CrlTrustLinkerTest {
 
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null, new RevocationData());
+				rootCertificate, null, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		EasyMock.verify(mockCrlRepository);
 		assertNull(result);
@@ -107,7 +109,7 @@ public class CrlTrustLinkerTest {
 
 		try {
 			crlTrustLinker.hasTrustLink(certificate, rootCertificate, null,
-					new RevocationData());
+					new RevocationData(), new DefaultAlgorithmPolicy());
 			fail();
 		} catch (InvalidParameterException e) {
 			// expected
@@ -143,7 +145,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -180,7 +183,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertTrue(result.isValid());
@@ -217,7 +221,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -254,7 +259,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -291,7 +297,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -327,7 +334,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -363,7 +371,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -400,7 +409,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockCrlRepository);
@@ -438,7 +448,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertFalse(result.isValid());
@@ -497,7 +508,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertFalse(result.isValid());
@@ -548,7 +560,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertFalse(result.isValid());
@@ -587,7 +600,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertFalse(result.isValid());
@@ -630,7 +644,8 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNotNull(result);
 		assertTrue(result.isValid());
