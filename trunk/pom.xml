@@ -34,6 +34,7 @@
 	<modules>
 		<module>jtrust-lib</module>
 		<module>jtrust-tsl</module>
+		<module>jtrust-tests</module>
 	</modules>
 	<build>
 		<extensions>
