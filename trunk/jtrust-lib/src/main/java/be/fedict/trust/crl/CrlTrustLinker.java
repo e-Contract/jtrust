@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
@@ -47,12 +48,12 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
+import be.fedict.trust.AlgorithmPolicy;
 import be.fedict.trust.CRLRevocationData;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultReason;
-import be.fedict.trust.TrustValidator;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -78,7 +79,7 @@ public class CrlTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData) {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
 
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
@@ -87,13 +88,13 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 
 		return processCrl(crlUri, childCertificate, certificate,
-				validationDate, revocationData, null);
+				validationDate, revocationData, null, algorithmPolicy);
 	}
 
 	private TrustLinkerResult processCrl(URI crlUri,
 			X509Certificate childCertificate, X509Certificate certificate,
 			Date validationDate, RevocationData revocationData,
-			BigInteger baseCrlNumber) {
+			BigInteger baseCrlNumber, AlgorithmPolicy algorithmPolicy) {
 
 		LOG.debug("CRL URI: " + crlUri);
 		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
@@ -109,11 +110,13 @@ public class CrlTrustLinker implements TrustLinker {
 			return null;
 		}
 
-		// check CRL signature
-		TrustLinkerResult trustResult = TrustValidator
-				.checkSignatureAlgorithm(x509crl.getSigAlgName());
-		if (!trustResult.isValid()) {
-			return trustResult;
+		// check CRL signature algorithm
+		try {
+			algorithmPolicy.checkSignatureAlgorithm(x509crl.getSigAlgOID());
+		} catch (SignatureException e) {
+			return new TrustLinkerResult(false,
+					TrustLinkerResultReason.INVALID_SIGNATURE,
+					"algorithm error: " + e.getMessage());
 		}
 
 		// we don't support indirect CRLs
@@ -173,7 +176,8 @@ public class CrlTrustLinker implements TrustLinker {
 					LOG.debug("delta CRL: " + deltaCrlUri.toString());
 					TrustLinkerResult result = processCrl(deltaCrlUri,
 							childCertificate, certificate, validationDate,
-							revocationData, getCrlNumber(x509crl));
+							revocationData, getCrlNumber(x509crl),
+							algorithmPolicy);
 					if (null != result)
 						return result;
 				}
@@ -282,8 +286,7 @@ public class CrlTrustLinker implements TrustLinker {
 					LOG.debug("not a uniform resource identifier");
 					continue;
 				}
-				DERIA5String derStr = DERIA5String.getInstance(name
-						.getName());
+				DERIA5String derStr = DERIA5String.getInstance(name.getName());
 				String str = derStr.getString();
 				URI uri = toURI(str);
 				return uri;
@@ -330,8 +333,7 @@ public class CrlTrustLinker implements TrustLinker {
 					LOG.debug("not a uniform resource identifier");
 					continue;
 				}
-				DERIA5String derStr = DERIA5String.getInstance(name
-						.getName());
+				DERIA5String derStr = DERIA5String.getInstance(name.getName());
 				String str = derStr.getString();
 				URI uri = toURI(str);
 				deltaCrlUris.add(uri);

@@ -23,12 +23,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
 
+import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.DefaultAlgorithmPolicy;
 import be.fedict.trust.FallbackTrustLinker;
+import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
 
@@ -40,8 +44,13 @@ public class FallbackTrustLinkerTest {
 		Date validationDate = new Date();
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
-				mockTrustLinker.hasTrustLink(null, null, validationDate, null))
-				.andReturn(new TrustLinkerResult(true));
+				mockTrustLinker.hasTrustLink(
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq(validationDate),
+						EasyMock.eq((RevocationData) null),
+						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
+				new TrustLinkerResult(true));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -50,7 +59,7 @@ public class FallbackTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
-				validationDate, null);
+				validationDate, null, new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -64,8 +73,13 @@ public class FallbackTrustLinkerTest {
 		Date validationDate = new Date();
 		TrustLinker mockTrustLinker = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
-				mockTrustLinker.hasTrustLink(null, null, validationDate, null))
-				.andReturn(new TrustLinkerResult(false));
+				mockTrustLinker.hasTrustLink(
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq(validationDate),
+						EasyMock.eq((RevocationData) null),
+						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
+				new TrustLinkerResult(false));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -74,7 +88,7 @@ public class FallbackTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
-				validationDate, null);
+				validationDate, null, new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -89,7 +103,7 @@ public class FallbackTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
-				null, null);
+				null, null, new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);
@@ -101,12 +115,22 @@ public class FallbackTrustLinkerTest {
 		Date validationDate = new Date();
 		TrustLinker mockTrustLinker1 = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
-				mockTrustLinker1.hasTrustLink(null, null, validationDate, null))
-				.andReturn(null);
+				mockTrustLinker1.hasTrustLink(
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq(validationDate),
+						EasyMock.eq((RevocationData) null),
+						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
+				null);
 		TrustLinker mockTrustLinker2 = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
-				mockTrustLinker2.hasTrustLink(null, null, validationDate, null))
-				.andReturn(new TrustLinkerResult(true));
+				mockTrustLinker2.hasTrustLink(
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq((X509Certificate) null),
+						EasyMock.eq(validationDate),
+						EasyMock.eq((RevocationData) null),
+						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
+				new TrustLinkerResult(true));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker1);
@@ -116,7 +140,7 @@ public class FallbackTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
-				validationDate, null);
+				validationDate, null, new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);

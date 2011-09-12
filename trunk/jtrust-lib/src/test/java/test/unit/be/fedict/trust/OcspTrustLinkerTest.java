@@ -38,6 +38,7 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.DefaultAlgorithmPolicy;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultReason;
@@ -74,7 +75,8 @@ public class OcspTrustLinkerTest {
 		EasyMock.replay(mockOcspRepository);
 
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null, new RevocationData());
+				rootCertificate, null, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		assertNull(result);
 		EasyMock.verify(mockOcspRepository);
@@ -108,7 +110,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, null, new RevocationData());
+				rootCertificate, null, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);
@@ -148,7 +151,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -189,7 +193,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -232,7 +237,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);
@@ -273,7 +279,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -316,7 +323,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);
@@ -361,7 +369,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);
@@ -401,7 +410,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -453,7 +463,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -496,7 +507,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -540,7 +552,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNotNull(result);
@@ -592,7 +605,8 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData());
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
 
 		// verify
 		assertNull(result);

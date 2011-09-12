@@ -55,6 +55,8 @@ public class TrustValidator {
 
 	private TrustLinkerResult result;
 
+	private AlgorithmPolicy algorithmPolicy;
+
 	/**
 	 * Main constructor.
 	 * 
@@ -62,11 +64,7 @@ public class TrustValidator {
 	 *            the certificate repository used by this trust validator.
 	 */
 	public TrustValidator(CertificateRepository certificateRepository) {
-		this.certificateRepository = certificateRepository;
-		this.trustLinkers = new LinkedList<TrustLinker>();
-		this.certificateConstraints = new LinkedList<CertificateConstraint>();
-		this.revocationData = null;
-		this.result = null;
+		this(certificateRepository, null);
 	}
 
 	/**
@@ -86,6 +84,7 @@ public class TrustValidator {
 		this.certificateConstraints = new LinkedList<CertificateConstraint>();
 		this.revocationData = revocationData;
 		this.result = null;
+		this.algorithmPolicy = new DefaultAlgorithmPolicy();
 	}
 
 	/**
@@ -97,6 +96,17 @@ public class TrustValidator {
 	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);
+	}
+
+	/**
+	 * Sets the algorithm policy to be used when validation used signature
+	 * algorithms.
+	 * 
+	 * @param algorithmPolicy
+	 *            the algorithm policy component.
+	 */
+	public void setAlgorithmPolicy(AlgorithmPolicy algorithmPolicy) {
+		this.algorithmPolicy = algorithmPolicy;
 	}
 
 	/**
@@ -281,24 +291,14 @@ public class TrustValidator {
 		return new TrustLinkerResult(true);
 	}
 
-	/**
-	 * Checks whether given signature algorithm is allowed. MD5 for example is
-	 * not
-	 * 
-	 * @param signatureAlgorithm
-	 */
-	public static TrustLinkerResult checkSignatureAlgorithm(
-			String signatureAlgorithm) {
-
-		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
-		// disallow MD5 certificate signatures
-		if (signatureAlgorithm.contains("MD5")
-				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
+	private TrustLinkerResult checkSignatureAlgorithm(String signatureAlgorithm) {
+		try {
+			this.algorithmPolicy.checkSignatureAlgorithm(signatureAlgorithm);
+		} catch (SignatureException e) {
 			return new TrustLinkerResult(false,
 					TrustLinkerResultReason.INVALID_SIGNATURE,
 					"Invalid signature algorithm: " + signatureAlgorithm);
 		}
-
 		return new TrustLinkerResult(true);
 	}
 
@@ -386,7 +386,8 @@ public class TrustValidator {
 			LOG.debug("trying trust linker: "
 					+ trustLinker.getClass().getSimpleName());
 			this.result = trustLinker.hasTrustLink(childCertificate,
-					certificate, validationDate, this.revocationData);
+					certificate, validationDate, this.revocationData,
+					this.algorithmPolicy);
 			if (null == this.result) {
 				continue;
 			}
