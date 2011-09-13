@@ -56,7 +56,6 @@ import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 
 import be.fedict.trust.AlgorithmPolicy;
-import be.fedict.trust.OCSPRevocationData;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
@@ -331,7 +330,7 @@ public class OcspTrustLinker implements TrustLinker {
 		if (null != revocationData) {
 			try {
 				revocationData.getOcspRevocationData().add(
-						new OCSPRevocationData(ocspResp.getEncoded()));
+						ocspResp.getEncoded());
 			} catch (IOException e) {
 				LOG.error("IOException: " + e.getMessage(), e);
 				throw new RuntimeException("IOException : " + e.getMessage(), e);
