@@ -31,11 +31,6 @@ import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.constraints.TSACertificateConstraint;
-import be.fedict.trust.crl.CachedCrlRepository;
-import be.fedict.trust.crl.CrlTrustLinker;
-import be.fedict.trust.crl.OnlineCrlRepository;
-import be.fedict.trust.ocsp.OcspTrustLinker;
-import be.fedict.trust.ocsp.OnlineOcspRepository;
 
 /**
  * Trust Validator Factory for Belgian (eID) PKI.
@@ -171,25 +166,10 @@ public class BelgianTrustValidatorFactory {
 				memoryCertificateRepository);
 
 		// add trust linkers
-		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
-
-		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
 				networkConfig);
-
-		OnlineCrlRepository crlRepository = new OnlineCrlRepository(
-				networkConfig);
-		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(
-				crlRepository);
-
-		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
-		if (null != externalTrustLinker) {
-			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
-		}
-		fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
-		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
-				cachedCrlRepository));
-
-		trustValidator.addTrustLinker(fallbackTrustLinker);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
+				externalTrustLinker);
 
 		// add certificate constraints
 		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
@@ -240,25 +220,10 @@ public class BelgianTrustValidatorFactory {
 			trustValidator = new TrustValidator(certificateRepository);
 		}
 
-		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
-
-		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
 				networkConfig);
-
-		OnlineCrlRepository crlRepository = new OnlineCrlRepository(
-				networkConfig);
-		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(
-				crlRepository);
-
-		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
-		if (null != externalTrustLinker) {
-			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
-		}
-		fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
-		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
-				cachedCrlRepository));
-
-		trustValidator.addTrustLinker(fallbackTrustLinker);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
+				externalTrustLinker);
 
 		KeyUsageCertificateConstraint keyUsageCertificateConstraint = new KeyUsageCertificateConstraint();
 		switch (certificateType) {

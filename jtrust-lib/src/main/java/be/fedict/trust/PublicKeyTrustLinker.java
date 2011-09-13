@@ -18,6 +18,11 @@
 
 package be.fedict.trust;
 
+import java.io.IOException;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,11 +33,6 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
-import java.io.IOException;
-import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
 
 /**
  * Public key trust linker implementation. Performs simple sanity checks based
@@ -106,10 +106,20 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"certificate already expired");
 		}
 		if (-1 == certificate.getBasicConstraints()) {
-			LOG.debug("certificate not a CA");
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
-					"certificate not a CA");
+			LOG.debug("certificate not a CA: "
+					+ certificate.getSubjectX500Principal());
+			/*
+			 * http://www.valicert.com/ Root CA has no CA flag set. Actually
+			 * this is in violation with 4.2.1.10 Basic Constraints of RFC2459.
+			 */
+			try {
+				certificate.verify(certificate.getPublicKey());
+				LOG.warn("allowing self-signed Root CA without CA flag set");
+			} catch (Exception e) {
+				return new TrustLinkerResult(false,
+						TrustLinkerResultReason.INVALID_TRUST,
+						"certificate not a CA");
+			}
 		}
 		if (0 == certificate.getBasicConstraints()
 				&& -1 != childCertificate.getBasicConstraints()) {

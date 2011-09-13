@@ -231,8 +231,11 @@ public class CrlTrustLinker implements TrustLinker {
 
 		// assert cRLSign KeyUsage bit
 		if (null == issuerCertificate.getKeyUsage()) {
-			LOG.debug("No KeyUsage extension for CRL issuing certificate");
-			return false;
+			LOG.warn("No KeyUsage extension for CRL issuing certificate");
+			/*
+			 * Not really required according to RFC2459.
+			 */
+			return true;
 		}
 
 		if (false == issuerCertificate.getKeyUsage()[6]) {
