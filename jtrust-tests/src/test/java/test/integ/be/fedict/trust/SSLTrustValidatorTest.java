@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.CertificatePathBuilder;
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
@@ -59,14 +60,16 @@ public class SSLTrustValidatorTest {
 				"proxy.yourict.net", 8080));
 		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
 				8080);
+		// URL url = new URL("https://eid.belgium.be/"); // OK
 		// URL url = new URL("https://www.fortisbanking.be"); // OK
-		// URL url = new URL("https://www.e-contract.be/"); // OK
-		
+		//URL url = new URL("https://www.e-contract.be/"); // OK
+		//URL url = new URL("https://idp.services.belgium.be"); // OK
+		URL url = new URL("https://idp.int.belgium.be"); // OK
+
 		// URL url = new URL("https://www.facebook.com");
 		// URL url = new URL("https://www.twitter.com");
 		// URL url = new URL("https://www.mozilla.org");
 		// URL url = new URL("https://www.verisign.com/");
-		URL url = new URL("https://eid.belgium.be/");
 		HttpsURLConnection connection = (HttpsURLConnection) url
 				.openConnection(proxy);
 		connection.connect();
@@ -78,9 +81,16 @@ public class SSLTrustValidatorTest {
 			LOG.debug("certificate: " + x509Cert);
 		}
 
+		if (true) {
+			return;
+		}
+		
+		CertificatePathBuilder certificatePathBuilder = new CertificatePathBuilder();
+		certificateChain = certificatePathBuilder.buildPath(certificateChain);
+
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-		certificateRepository
-				.addTrustPoint((X509Certificate) serverCertificates[serverCertificates.length - 1]);
+		certificateRepository.addTrustPoint(certificateChain
+				.get(certificateChain.size() - 1));
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
 		trustValidator.setAlgorithmPolicy(new AlgorithmPolicy() {
