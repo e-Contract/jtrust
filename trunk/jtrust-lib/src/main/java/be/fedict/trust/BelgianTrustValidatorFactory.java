@@ -201,6 +201,15 @@ public class BelgianTrustValidatorFactory {
 				externalTrustLinker, certificateRepository);
 	}
 
+	public static CertificateRepository createCertificateRepository() {
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
+		memoryCertificateRepository.addTrustPoint(rootCaCertificate);
+		X509Certificate rootCa2Certificate = loadCertificate("be/fedict/trust/belgiumrca2.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa2Certificate);
+		return memoryCertificateRepository;
+	}
+
 	private static TrustValidator createTrustValidator(
 			CertificateType certificateType, NetworkConfig networkConfig,
 			TrustLinker externalTrustLinker,
@@ -209,13 +218,8 @@ public class BelgianTrustValidatorFactory {
 		TrustValidator trustValidator;
 		if (null == certificateRepository) {
 			// trust points
-			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
-			X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
-			memoryCertificateRepository.addTrustPoint(rootCaCertificate);
-			X509Certificate rootCa2Certificate = loadCertificate("be/fedict/trust/belgiumrca2.crt");
-			memoryCertificateRepository.addTrustPoint(rootCa2Certificate);
-
-			trustValidator = new TrustValidator(memoryCertificateRepository);
+			CertificateRepository localCertificateRepository = createCertificateRepository();
+			trustValidator = new TrustValidator(localCertificateRepository);
 		} else {
 			trustValidator = new TrustValidator(certificateRepository);
 		}

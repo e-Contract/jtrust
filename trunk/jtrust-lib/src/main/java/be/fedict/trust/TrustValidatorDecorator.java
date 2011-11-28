@@ -55,6 +55,21 @@ public class TrustValidatorDecorator {
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
 			TrustLinker externalTrustLinker) {
+		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker, false);
+	}
+
+	/**
+	 * Adds a default trust linker configuration to a given trust validator.
+	 * 
+	 * @param trustValidator
+	 *            the trust validator to be configured.
+	 * @param externalTrustLinker
+	 *            optional additional trust linker.
+	 * @param noOcsp
+	 *            set to <code>true</code> to avoid OCSP validation.
+	 */
+	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
+			TrustLinker externalTrustLinker, boolean noOcsp) {
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
 
 		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
@@ -69,7 +84,10 @@ public class TrustValidatorDecorator {
 		if (null != externalTrustLinker) {
 			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
 		}
-		fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
+		if (false == noOcsp) {
+			fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(
+					ocspRepository));
+		}
 		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
 				cachedCrlRepository));
 

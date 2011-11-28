@@ -37,16 +37,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 
 import be.fedict.trust.AlgorithmPolicy;
 import be.fedict.trust.RevocationData;
@@ -160,7 +162,7 @@ public class CrlTrustLinker implements TrustLinker {
 			revoked = false;
 		}
 
-		if (null != x509crl.getExtensionValue(X509Extensions.DeltaCRLIndicator
+		if (null != x509crl.getExtensionValue(X509Extension.deltaCRLIndicator
 				.getId())) {
 			// Delta CRL
 			if (!revoked)
@@ -184,6 +186,40 @@ public class CrlTrustLinker implements TrustLinker {
 
 		if (!revoked)
 			return new TrustLinkerResult(true);
+
+		LOG.debug("certificate revoked/suspended at: "
+				+ crlEntry.getRevocationDate());
+		if (crlEntry.hasExtensions()) {
+			LOG.debug("critical extensions: "
+					+ crlEntry.getCriticalExtensionOIDs());
+			LOG.debug("non-critical extensions: "
+					+ crlEntry.getNonCriticalExtensionOIDs());
+			byte[] reasonCodeExtension = crlEntry
+					.getExtensionValue(X509Extension.reasonCode.getId());
+			if (null != reasonCodeExtension) {
+				try {
+					DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
+							new ByteArrayInputStream(reasonCodeExtension))
+							.readObject());
+					byte[] octets = octetString.getOctets();
+					CRLReason crlReason = new CRLReason(
+							DEREnumerated.getInstance(new ASN1InputStream(
+									octets).readObject()));
+					BigInteger crlReasonValue = crlReason.getValue();
+					LOG.debug("CRL reason value: " + crlReasonValue);
+					switch (crlReasonValue.intValue()) {
+					case CRLReason.certificateHold:
+						return new TrustLinkerResult(
+								false,
+								TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+								"certificate suspended by CRL="
+										+ crlEntry.getSerialNumber());
+					}
+				} catch (IOException e) {
+					throw new RuntimeException("IO error: " + e.getMessage(), e);
+				}
+			}
+		}
 
 		return new TrustLinkerResult(false,
 				TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
@@ -254,7 +290,7 @@ public class CrlTrustLinker implements TrustLinker {
 	 */
 	public static URI getCrlUri(X509Certificate certificate) {
 		byte[] crlDistributionPointsValue = certificate
-				.getExtensionValue(X509Extensions.CRLDistributionPoints.getId());
+				.getExtensionValue(X509Extension.cRLDistributionPoints.getId());
 		if (null == crlDistributionPointsValue) {
 			return null;
 		}
@@ -289,6 +325,13 @@ public class CrlTrustLinker implements TrustLinker {
 				}
 				DERIA5String derStr = DERIA5String.getInstance(name.getName());
 				String str = derStr.getString();
+				if (false == str.startsWith("http")) {
+					/*
+					 * skip ldap:// protocols
+					 */
+					LOG.debug("not HTTP/HTTPS: " + str);
+					continue;
+				}
 				URI uri = toURI(str);
 				return uri;
 			}
@@ -299,7 +342,7 @@ public class CrlTrustLinker implements TrustLinker {
 	private List<URI> getDeltaCrlUris(X509CRL x509crl) {
 
 		byte[] freshestCrlValue = x509crl
-				.getExtensionValue(X509Extensions.FreshestCRL.getId());
+				.getExtensionValue(X509Extension.freshestCRL.getId());
 		if (null == freshestCrlValue) {
 			LOG.debug("no freshestCRL extension");
 			return null;
@@ -346,7 +389,7 @@ public class CrlTrustLinker implements TrustLinker {
 	private BigInteger getDeltaCrlIndicator(X509CRL deltaCrl) {
 
 		byte[] deltaCrlIndicatorValue = deltaCrl
-				.getExtensionValue(X509Extensions.DeltaCRLIndicator.getId());
+				.getExtensionValue(X509Extension.deltaCRLIndicator.getId());
 		if (null == deltaCrlIndicatorValue)
 			return null;
 
@@ -367,7 +410,7 @@ public class CrlTrustLinker implements TrustLinker {
 
 	private BigInteger getCrlNumber(X509CRL crl) {
 		byte[] crlNumberExtensionValue = crl
-				.getExtensionValue(X509Extensions.CRLNumber.getId());
+				.getExtensionValue(X509Extension.cRLNumber.getId());
 		if (null == crlNumberExtensionValue) {
 			return null;
 		}
@@ -387,7 +430,7 @@ public class CrlTrustLinker implements TrustLinker {
 
 	private boolean isIndirectCRL(X509CRL crl) {
 		byte[] idp = crl
-				.getExtensionValue(X509Extensions.IssuingDistributionPoint
+				.getExtensionValue(X509Extension.issuingDistributionPoint
 						.getId());
 		boolean isIndirect = false;
 		if (idp != null) {

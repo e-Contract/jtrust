@@ -208,6 +208,12 @@
 				<version>2.4</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>be.fedict.eid-applet</groupId>
+				<artifactId>eid-applet-core</artifactId>
+				<version>1.0.4.Beta4</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
