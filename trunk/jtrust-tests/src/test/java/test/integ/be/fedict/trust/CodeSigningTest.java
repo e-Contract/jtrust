@@ -31,6 +31,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import be.fedict.trust.AllowAllAlgorithmPolicy;
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
@@ -137,7 +138,7 @@ public class CodeSigningTest {
 
 		trustValidator.isTrusted(certChain);
 	}
-	
+
 	@Test
 	public void testEVZW() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory
@@ -173,6 +174,54 @@ public class CodeSigningTest {
 		certificateRepository.addTrustPoint(gsCert);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
+
+		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
+				8080);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
+				networkConfig);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
+				null, false);
+
+		trustValidator.isTrusted(certChain);
+	}
+
+	@Test
+	public void testCertipostCodeSigning() throws Exception {
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		InputStream fedictCertInputStream = CodeSigningTest.class
+				.getResourceAsStream("/FedICT-BE0367302178.cer");
+		X509Certificate fedictCert = (X509Certificate) certificateFactory
+				.generateCertificate(fedictCertInputStream);
+		LOG.debug("code signing not before: " + fedictCert.getNotBefore());
+
+		InputStream govCertInputStream = CodeSigningTest.class
+				.getResourceAsStream("/NCA_WSOS.crt");
+		X509Certificate ca2Cert = (X509Certificate) certificateFactory
+				.generateCertificate(govCertInputStream);
+
+		InputStream rootCertInputStream = CodeSigningTest.class
+				.getResourceAsStream("/NCA.crt");
+		X509Certificate rootCert = (X509Certificate) certificateFactory
+				.generateCertificate(rootCertInputStream);
+
+		InputStream gsCertInputStream = CodeSigningTest.class
+				.getResourceAsStream("/GTE_ROOT.crt");
+		X509Certificate gsCert = (X509Certificate) certificateFactory
+				.generateCertificate(gsCertInputStream);
+
+		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		certChain.add(fedictCert);
+		certChain.add(ca2Cert);
+		certChain.add(rootCert);
+		certChain.add(gsCert);
+
+		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
+		certificateRepository.addTrustPoint(gsCert);
+		TrustValidator trustValidator = new TrustValidator(
+				certificateRepository);
+		
+		trustValidator.setAlgorithmPolicy(new AllowAllAlgorithmPolicy());
 
 		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
 				8080);
