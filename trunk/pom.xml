@@ -216,6 +216,15 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<repositories>
+		<repository>
+			<id>e-contract</id>
+			<url>http://www.e-contract.be/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
 	<distributionManagement>
 		<downloadUrl>http://code.google.com/p/jtrust/downloads/list
         </downloadUrl>
