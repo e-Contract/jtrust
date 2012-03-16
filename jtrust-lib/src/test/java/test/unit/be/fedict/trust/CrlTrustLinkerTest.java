@@ -98,7 +98,7 @@ public class CrlTrustLinkerTest {
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
 		X509Certificate certificate = TrustTestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
-				rootCertificate, rootKeyPair.getPrivate(), false, -1, ":");
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, "foobar");
 
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
@@ -107,14 +107,10 @@ public class CrlTrustLinkerTest {
 
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		try {
-			crlTrustLinker.hasTrustLink(certificate, rootCertificate, null,
-					new RevocationData(), new DefaultAlgorithmPolicy());
-			fail();
-		} catch (InvalidParameterException e) {
-			// expected
-			EasyMock.verify(mockCrlRepository);
-		}
+		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+				rootCertificate, null, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+		assertNull(result);
 	}
 
 	@Test
@@ -127,18 +123,18 @@ public class CrlTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = new Date();
 
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(null);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(null);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -163,10 +159,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -175,8 +171,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -201,10 +197,10 @@ public class CrlTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"https://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -213,8 +209,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("https://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -239,10 +235,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.dataEncipherment));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"https://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -251,8 +247,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("https://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -276,10 +272,10 @@ public class CrlTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -289,8 +285,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore.minusMonths(2),
 				notAfter.minusMonths(2));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -314,10 +310,10 @@ public class CrlTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -326,8 +322,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(rootKeyPair.getPrivate(),
 				certificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -351,10 +347,10 @@ public class CrlTrustLinkerTest {
 						notBefore, notAfter, true, 0);
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -363,8 +359,8 @@ public class CrlTrustLinkerTest {
 		X509CRL x509crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -390,10 +386,10 @@ public class CrlTrustLinkerTest {
 		Date validationDate = notBefore.plusDays(1).toDate();
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"https://crl-uri");
 
 		CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
@@ -401,8 +397,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore.plusMonths(2),
 				notAfter.plusMonths(2));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("https://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -427,10 +423,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -440,8 +436,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore, notAfter,
 				certificate.getSerialNumber());
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -468,10 +464,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -492,8 +488,8 @@ public class CrlTrustLinkerTest {
 						certificate.getSerialNumber(), notBefore)));
 
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI(deltaCrlUris.get(0)),
 						rootCertificate, validationDate)).andReturn(
@@ -528,10 +524,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"https://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -548,8 +544,8 @@ public class CrlTrustLinkerTest {
 				null, true, new LinkedList<RevokedCertificate>());
 
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("https://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI(deltaCrlUris.get(0)),
 						rootCertificate, validationDate)).andReturn(
@@ -579,10 +575,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"https://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -592,8 +588,8 @@ public class CrlTrustLinkerTest {
 				rootCertificate, notBefore, notAfter, "MD5withRSA",
 				certificate.getSerialNumber());
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("https://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 
@@ -621,10 +617,10 @@ public class CrlTrustLinkerTest {
 								KeyUsage.cRLSign));
 
 		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
-				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-						notAfter, rootCertificate, rootKeyPair.getPrivate(),
-						false, -1, "crl-uri");
+		X509Certificate certificate = TrustTestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
 
 		Date validationDate = notBefore.plusDays(1).toDate();
 
@@ -636,8 +632,8 @@ public class CrlTrustLinkerTest {
 								certificate.getSerialNumber(), notBefore
 										.plusDays(2))));
 		EasyMock.expect(
-				mockCrlRepository.findCrl(new URI("crl-uri"), rootCertificate,
-						validationDate)).andReturn(x509crl);
+				mockCrlRepository.findCrl(new URI("http://crl-uri"),
+						rootCertificate, validationDate)).andReturn(x509crl);
 
 		EasyMock.replay(mockCrlRepository);
 

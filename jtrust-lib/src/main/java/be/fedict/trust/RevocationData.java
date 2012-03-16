@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2009-2011 FedICT.
+ * Copyright (C) 2009-2012 FedICT.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,21 +24,21 @@ import java.util.List;
 /**
  * Contains the used OCSP and CRL revocation data.
  * 
- * @author wvdhaute
+ * @author Frank Cornelis
  */
 public class RevocationData {
 
-	private final List<byte[]> ocspRevocationData;
+	private final List<OCSPRevocationData> ocspRevocationData;
 
-	private final List<byte[]> crlRevocationData;
+	private final List<CRLRevocationData> crlRevocationData;
 
 	/**
 	 * Main constructor.
 	 */
 	public RevocationData() {
 
-		this.ocspRevocationData = new LinkedList<byte[]>();
-		this.crlRevocationData = new LinkedList<byte[]>();
+		this.ocspRevocationData = new LinkedList<OCSPRevocationData>();
+		this.crlRevocationData = new LinkedList<CRLRevocationData>();
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class RevocationData {
 	 * 
 	 * @return a list of OCSP revocation data.
 	 */
-	public List<byte[]> getOcspRevocationData() {
+	public List<OCSPRevocationData> getOcspRevocationData() {
 
 		return this.ocspRevocationData;
 	}
@@ -56,7 +56,7 @@ public class RevocationData {
 	 * 
 	 * @return a list of CRL revocation data.
 	 */
-	public List<byte[]> getCrlRevocationData() {
+	public List<CRLRevocationData> getCrlRevocationData() {
 
 		return this.crlRevocationData;
 	}

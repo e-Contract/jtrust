@@ -126,7 +126,8 @@ public class PublicKeyTrustLinkerTest {
 		assertFalse(result.isValid());
 	}
 
-	@Test
+	//@Test
+	// XXX: there are production CAs that have no CA flag set.
 	public void testNoCaFlagFails() throws Exception {
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
