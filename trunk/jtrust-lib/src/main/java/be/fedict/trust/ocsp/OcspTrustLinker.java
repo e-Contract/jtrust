@@ -56,6 +56,7 @@ import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 
 import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.OCSPRevocationData;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
@@ -306,7 +307,7 @@ public class OcspTrustLinker implements TrustLinker {
 			if (null == singleResp.getCertStatus()) {
 				LOG.debug("OCSP OK for: "
 						+ childCertificate.getSubjectX500Principal());
-				addRevocationData(revocationData, ocspResp);
+				addRevocationData(revocationData, ocspResp, ocspUri);
 				return new TrustLinkerResult(true);
 			} else {
 				LOG.debug("OCSP certificate status: "
@@ -314,7 +315,7 @@ public class OcspTrustLinker implements TrustLinker {
 				if (singleResp.getCertStatus() instanceof RevokedStatus) {
 					LOG.debug("OCSP status revoked");
 				}
-				addRevocationData(revocationData, ocspResp);
+				addRevocationData(revocationData, ocspResp, ocspUri);
 				return new TrustLinkerResult(false,
 						TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
 						"certificate revoked by OCSP");
@@ -326,11 +327,12 @@ public class OcspTrustLinker implements TrustLinker {
 	}
 
 	private void addRevocationData(RevocationData revocationData,
-			OCSPResp ocspResp) {
+			OCSPResp ocspResp, URI uri) {
 		if (null != revocationData) {
 			try {
-				revocationData.getOcspRevocationData().add(
-						ocspResp.getEncoded());
+				OCSPRevocationData ocspRevocationData = new OCSPRevocationData(
+						ocspResp.getEncoded(), uri.toString());
+				revocationData.getOcspRevocationData().add(ocspRevocationData);
 			} catch (IOException e) {
 				LOG.error("IOException: " + e.getMessage(), e);
 				throw new RuntimeException("IOException : " + e.getMessage(), e);

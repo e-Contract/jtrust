@@ -51,6 +51,7 @@ import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extension;
 
 import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.CRLRevocationData;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
@@ -140,7 +141,9 @@ public class CrlTrustLinker implements TrustLinker {
 		// fill up revocation data if not null with this valid CRL
 		if (null != revocationData) {
 			try {
-				revocationData.getCrlRevocationData().add(x509crl.getEncoded());
+				CRLRevocationData crlRevocationData = new CRLRevocationData(
+						x509crl.getEncoded(), crlUri.toString());
+				revocationData.getCrlRevocationData().add(crlRevocationData);
 			} catch (CRLException e) {
 				LOG.error("CRLException: " + e.getMessage(), e);
 				throw new RuntimeException("CRLException : " + e.getMessage(),

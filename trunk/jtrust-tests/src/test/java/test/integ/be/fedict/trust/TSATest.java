@@ -75,7 +75,10 @@ public class TSATest {
 				"application/timestamp-query"));
 
 		// operate
+		long t0 = System.currentTimeMillis();
 		int statusCode = httpClient.executeMethod(postMethod);
+		long t1 = System.currentTimeMillis();
+		LOG.debug("dt TSP: " + (t1 - t0) + " ms");
 		if (statusCode != HttpStatus.SC_OK) {
 			LOG.error("Error contacting TSP server " + TSA_LOCATION);
 			throw new Exception("Error contacting TSP server " + TSA_LOCATION);
