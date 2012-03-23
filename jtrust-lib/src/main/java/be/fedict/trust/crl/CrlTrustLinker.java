@@ -85,7 +85,8 @@ public class CrlTrustLinker implements TrustLinker {
 
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
-			LOG.debug("no CRL uri in certificate");
+			LOG.debug("no CRL uri in certificate: "
+					+ childCertificate.getSubjectX500Principal());
 			return null;
 		}
 
