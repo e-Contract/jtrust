@@ -148,11 +148,12 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"certificate is CA and  MUST contain a Subject Key Identifier");
 		}
 
-		if (isChildCa && null == authorityKeyIdentifierData) {
-			LOG.debug("child certificate is CA and MUST contain an Authority Key Identifier");
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
-					"child certificate is CA and MUST contain an Authority Key Identifier");
+		if (isChildCa && null == authorityKeyIdentifierData
+				&& null != subjectKeyIdentifierData) {
+			LOG.error("child certificate is CA and MUST contain an Authority Key Identifier");
+			//return new TrustLinkerResult(false,
+			//		TrustLinkerResultReason.INVALID_TRUST,
+			//		"child certificate is CA and MUST contain an Authority Key Identifier");
 		}
 
 		if (null != subjectKeyIdentifierData
