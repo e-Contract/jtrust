@@ -18,10 +18,6 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -36,6 +32,8 @@ import be.fedict.trust.DefaultAlgorithmPolicy;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinkerResult;
+
+import static org.junit.Assert.*;
 
 public class PublicKeyTrustLinkerTest {
 
@@ -250,8 +248,7 @@ public class PublicKeyTrustLinkerTest {
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNotNull(result);
-		assertFalse(result.isValid());
+		assertNull(result);
 	}
 
 	@Test
