@@ -18,29 +18,21 @@
 
 package test.integ.be.fedict.trust;
 
-import java.net.URI;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Test;
-
-import be.fedict.eid.applet.Messages;
-import be.fedict.eid.applet.sc.PcscEid;
-import be.fedict.trust.BelgianTrustValidatorFactory;
-import be.fedict.trust.CertificateRepository;
-import be.fedict.trust.NetworkConfig;
-import be.fedict.trust.PublicKeyTrustLinker;
-import be.fedict.trust.TrustValidator;
+import be.fedict.commons.eid.jca.BeIDProvider;
+import be.fedict.trust.*;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Test;
+
+import java.security.KeyStore;
+import java.security.Security;
+import java.security.cert.Certificate;
 
 public class BelgianIdentityCardTrustValidatorTest {
 
@@ -49,15 +41,10 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 	@Test
 	public void testValidity() throws Exception {
-		PcscEid pcscEid = new PcscEid(new TestView(), new Messages(
-				Locale.getDefault()));
-		if (false == pcscEid.isEidPresent()) {
-			LOG.debug("insert eID card");
-			pcscEid.waitForEidPresent();
-		}
-
-		List<X509Certificate> certChain = pcscEid.getAuthnCertificateChain();
-		LOG.debug("cert serial nr: " + certChain.get(0).getSerialNumber());
+        Security.addProvider(new BeIDProvider());
+        KeyStore keyStore = KeyStore.getInstance("BeID");
+        keyStore.load(null);
+        Certificate[] authnCertificateChain = keyStore.getCertificateChain("Authentication");
 
 		Security.addProvider(new BouncyCastleProvider());
 
@@ -86,22 +73,7 @@ public class BelgianIdentityCardTrustValidatorTest {
 		trustValidator.addTrustLinker(new OcspTrustLinker(ocspRepository));
 		trustValidator.addTrustLinker(new CrlTrustLinker(cachedCrlRepository));
 
-		trustValidator.isTrusted(certChain);
-
-		int count = 0;
-		final int COUNT = 100;
-		long t0 = System.currentTimeMillis();
-		while (count < COUNT) {
-			ocspRepository.findOcspResponse(new URI("http://64.18.17.111"),
-					certChain.get(0), certChain.get(1));
-			count++;
-			LOG.debug("count: " + count);
-		}
-		long t1 = System.currentTimeMillis();
-		long total_dt = t1 - t0;
-		LOG.debug("total dt: " + total_dt);
-		LOG.debug("avg dt: " + (double) total_dt / COUNT);
-		LOG.debug("avg # req / sec: " + (double) COUNT * 1000 / total_dt);
+		trustValidator.isTrusted(authnCertificateChain);
 	}
 
 }

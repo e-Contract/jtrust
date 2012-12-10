@@ -23,10 +23,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -134,6 +131,22 @@ public class TrustValidator {
 			throws CertPathValidatorException {
 		isTrusted(certificatePath, new Date());
 	}
+
+    /**
+     * Validates whether the given certificate path is valid according to the configured trust linkers.
+     * Convenience method when loading a certificate chain directly from a JCA key store implementation.
+     *
+     * @param certificates
+     * @throws CertPathValidatorException
+     */
+    public void isTrusted(Certificate[] certificates) throws CertPathValidatorException {
+        List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+        for (Certificate certificate : certificates) {
+            X509Certificate x509Certificate = (X509Certificate) certificate;
+            certificateChain.add(x509Certificate);
+        }
+        isTrusted(certificateChain);
+    }
 
 	/**
 	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The

@@ -62,8 +62,8 @@ public class SSLTrustValidatorTest {
 				8080);
 		// URL url = new URL("https://eid.belgium.be/"); // OK
 		// URL url = new URL("https://www.fortisbanking.be"); // OK
-		//URL url = new URL("https://www.e-contract.be/"); // OK
-		//URL url = new URL("https://idp.services.belgium.be"); // OK
+		// URL url = new URL("https://www.e-contract.be/"); // OK
+		// URL url = new URL("https://idp.services.belgium.be"); // OK
 		URL url = new URL("https://idp.int.belgium.be"); // OK
 
 		// URL url = new URL("https://www.facebook.com");
@@ -78,15 +78,15 @@ public class SSLTrustValidatorTest {
 		for (Certificate certificate : serverCertificates) {
 			X509Certificate x509Cert = (X509Certificate) certificate;
 			certificateChain.add(x509Cert);
-			LOG.debug("certificate: " + x509Cert);
+			LOG.debug("certificate subject: "
+					+ x509Cert.getSubjectX500Principal());
+			LOG.debug("certificate issuer: "
+					+ x509Cert.getIssuerX500Principal());
 		}
 
-		if (true) {
-			return;
-		}
-		
 		CertificatePathBuilder certificatePathBuilder = new CertificatePathBuilder();
-		certificateChain = certificatePathBuilder.buildPath(certificateChain);
+		// certificateChain =
+		// certificatePathBuilder.buildPath(certificateChain);
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		certificateRepository.addTrustPoint(certificateChain

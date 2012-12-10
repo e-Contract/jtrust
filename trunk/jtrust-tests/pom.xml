@@ -46,8 +46,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>be.fedict.eid-applet</groupId>
-			<artifactId>eid-applet-core</artifactId>
+			<groupId>be.fedict.commons-eid</groupId>
+			<artifactId>commons-eid-jca</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
