@@ -220,7 +220,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-		assertNull(result);
+		assertNotNull(result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
