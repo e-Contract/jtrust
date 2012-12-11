@@ -18,19 +18,16 @@
 
 package be.fedict.trust;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.security.SignatureException;
-import java.security.cert.*;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
  * Trust Validator.
@@ -148,99 +145,6 @@ public class TrustValidator {
         isTrusted(certificateChain);
     }
 
-	/**
-	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The
-	 * supplied certificate path will also be validated and used to validate the
-	 * attribute certificates.
-	 * 
-	 * @see #isTrusted(List, List, Date)
-	 */
-	public void isTrusted(List<byte[]> encodedAttributeCertificates,
-			List<X509Certificate> certificatePath)
-			throws CertPathValidatorException {
-
-		isTrusted(encodedAttributeCertificates, certificatePath, new Date());
-	}
-
-	/**
-	 * Validate the specified encoded {@link X509V2AttributeCertificate}'s. The
-	 * supplied certificate path will also be validated and used to validate the
-	 * attribute certificates.
-	 * 
-	 * @param encodedAttributeCertificates
-	 *            the encoded X509V2 attribute certificate.
-	 * 
-	 * @param certificatePath
-	 *            the certificate path.
-	 * @param validationDate
-	 *            the validation date.
-	 * @throws CertPathValidatorException
-	 */
-	public void isTrusted(List<byte[]> encodedAttributeCertificates,
-			List<X509Certificate> certificatePath, Date validationDate)
-			throws CertPathValidatorException {
-
-		try {
-
-			/*
-			 * Validate the supplied certificate path
-			 */
-			isTrusted(certificatePath, validationDate);
-
-			/*
-			 * Validate the attribute certificates
-			 */
-			for (byte[] encodedAttributeCertificate : encodedAttributeCertificates) {
-				X509V2AttributeCertificate attributeCertificate = new X509V2AttributeCertificate(
-						encodedAttributeCertificate);
-
-				// check validity
-				attributeCertificate.checkValidity();
-
-				if (certificatePath.size() < 2) {
-					this.result = new TrustLinkerResult(false,
-							TrustLinkerResultReason.INVALID_TRUST,
-							"Certificate path should at least contain 2 certificates");
-					throw new CertPathValidatorException(
-							this.result.getMessage());
-				}
-
-				// validate the signature on the attribute certificate against
-				// the attribute certificate's holder
-				X509Certificate issuerCertificate = certificatePath.get(1);
-				attributeCertificate.verify(issuerCertificate.getPublicKey(),
-						"BC");
-			}
-		} catch (CertificateExpiredException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
-					"CertificateExpiredException: " + e.getMessage());
-		} catch (InvalidKeyException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"InvalidKeyException: " + e.getMessage());
-		} catch (CertificateException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"CertificateException: " + e.getMessage());
-		} catch (NoSuchAlgorithmException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"NoSuchAlgorithmException: " + e.getMessage());
-		} catch (NoSuchProviderException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"NoSuchProviderException: " + e.getMessage());
-		} catch (SignatureException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"SignatureException: " + e.getMessage());
-		} catch (IOException e) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE, "IOException: "
-							+ e.getMessage());
-		}
-	}
 
 	/**
 	 * Returns the {@link RevocationData} returned by the configured

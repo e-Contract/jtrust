@@ -18,33 +18,10 @@
 
 package test.unit.be.fedict.trust;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -52,25 +29,25 @@ import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.cert.ocsp.jcajce.JcaBasicOCSPRespBuilder;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.tsp.TSPAlgorithms;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenGenerator;
-import org.bouncycastle.x509.AttributeCertificateHolder;
-import org.bouncycastle.x509.AttributeCertificateIssuer;
-import org.bouncycastle.x509.X509Attribute;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
-import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
+import org.bouncycastle.tsp.*;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.joda.time.DateTime;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.*;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TrustTestUtils {
 
@@ -732,32 +709,5 @@ public class TrustTestUtils {
 				privateKey, certificateChain.get(0), TSPAlgorithms.SHA1, "1.2");
 		tstGen.setCertificatesAndCRLs(certStore);
 		return tstGen.generate(request, BigInteger.ONE, new Date(), "BC");
-	}
-
-	public static X509V2AttributeCertificate createAttributeCertificate(
-			X509Certificate holderCertificate,
-			X509Certificate issuerCertificate, PrivateKey issuerPrivateKey,
-			Date notBefore, Date notAfter) throws Exception {
-
-		X509V2AttributeCertificateGenerator acGen = new X509V2AttributeCertificateGenerator();
-		acGen.reset();
-		acGen.setHolder(new AttributeCertificateHolder(holderCertificate));
-		acGen.setIssuer(new AttributeCertificateIssuer(issuerCertificate
-				.getSubjectX500Principal()));
-		acGen.setSerialNumber(new BigInteger("1"));
-		acGen.setNotBefore(notBefore);
-		acGen.setNotAfter(notAfter);
-		acGen.setSignatureAlgorithm("SHA512WithRSAEncryption");
-		GeneralName roleName = new GeneralName(GeneralName.rfc822Name,
-				"RoleName");
-		ASN1EncodableVector roleSyntax = new ASN1EncodableVector();
-		roleSyntax.add(roleName);
-		X509Attribute attributes = new X509Attribute("2.5.24.72",
-				new DERSequence(roleSyntax));
-		acGen.addAttribute(attributes);
-
-		return (X509V2AttributeCertificate) acGen.generate(issuerPrivateKey,
-				"BC");
-
 	}
 }
