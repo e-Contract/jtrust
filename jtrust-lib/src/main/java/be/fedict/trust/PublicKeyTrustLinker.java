@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
@@ -136,9 +136,9 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		boolean isChildCa = isCa(childCertificate);
 
 		byte[] subjectKeyIdentifierData = certificate
-				.getExtensionValue(X509Extensions.SubjectKeyIdentifier.getId());
+				.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
 		byte[] authorityKeyIdentifierData = childCertificate
-				.getExtensionValue(X509Extensions.AuthorityKeyIdentifier
+				.getExtensionValue(X509Extension.authorityKeyIdentifier
 						.getId());
 
 		if (isCa && null == subjectKeyIdentifierData) {
@@ -206,7 +206,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 	private boolean isCa(X509Certificate certificate) {
 
 		byte[] basicConstraintsValue = certificate
-				.getExtensionValue(X509Extensions.BasicConstraints.getId());
+				.getExtensionValue(X509Extension.basicConstraints.getId());
 		if (null == basicConstraintsValue) {
 			return false;
 		}
@@ -224,7 +224,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			return false;
 		}
 		ASN1Sequence basicConstraintsSequence = (ASN1Sequence) basicConstraintsDecoded;
-		BasicConstraints basicConstraints = new BasicConstraints(
+		BasicConstraints basicConstraints = BasicConstraints.getInstance(
 				basicConstraintsSequence);
 		return basicConstraints.isCA();
 	}

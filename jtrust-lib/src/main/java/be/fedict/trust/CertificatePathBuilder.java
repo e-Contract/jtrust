@@ -39,8 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 
@@ -153,54 +153,33 @@ public class CertificatePathBuilder {
 	}
 
 	private String getSubjectKeyIdentifier(X509Certificate certificate) {
-		byte[] subjectKeyIdentifierData = certificate
-				.getExtensionValue(X509Extensions.SubjectKeyIdentifier.getId());
-		if (null == subjectKeyIdentifierData) {
-			/*
-			 * So we have to calculate it ourselves.
-			 */
-			MessageDigest messageDigest;
-			try {
-				messageDigest = MessageDigest.getInstance("SHA1");
-			} catch (NoSuchAlgorithmException e) {
-				throw new RuntimeException("SHA1 error: " + e.getMessage());
-			}
-			String skidId = new String(Hex.encodeHex(messageDigest
-					.digest(certificate.getPublicKey().getEncoded())));
-			return skidId;
-		}
-		SubjectKeyIdentifierStructure subjectKeyIdentifierStructure;
-		try {
-			subjectKeyIdentifierStructure = new SubjectKeyIdentifierStructure(
-					subjectKeyIdentifierData);
-		} catch (IOException e) {
-			throw new RuntimeException("SKI error: " + e.getMessage());
-		}
-		String skidId = new String(Hex.encodeHex(subjectKeyIdentifierStructure
-				.getKeyIdentifier()));
+        JcaX509ExtensionUtils utils;
+        try {
+            utils = new JcaX509ExtensionUtils();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        SubjectKeyIdentifier subjectKeyIdentifier = utils.createSubjectKeyIdentifier(certificate.getPublicKey());
+		String skidId = new String(Hex.encodeHex(subjectKeyIdentifier.getKeyIdentifier()));
 		return skidId;
 	}
 
 	private String getAuthorityKeyIdentifier(X509Certificate certificate) {
 		byte[] authorityKeyIdentifierData = certificate
-				.getExtensionValue(X509Extensions.AuthorityKeyIdentifier
+				.getExtensionValue(X509Extension.authorityKeyIdentifier
 						.getId());
 		if (null == authorityKeyIdentifierData) {
 			return null;
 		}
-		AuthorityKeyIdentifierStructure authorityKeyIdentifierStructure;
-		try {
-			authorityKeyIdentifierStructure = new AuthorityKeyIdentifierStructure(
-					authorityKeyIdentifierData);
-		} catch (IOException e) {
-			throw new RuntimeException("error parsing AKI: " + e.getMessage());
-		}
-		if (null == authorityKeyIdentifierStructure.getKeyIdentifier()) {
-			return null;
-		}
+        JcaX509ExtensionUtils utils;
+        try {
+            utils = new JcaX509ExtensionUtils();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(authorityKeyIdentifierData);
 		String akidId = new String(
-				Hex.encodeHex(authorityKeyIdentifierStructure
-						.getKeyIdentifier()));
+				Hex.encodeHex(authorityKeyIdentifier.getKeyIdentifier()));
 		return akidId;
 	}
 

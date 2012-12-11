@@ -21,7 +21,7 @@ package be.fedict.trust.ocsp;
 import java.net.URI;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.OCSPResp;
 
 /**
  * Interface for OCSP repository components.

@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.ocsp.OCSPResp;
 
 import be.fedict.trust.NetworkConfig;
 
@@ -58,8 +57,8 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 	}
 
 	@Override
-	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate) {
+	public org.bouncycastle.cert.ocsp.OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
+                                                                X509Certificate issuerCertificate) {
 		URI overrideOcspUri = this.overrideURIs.get(ocspUri);
 		if (null != overrideOcspUri) {
 			LOG.debug("Overriding OCSP URI: " + ocspUri + " with "

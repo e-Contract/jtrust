@@ -42,44 +42,21 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLNumber;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.CertificatePolicies;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.*;
+import org.bouncycastle.cert.ocsp.jcajce.JcaBasicOCSPRespBuilder;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.BasicOCSPRespGenerator;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.CertificateStatus;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.OCSPRespGenerator;
-import org.bouncycastle.ocsp.Req;
-import org.bouncycastle.ocsp.RevokedStatus;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
@@ -319,7 +296,7 @@ public class TrustTestUtils {
 			GeneralName gn = new GeneralName(
 					GeneralName.uniformResourceIdentifier, new DERIA5String(
 							crlUri));
-			GeneralNames gns = new GeneralNames(new DERSequence(gn));
+			GeneralNames gns = new GeneralNames(gn);
 			DistributionPointName dpn = new DistributionPointName(0, gns);
 			DistributionPoint distp = new DistributionPoint(dpn, null, null);
 			certificateGenerator.addExtension(
@@ -343,10 +320,11 @@ public class TrustTestUtils {
 		}
 
 		if (null != certificatePolicy) {
+            ASN1ObjectIdentifier policyObjectIdentifier = new ASN1ObjectIdentifier(certificatePolicy);
+            PolicyInformation policyInformation = new PolicyInformation(policyObjectIdentifier);
 			certificateGenerator.addExtension(
-					X509Extensions.CertificatePolicies, true,
-					new CertificatePolicies(certificatePolicy) {
-					});
+                    X509Extension.certificatePolicies, true,
+					new CertificatePolicies(policyInformation));
 		}
 
 		if (null != qcCompliance) {
@@ -622,9 +600,7 @@ public class TrustTestUtils {
 	public static DistributionPoint getDistributionPoint(String uri) {
 		GeneralName gn = new GeneralName(GeneralName.uniformResourceIdentifier,
 				new DERIA5String(uri));
-		ASN1EncodableVector vec = new ASN1EncodableVector();
-		vec.add(gn);
-		GeneralNames gns = new GeneralNames(new DERSequence(vec));
+		GeneralNames gns = new GeneralNames(gn);
 		DistributionPointName dpn = new DistributionPointName(0, gns);
 		return new DistributionPoint(dpn, null, null);
 	}
@@ -644,14 +620,14 @@ public class TrustTestUtils {
 			PrivateKey ocspResponderPrivateKey, String signatureAlgorithm)
 			throws Exception {
 		// request
-		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
-		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
-				issuerCertificate, certificate.getSerialNumber());
-		ocspReqGenerator.addRequest(certId);
-		OCSPReq ocspReq = ocspReqGenerator.generate();
-
-		BasicOCSPRespGenerator basicOCSPRespGenerator = new BasicOCSPRespGenerator(
-				ocspResponderCertificate.getPublicKey());
+        OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
+        DigestCalculatorProvider
+                digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+        CertificateID certId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
+                new JcaX509CertificateHolder(issuerCertificate), certificate.getSerialNumber());
+        ocspReqBuilder.addRequest(certId);
+		OCSPReq ocspReq = ocspReqBuilder.build();
+        BasicOCSPRespBuilder basicOCSPRespBuilder = new JcaBasicOCSPRespBuilder(ocspResponderCertificate.getPublicKey(), digCalcProv.get(CertificateID.HASH_SHA1));
 
 		// request processing
 		Req[] requestList = ocspReq.getRequestList();
@@ -664,25 +640,24 @@ public class TrustTestUtils {
 			} else {
 				certificateStatus = CertificateStatus.GOOD;
 			}
-			basicOCSPRespGenerator
+            basicOCSPRespBuilder
 					.addResponse(certificateID, certificateStatus);
 		}
 
 		// basic response generation
-		X509Certificate[] chain = null;
+        X509CertificateHolder[] chain = null;
 		if (!ocspResponderCertificate.equals(issuerCertificate)) {
-			chain = new X509Certificate[] { ocspResponderCertificate,
-					issuerCertificate };
+			chain = new X509CertificateHolder[] { new X509CertificateHolder(ocspResponderCertificate.getEncoded()),
+					new X509CertificateHolder(issuerCertificate.getEncoded()) };
 		}
 
-		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
-				signatureAlgorithm, ocspResponderPrivateKey, chain, new Date(),
-				BouncyCastleProvider.PROVIDER_NAME);
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(ocspResponderPrivateKey);
+		BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, new Date());
 
 		// response generation
-		OCSPRespGenerator ocspRespGenerator = new OCSPRespGenerator();
-		OCSPResp ocspResp = ocspRespGenerator.generate(
-				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
+        OCSPRespBuilder ocspRespBuilder = new OCSPRespBuilder();
+		OCSPResp ocspResp = ocspRespBuilder.build(
+                OCSPRespBuilder.SUCCESSFUL, basicOCSPResp);
 
 		return ocspResp;
 	}
@@ -694,14 +669,14 @@ public class TrustTestUtils {
 			List<X509Certificate> ocspResponderCertificateChain)
 			throws Exception {
 		// request
-		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
-		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1,
-				issuerCertificate, certificate.getSerialNumber());
-		ocspReqGenerator.addRequest(certId);
-		OCSPReq ocspReq = ocspReqGenerator.generate();
-
-		BasicOCSPRespGenerator basicOCSPRespGenerator = new BasicOCSPRespGenerator(
-				ocspResponderCertificate.getPublicKey());
+        OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
+        DigestCalculatorProvider
+                digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+        CertificateID certId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
+                new JcaX509CertificateHolder(issuerCertificate), certificate.getSerialNumber());
+        ocspReqBuilder.addRequest(certId);
+        OCSPReq ocspReq = ocspReqBuilder.build();
+        BasicOCSPRespBuilder basicOCSPRespBuilder = new JcaBasicOCSPRespBuilder(ocspResponderCertificate.getPublicKey(), digCalcProv.get(CertificateID.HASH_SHA1));
 
 		// request processing
 		Req[] requestList = ocspReq.getRequestList();
@@ -714,28 +689,28 @@ public class TrustTestUtils {
 			} else {
 				certificateStatus = CertificateStatus.GOOD;
 			}
-			basicOCSPRespGenerator
+            basicOCSPRespBuilder
 					.addResponse(certificateID, certificateStatus);
 		}
 
 		// basic response generation
-		X509Certificate[] chain;
+        X509CertificateHolder[] chain;
 		if (ocspResponderCertificateChain.isEmpty()) {
 			chain = null;
 		} else {
-			chain = ocspResponderCertificateChain
-					.toArray(new X509Certificate[ocspResponderCertificateChain
-							.size()]);
-		}
+            chain = new X509CertificateHolder[ocspResponderCertificateChain.size()];
+            for (int idx = 0; idx < chain.length; idx++) {
+                chain[idx] = new X509CertificateHolder(ocspResponderCertificateChain.get(idx).getEncoded());
+            }
+        }
 
-		BasicOCSPResp basicOCSPResp = basicOCSPRespGenerator.generate(
-				signatureAlgorithm, ocspResponderPrivateKey, chain, new Date(),
-				BouncyCastleProvider.PROVIDER_NAME);
+        ContentSigner contentSigner = new JcaContentSignerBuilder("SHA1withRSA").build(ocspResponderPrivateKey);
+        BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, new Date());
 
-		// response generation
-		OCSPRespGenerator ocspRespGenerator = new OCSPRespGenerator();
-		OCSPResp ocspResp = ocspRespGenerator.generate(
-				OCSPRespGenerator.SUCCESSFUL, basicOCSPResp);
+        // response generation
+        OCSPRespBuilder ocspRespBuilder = new OCSPRespBuilder();
+        OCSPResp ocspResp = ocspRespBuilder.build(
+                OCSPRespBuilder.SUCCESSFUL, basicOCSPResp);
 
 		return ocspResp;
 	}
