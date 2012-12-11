@@ -30,8 +30,6 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,13 +89,12 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 
 		return processCrl(crlUri, childCertificate, certificate,
-				validationDate, revocationData, null, algorithmPolicy);
+				validationDate, revocationData, algorithmPolicy);
 	}
 
 	private TrustLinkerResult processCrl(URI crlUri,
 			X509Certificate childCertificate, X509Certificate certificate,
-			Date validationDate, RevocationData revocationData,
-			BigInteger baseCrlNumber, AlgorithmPolicy algorithmPolicy) {
+			Date validationDate, RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
 
 		LOG.debug("CRL URI: " + crlUri);
 		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
@@ -129,15 +126,6 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 
 		LOG.debug("CRL number: " + getCrlNumber(x509crl));
-		// check delta CRL indicator against completeCrlNuber
-		if (null != baseCrlNumber) {
-			BigInteger crlNumber = getDeltaCrlIndicator(x509crl);
-			if (!baseCrlNumber.equals(crlNumber)) {
-				LOG.error("Delta CRL indicator (" + crlNumber
-						+ ") not equals base CRL number(" + baseCrlNumber + ")");
-				return null;
-			}
-		}
 
 		// fill up revocation data if not null with this valid CRL
 		if (null != revocationData) {
@@ -166,30 +154,9 @@ public class CrlTrustLinker implements TrustLinker {
 			revoked = false;
 		}
 
-		if (null != x509crl.getExtensionValue(X509Extension.deltaCRLIndicator
-				.getId())) {
-			// Delta CRL
-			if (!revoked)
-				return null;
-
-		} else {
-			// Base CRL, look for delta's
-			List<URI> deltaCrlUris = getDeltaCrlUris(x509crl);
-			if (null != deltaCrlUris) {
-				for (URI deltaCrlUri : deltaCrlUris) {
-					LOG.debug("delta CRL: " + deltaCrlUri.toString());
-					TrustLinkerResult result = processCrl(deltaCrlUri,
-							childCertificate, certificate, validationDate,
-							revocationData, getCrlNumber(x509crl),
-							algorithmPolicy);
-					if (null != result)
-						return result;
-				}
-			}
-		}
-
-		if (!revoked)
+		if (!revoked) {
 			return new TrustLinkerResult(true);
+        }
 
 		LOG.debug("certificate revoked/suspended at: "
 				+ crlEntry.getRevocationDate());
@@ -341,75 +308,6 @@ public class CrlTrustLinker implements TrustLinker {
 			}
 		}
 		return null;
-	}
-
-	private List<URI> getDeltaCrlUris(X509CRL x509crl) {
-
-		byte[] freshestCrlValue = x509crl
-				.getExtensionValue(X509Extension.freshestCRL.getId());
-		if (null == freshestCrlValue) {
-			LOG.debug("no freshestCRL extension");
-			return null;
-		}
-		ASN1Sequence seq;
-		try {
-			DEROctetString oct;
-			oct = (DEROctetString) (new ASN1InputStream(
-					new ByteArrayInputStream(freshestCrlValue)).readObject());
-			seq = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
-					.readObject();
-		} catch (IOException e) {
-			throw new RuntimeException("IO error: " + e.getMessage(), e);
-		}
-
-		List<URI> deltaCrlUris = new LinkedList<URI>();
-		CRLDistPoint distPoint = CRLDistPoint.getInstance(seq);
-		DistributionPoint[] distributionPoints = distPoint
-				.getDistributionPoints();
-		for (DistributionPoint distributionPoint : distributionPoints) {
-			DistributionPointName distributionPointName = distributionPoint
-					.getDistributionPoint();
-			if (DistributionPointName.FULL_NAME != distributionPointName
-					.getType()) {
-				continue;
-			}
-			GeneralNames generalNames = (GeneralNames) distributionPointName
-					.getName();
-			GeneralName[] names = generalNames.getNames();
-			for (GeneralName name : names) {
-				if (name.getTagNo() != GeneralName.uniformResourceIdentifier) {
-					LOG.debug("not a uniform resource identifier");
-					continue;
-				}
-				DERIA5String derStr = DERIA5String.getInstance(name.getName());
-				String str = derStr.getString();
-				URI uri = toURI(str);
-				deltaCrlUris.add(uri);
-			}
-		}
-		return deltaCrlUris;
-	}
-
-	private BigInteger getDeltaCrlIndicator(X509CRL deltaCrl) {
-
-		byte[] deltaCrlIndicatorValue = deltaCrl
-				.getExtensionValue(X509Extension.deltaCRLIndicator.getId());
-		if (null == deltaCrlIndicatorValue)
-			return null;
-
-		try {
-			DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
-					new ByteArrayInputStream(deltaCrlIndicatorValue))
-					.readObject());
-			byte[] octets = octetString.getOctets();
-			DERInteger integer = (DERInteger) new ASN1InputStream(octets)
-					.readObject();
-			BigInteger crlNumber = integer.getPositiveValue();
-			return crlNumber;
-		} catch (IOException e) {
-			throw new RuntimeException("IO error: " + e.getMessage(), e);
-		}
-
 	}
 
 	private BigInteger getCrlNumber(X509CRL crl) {
