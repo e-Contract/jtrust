@@ -18,13 +18,7 @@
 
 package be.fedict.trust.constraints;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-
+import be.fedict.trust.CertificateConstraint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -32,9 +26,14 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 
-import be.fedict.trust.CertificateConstraint;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Certificate Policies certificate constraint implementation.
@@ -68,7 +67,7 @@ public class CertificatePoliciesCertificateConstraint implements
 
 	public boolean check(X509Certificate certificate) {
 		byte[] extensionValue = certificate
-				.getExtensionValue(X509Extensions.CertificatePolicies.getId());
+				.getExtensionValue(X509Extension.certificatePolicies.getId());
 		if (null == extensionValue) {
 			return false;
 		}

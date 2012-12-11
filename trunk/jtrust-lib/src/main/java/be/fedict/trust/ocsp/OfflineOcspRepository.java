@@ -20,7 +20,12 @@ package be.fedict.trust.ocsp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.ocsp.*;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.*;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -66,13 +71,27 @@ public class OfflineOcspRepository implements OcspRepository {
 
 		LOG.debug("find OCSP response");
 
+        DigestCalculatorProvider digCalcProv;
+        try {
+            digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+        } catch (OperatorCreationException e) {
+            throw new RuntimeException(e);
+        }
+
 		try {
 			for (OCSPResp ocspResp : this.ocspResponses) {
 
-				CertificateID certId = new CertificateID(
-						CertificateID.HASH_SHA1, issuerCertificate,
-						certificate.getSerialNumber());
-				BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
+                CertificateID certId =
+
+                        null;
+                try {
+                    certId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
+                            new JcaX509CertificateHolder(issuerCertificate), certificate.getSerialNumber());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
 						.getResponseObject();
 				for (SingleResp singleResp : basicOCSPResp.getResponses()) {
 					if (singleResp.getCertID().equals(certId)) {

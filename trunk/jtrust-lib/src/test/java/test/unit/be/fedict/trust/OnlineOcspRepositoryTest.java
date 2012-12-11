@@ -20,6 +20,7 @@ package test.unit.be.fedict.trust;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,8 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.OCSPResp;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -156,12 +157,15 @@ public class OnlineOcspRepositoryTest {
 		OcspResponderTestServlet.setContentType("application/ocsp-response");
 		OcspResponderTestServlet.setOcspData("foobar".getBytes());
 
-		// operate
-		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
+		// operate & verify
+        try {
+		    OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
 				this.certificate, this.rootCertificate);
-
-		// verify
-		assertNull(ocspResp);
+            fail();
+        }
+        catch(Exception e) {
+            // expected
+        }
 	}
 
 	@Test

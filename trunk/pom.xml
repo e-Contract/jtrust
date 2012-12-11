@@ -146,16 +146,16 @@
 				<artifactId>commons-io</artifactId>
 				<version>1.4</version>
 			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk16</artifactId>
-				<version>${bouncycastle.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bctsp-jdk16</artifactId>
-				<version>${bouncycastle.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging-api</artifactId>
@@ -248,6 +248,6 @@
 		</mailingList>
 	</mailingLists>
 	<properties>
-		<bouncycastle.version>1.46</bouncycastle.version>
+		<bouncycastle.version>1.47</bouncycastle.version>
 	</properties>
 </project>

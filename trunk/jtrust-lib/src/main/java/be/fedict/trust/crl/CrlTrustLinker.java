@@ -206,9 +206,9 @@ public class CrlTrustLinker implements TrustLinker {
 							new ByteArrayInputStream(reasonCodeExtension))
 							.readObject());
 					byte[] octets = octetString.getOctets();
-					CRLReason crlReason = new CRLReason(
-							DEREnumerated.getInstance(new ASN1InputStream(
-									octets).readObject()));
+					CRLReason crlReason = CRLReason.getInstance(
+                            DEREnumerated.getInstance(new ASN1InputStream(
+                                    octets).readObject()));
 					BigInteger crlReasonValue = crlReason.getValue();
 					LOG.debug("CRL reason value: " + crlReasonValue);
 					switch (crlReasonValue.intValue()) {

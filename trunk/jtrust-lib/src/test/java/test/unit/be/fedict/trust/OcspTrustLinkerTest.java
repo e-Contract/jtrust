@@ -31,8 +31,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
+import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.OCSPResp;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;

@@ -19,8 +19,8 @@
 package test.unit.be.fedict.trust;
 
 import be.fedict.trust.ocsp.OfflineOcspRepository;
+import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.OCSPResp;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;

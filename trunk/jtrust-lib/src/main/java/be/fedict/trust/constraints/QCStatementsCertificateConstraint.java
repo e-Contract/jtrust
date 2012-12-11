@@ -29,7 +29,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 
 import be.fedict.trust.CertificateConstraint;
@@ -54,7 +54,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 	public boolean check(X509Certificate certificate) {
 		byte[] extensionValue = certificate
-				.getExtensionValue(X509Extensions.QCStatements.getId());
+				.getExtensionValue(X509Extension.qCStatements.getId());
 		if (null == extensionValue) {
 			return false;
 		}
