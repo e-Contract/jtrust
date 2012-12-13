@@ -18,18 +18,19 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
+
+import static org.junit.Assert.*;
 
 public class DistinguishedNameCertificateConstraintTest {
 
@@ -54,7 +55,12 @@ public class DistinguishedNameCertificateConstraintTest {
 						notAfter);
 
 		// operate
-		assertFalse(this.testedInstance.check(certificate));
+        try {
+            this.testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 
 	@Test
@@ -68,6 +74,6 @@ public class DistinguishedNameCertificateConstraintTest {
 						notAfter);
 
 		// operate
-		assertTrue(this.testedInstance.check(certificate));
+		this.testedInstance.check(certificate);
 	}
 }

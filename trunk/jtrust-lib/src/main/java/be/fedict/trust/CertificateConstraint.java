@@ -33,8 +33,6 @@ public interface CertificateConstraint {
 	 * 
 	 * @param certificate
 	 *            the X509 certificate.
-	 * @return <code>true</code> if the certificate is OK according to this
-	 *         constraint, otherwise <code>false</code>.
 	 */
-	boolean check(X509Certificate certificate);
+	void check(X509Certificate certificate) throws TrustLinkerResultException, Exception;
 }

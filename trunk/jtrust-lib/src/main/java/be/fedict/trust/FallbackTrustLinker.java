@@ -58,7 +58,7 @@ public class FallbackTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			LOG.debug("trying trust linker: "
 					+ trustLinker.getClass().getSimpleName());
@@ -68,8 +68,11 @@ public class FallbackTrustLinker implements TrustLinker {
 			if (null == result) {
 				continue;
 			}
+            if (TrustLinkerResult.UNDECIDED == result) {
+                continue;
+            }
 			return result;
 		}
-		return null;
+		return TrustLinkerResult.UNDECIDED;
 	}
 }

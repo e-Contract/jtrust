@@ -22,6 +22,8 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,10 +47,13 @@ public class DistinguishedNameCertificateConstraint implements
 		this.acceptedSubject = new X500Principal(acceptedSubjectName);
 	}
 
-	public boolean check(X509Certificate certificate) {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException {
 		X500Principal certificateSubject = certificate
 				.getSubjectX500Principal();
 		LOG.debug("accepted subject: " + this.acceptedSubject);
-		return this.acceptedSubject.equals(certificateSubject);
+		if (this.acceptedSubject.equals(certificateSubject)) {
+            return;
+        }
+        throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "DN mismatch");
 	}
 }

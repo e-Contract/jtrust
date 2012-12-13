@@ -40,5 +40,4 @@ public class NetworkConfigTest {
 		assertEquals(proxyHost, networkConfig.getProxyHost());
 		assertEquals(proxyPort, networkConfig.getProxyPort());
 	}
-
 }

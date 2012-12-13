@@ -19,6 +19,8 @@
 package be.fedict.trust.constraints;
 
 import be.fedict.trust.CertificateConstraint;
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -65,21 +67,16 @@ public class CertificatePoliciesCertificateConstraint implements
 		this.certificatePolicies.add(certificatePolicy);
 	}
 
-	public boolean check(X509Certificate certificate) {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
 				.getExtensionValue(X509Extension.certificatePolicies.getId());
 		if (null == extensionValue) {
-			return false;
-		}
-		ASN1Sequence certPolicies;
-		try {
-			DEROctetString oct = (DEROctetString) (new ASN1InputStream(
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing certificate policies X509 extension");
+        }
+		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
 					new ByteArrayInputStream(extensionValue)).readObject());
-			certPolicies = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
+        ASN1Sequence certPolicies = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
 					.readObject();
-		} catch (IOException e) {
-			throw new RuntimeException("IO error: " + e.getMessage(), e);
-		}
 		Enumeration<?> certPoliciesEnum = certPolicies.getObjects();
 		while (certPoliciesEnum.hasMoreElements()) {
 			PolicyInformation policyInfo = PolicyInformation
@@ -89,9 +86,9 @@ public class CertificatePoliciesCertificateConstraint implements
 			LOG.debug("present policy OID: " + policyId);
 			if (this.certificatePolicies.contains(policyId)) {
 				LOG.debug("matching certificate policy OID: " + policyId);
-				return true;
+				return;
 			}
 		}
-		return false;
+        throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "required policy OID not present");
 	}
 }

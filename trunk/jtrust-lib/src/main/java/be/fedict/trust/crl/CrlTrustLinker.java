@@ -31,6 +31,7 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -47,13 +48,6 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extension;
-
-import be.fedict.trust.AlgorithmPolicy;
-import be.fedict.trust.CRLRevocationData;
-import be.fedict.trust.RevocationData;
-import be.fedict.trust.TrustLinker;
-import be.fedict.trust.TrustLinkerResult;
-import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -79,50 +73,36 @@ public class CrlTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
 
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
 			LOG.debug("no CRL uri in certificate: "
 					+ childCertificate.getSubjectX500Principal());
-			return null;
+			return TrustLinkerResult.UNDECIDED;
 		}
-
-		return processCrl(crlUri, childCertificate, certificate,
-				validationDate, revocationData, algorithmPolicy);
-	}
-
-	private TrustLinkerResult processCrl(URI crlUri,
-			X509Certificate childCertificate, X509Certificate certificate,
-			Date validationDate, RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
 
 		LOG.debug("CRL URI: " + crlUri);
 		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
 				validationDate);
 		if (null == x509crl) {
-			return null;
+			return TrustLinkerResult.UNDECIDED;
 		}
 
 		// check CRL integrity
 		boolean crlIntegrityResult = checkCrlIntegrity(x509crl, certificate,
 				validationDate);
 		if (false == crlIntegrityResult) {
-			return null;
+			return TrustLinkerResult.UNDECIDED;
 		}
 
 		// check CRL signature algorithm
-		try {
-			algorithmPolicy.checkSignatureAlgorithm(x509crl.getSigAlgOID());
-		} catch (SignatureException e) {
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"algorithm error: " + e.getMessage());
-		}
+		algorithmPolicy.checkSignatureAlgorithm(x509crl.getSigAlgOID());
 
 		// we don't support indirect CRLs
 		if (isIndirectCRL(x509crl)) {
 			LOG.debug("indirect CRL detected");
-			return null;
+			return TrustLinkerResult.UNDECIDED;
 		}
 
 		LOG.debug("CRL number: " + getCrlNumber(x509crl));
@@ -135,28 +115,23 @@ public class CrlTrustLinker implements TrustLinker {
 				revocationData.getCrlRevocationData().add(crlRevocationData);
 			} catch (CRLException e) {
 				LOG.error("CRLException: " + e.getMessage(), e);
-				throw new RuntimeException("CRLException : " + e.getMessage(),
+				throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "CRLException : " + e.getMessage(),
 						e);
 			}
 		}
 
-		boolean revoked = true;
 		X509CRLEntry crlEntry = x509crl.getRevokedCertificate(childCertificate
 				.getSerialNumber());
 		if (null == crlEntry) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal());
-			revoked = false;
+			return TrustLinkerResult.TRUSTED;
 		} else if (crlEntry.getRevocationDate().after(validationDate)) {
 			LOG.debug("CRL OK for: "
 					+ childCertificate.getSubjectX500Principal() + " at "
 					+ validationDate);
-			revoked = false;
+			return TrustLinkerResult.TRUSTED;
 		}
-
-		if (!revoked) {
-			return new TrustLinkerResult(true);
-        }
 
 		LOG.debug("certificate revoked/suspended at: "
 				+ crlEntry.getRevocationDate());
@@ -180,19 +155,18 @@ public class CrlTrustLinker implements TrustLinker {
 					LOG.debug("CRL reason value: " + crlReasonValue);
 					switch (crlReasonValue.intValue()) {
 					case CRLReason.certificateHold:
-						return new TrustLinkerResult(
-								false,
+						throw new TrustLinkerResultException(
 								TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
 								"certificate suspended by CRL="
 										+ crlEntry.getSerialNumber());
 					}
 				} catch (IOException e) {
-					throw new RuntimeException("IO error: " + e.getMessage(), e);
+					throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "IO error: " + e.getMessage(), e);
 				}
 			}
 		}
 
-		return new TrustLinkerResult(false,
+		throw new TrustLinkerResultException(
 				TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
 				"certificate revoked by CRL=" + crlEntry.getSerialNumber());
 

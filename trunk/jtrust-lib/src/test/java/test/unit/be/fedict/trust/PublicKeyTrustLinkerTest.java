@@ -23,15 +23,11 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-
-import be.fedict.trust.DefaultAlgorithmPolicy;
-import be.fedict.trust.PublicKeyTrustLinker;
-import be.fedict.trust.RevocationData;
-import be.fedict.trust.TrustLinkerResult;
 
 import static org.junit.Assert.*;
 
@@ -44,6 +40,7 @@ public class PublicKeyTrustLinkerTest {
 
 	@Test
 	public void testHasTrustLink() throws Exception {
+        // setup
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
@@ -60,10 +57,13 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
+        // operate
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNull(result);
+
+        // verify
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 	}
 
 	@Test
@@ -86,13 +86,14 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = notAfter.plusDays(1).toDate();
 
 		// operate
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+        try {
+		    publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch(TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, e.getReason());
+        }
 	}
 
 	@Test
@@ -115,13 +116,14 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = notBefore.minusDays(1).toDate();
 
 		// operate
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+		try {
+            publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-
-		// verify
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, e.getReason());
+        }
 	}
 
 	//@Test
@@ -147,12 +149,13 @@ public class PublicKeyTrustLinkerTest {
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
 		assertNotNull(result);
-		assertFalse(result.isValid());
+		//assertFalse(result.isValid());
 	}
 
 	@Test
 	public void testChildNotAllowToBeCA() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		// setup
+        KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = TrustTestUtils
@@ -168,16 +171,21 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+        // operate & verify
+		try {
+            publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch(TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+        }
 	}
 
 	@Test
 	public void testNoChildFails() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		// setup
+        KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = TrustTestUtils
@@ -193,11 +201,15 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+        // operate & verify
+		try {
+            publicKeyTrustLinker.hasTrustLink(
 				root2Certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+        }
 	}
 
 	@Test
@@ -219,15 +231,19 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+		try {
+            publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+        }
 	}
 
 	@Test
 	public void testChildCACertificateNoAKIDNotSelfSigned() throws Exception {
+        // setup
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
@@ -245,10 +261,13 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
+        // operate
 		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNull(result);
+
+        // verify
+        assertEquals(TrustLinkerResult.UNDECIDED, result);
 	}
 
 	@Test
@@ -272,11 +291,13 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		TrustLinkerResult result = publicKeyTrustLinker.hasTrustLink(
+		try {
+            publicKeyTrustLinker.hasTrustLink(
 				certificate, rootCertificate, validationDate,
 				new RevocationData(), new DefaultAlgorithmPolicy());
-		assertNotNull(result);
-		assertFalse(result.isValid());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+        }
 	}
-
 }

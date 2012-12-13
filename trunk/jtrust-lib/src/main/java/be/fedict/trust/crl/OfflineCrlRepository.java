@@ -63,9 +63,6 @@ public class OfflineCrlRepository implements CrlRepository {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
 
