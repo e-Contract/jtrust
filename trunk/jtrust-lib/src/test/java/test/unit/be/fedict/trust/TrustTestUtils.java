@@ -41,6 +41,7 @@ import org.joda.time.DateTime;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.*;
@@ -710,4 +711,11 @@ public class TrustTestUtils {
 		tstGen.setCertificatesAndCRLs(certStore);
 		return tstGen.generate(request, BigInteger.ONE, new Date(), "BC");
 	}
+
+    public static X509Certificate loadCertificate(String resourceName) throws CertificateException {
+        InputStream inputStream = TrustTestUtils.class.getResourceAsStream(resourceName);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(inputStream);
+        return certificate;
+    }
 }
