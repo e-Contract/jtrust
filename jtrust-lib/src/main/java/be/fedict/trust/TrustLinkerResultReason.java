@@ -26,19 +26,42 @@ package be.fedict.trust;
 public enum TrustLinkerResultReason {
 
 	/**
-	 * Certificate path could not be constructed to a trusted root
+	 * The exact reason is unspecified, or further specified in the exception message.
 	 */
-	INVALID_TRUST,
+	UNSPECIFIED,
+
+    /**
+     * The root certificate was not trusted.
+     */
+    ROOT,
+
+    /**
+     * Used to indicate that no trust between two certificates could be established.
+     */
+    NO_TRUST,
+
+    /**
+     * Used to indicate that the end-entity certificate violated some constraint.
+     */
+    CONSTRAINT_VIOLATION,
+
 	/**
 	 * Certificate Signature verification failed
 	 */
 	INVALID_SIGNATURE,
-	/**
+
+    /**
+     * An invalid algorithm was used.
+     */
+    INVALID_ALGORITHM,
+
+    /**
 	 * The requested time instant was before or after the certificate chain
 	 * validity interval
 	 */
 	INVALID_VALIDITY_INTERVAL,
-	/**
+
+    /**
 	 * Certificate status returned revoked or suspended.
 	 */
 	INVALID_REVOCATION_STATUS

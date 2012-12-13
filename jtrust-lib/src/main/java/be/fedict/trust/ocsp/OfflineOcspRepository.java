@@ -63,9 +63,6 @@ public class OfflineOcspRepository implements OcspRepository {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate) {
 

@@ -20,6 +20,8 @@ package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -91,12 +93,12 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 		this.mask[DECIPHER_ONLY_IDX] = flag;
 	}
 
-	public boolean check(X509Certificate certificate) {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException {
 		boolean[] keyUsage = certificate.getKeyUsage();
 		if (null == keyUsage) {
 			LOG.debug("no key usage extension for certificate: "
 					+ certificate.getSubjectX500Principal());
-			return false;
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing key usage extension");
 		}
 		for (int idx = 0; idx < this.mask.length; idx++) {
 			Boolean flag = this.mask[idx];
@@ -106,16 +108,15 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 			if (false == flag) {
 				if (keyUsage[idx]) {
 					LOG.debug("should not have key usage: " + idx);
-					return false;
+					throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "should not have key usage flag: " + idx);
 				}
 			} else {
 				if (false == keyUsage[idx]) {
 					LOG.debug("missing key usage: " + idx);
-					return false;
+					throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing key usage flag: " + idx);
 				}
 			}
 		}
 		LOG.debug("key usage checked");
-		return true;
 	}
 }

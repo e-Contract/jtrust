@@ -47,8 +47,6 @@ public class TrustValidator {
 
 	private RevocationData revocationData;
 
-	private TrustLinkerResult result;
-
 	private AlgorithmPolicy algorithmPolicy;
 
 	/**
@@ -77,7 +75,6 @@ public class TrustValidator {
 		this.trustLinkers = new LinkedList<TrustLinker>();
 		this.certificateConstraints = new LinkedList<CertificateConstraint>();
 		this.revocationData = revocationData;
-		this.result = null;
 		this.algorithmPolicy = new DefaultAlgorithmPolicy();
 	}
 
@@ -125,7 +122,7 @@ public class TrustValidator {
 	 * @see #isTrusted(List, Date)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath)
-			throws CertPathValidatorException {
+			throws TrustLinkerResultException {
 		isTrusted(certificatePath, new Date());
 	}
 
@@ -134,9 +131,8 @@ public class TrustValidator {
      * Convenience method when loading a certificate chain directly from a JCA key store implementation.
      *
      * @param certificates
-     * @throws CertPathValidatorException
      */
-    public void isTrusted(Certificate[] certificates) throws CertPathValidatorException {
+    public void isTrusted(Certificate[] certificates) throws TrustLinkerResultException {
         List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
         for (Certificate certificate : certificates) {
             X509Certificate x509Certificate = (X509Certificate) certificate;
@@ -159,25 +155,14 @@ public class TrustValidator {
 	}
 
 	/**
-	 * Returns the {@link TrustLinkerResult} of the last validation.
-	 * 
-	 * @return {@link TrustLinkerResult}
-	 */
-	public TrustLinkerResult getResult() {
-
-		return this.result;
-	}
-
-	/**
 	 * Checks whether the given certificate is self-signed.
 	 * 
 	 * @param certificate
 	 *            the X509 certificate.
 	 * @return <code>true</code> if self-signed, <code>false</code> otherwise.
 	 */
-	public static boolean isSelfSigned(X509Certificate certificate) {
-
-		return getSelfSignedResult(certificate).isValid();
+	public static void isSelfSigned(X509Certificate certificate) throws TrustLinkerResultException {
+		checkSelfSigned(certificate);
 	}
 
 	/**
@@ -186,37 +171,37 @@ public class TrustValidator {
 	 * 
 	 * @param certificate
 	 *            the self-signed certificate to validate.
-	 * @return the validation result.
 	 */
-	public static TrustLinkerResult getSelfSignedResult(
-			X509Certificate certificate) {
-
+	public static void checkSelfSigned(
+			X509Certificate certificate) throws TrustLinkerResultException {
 		if (false == certificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.NO_TRUST,
 					"root certificate should be self-signed: "
 							+ certificate.getSubjectX500Principal());
 		}
 		try {
 			certificate.verify(certificate.getPublicKey());
 		} catch (Exception e) {
-			return new TrustLinkerResult(false,
+			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_SIGNATURE,
 					"certificate signature error: " + e.getMessage());
 		}
-		return new TrustLinkerResult(true);
 	}
 
-	private TrustLinkerResult checkSignatureAlgorithm(String signatureAlgorithm) {
+	private void checkSignatureAlgorithm(String signatureAlgorithm) throws TrustLinkerResultException {
 		try {
 			this.algorithmPolicy.checkSignatureAlgorithm(signatureAlgorithm);
-		} catch (SignatureException e) {
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
+        }
+        catch (TrustLinkerResultException e) {
+            // re-wrapping this type of exception doesn't bring anything
+            throw e;
+		} catch (Exception e) {
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.INVALID_ALGORITHM,
 					"Invalid signature algorithm: " + signatureAlgorithm);
 		}
-		return new TrustLinkerResult(true);
 	}
 
 	/**
@@ -228,34 +213,23 @@ public class TrustValidator {
 	 * @param validationDate
 	 *            the date at which the certificate path validation should be
 	 *            verified.
-	 * @throws CertPathValidatorException
-	 *             in case of an invalid certificate path.
 	 * @see #isTrusted(List)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath,
-			Date validationDate) throws CertPathValidatorException {
+			Date validationDate) throws TrustLinkerResultException {
 		if (certificatePath.isEmpty()) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.UNSPECIFIED,
 					"certificate path is empty");
-			throw new CertPathValidatorException(this.result.getMessage());
 		}
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
 		LOG.debug("verifying root certificate: "
 				+ certificate.getSubjectX500Principal());
-		this.result = getSelfSignedResult(certificate);
-		if (!this.result.isValid()) {
-			LOG.debug("result: " + this.result.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		}
+		checkSelfSigned(certificate);
 		// check certificate signature
-		this.result = checkSignatureAlgorithm(certificate.getSigAlgName());
-		if (!this.result.isValid()) {
-			LOG.debug("result: " + this.result.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
-		}
+		checkSignatureAlgorithm(certificate.getSigAlgName());
 		checkSelfSignedTrust(certificate, validationDate);
 
 		certIdx--;
@@ -274,74 +248,73 @@ public class TrustValidator {
 					.getSimpleName();
 			LOG.debug("certificate constraint check: "
 					+ certificateConstraintName);
-			if (false == certificateConstraint.check(certificate)) {
-				this.result = new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_TRUST,
-						"certificate constraint failure: "
-								+ certificateConstraintName);
-				throw new CertPathValidatorException(this.result.getMessage());
-			}
-		}
-
-		this.result = new TrustLinkerResult(true);
+            try {
+                certificateConstraint.check(certificate);
+            } catch (TrustLinkerResultException e) {
+                // let this specific type of exception pass as is
+                throw e;
+            } catch (Exception e) {
+                throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "certificate constraint error " + certificateConstraintName + ": " + e.getMessage(), e);
+            }
+        }
 	}
 
 	private void checkTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate)
-			throws CertPathValidatorException {
+			throws TrustLinkerResultException {
 		if (null == childCertificate) {
 			return;
 		}
 		// check certificate signature
-		this.result = checkSignatureAlgorithm(childCertificate.getSigAlgName());
-		if (!this.result.isValid()) {
-			throw new CertPathValidatorException(this.result.getMessage());
-		}
+		checkSignatureAlgorithm(childCertificate.getSigAlgName());
 
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			LOG.debug("trying trust linker: "
 					+ trustLinker.getClass().getSimpleName());
-			this.result = trustLinker.hasTrustLink(childCertificate,
-					certificate, validationDate, this.revocationData,
-					this.algorithmPolicy);
-			if (null == this.result) {
-				continue;
-			}
-			if (this.result.isValid()) {
+            TrustLinkerResult trustLinkerResult;
+            try {
+                trustLinkerResult = trustLinker.hasTrustLink(childCertificate,
+                        certificate, validationDate, this.revocationData,
+                        this.algorithmPolicy);
+            } catch (TrustLinkerResultException e) {
+                // we let this type of exception pass as is
+                throw e;
+            } catch (Exception e) {
+                throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "trust linker error: " + e.getMessage(), e);
+            }
+            if (null == trustLinkerResult) {
+                LOG.warn("trust linker result should not be NULL");
+            }
+			if (TrustLinkerResult.TRUSTED == trustLinkerResult) {
+                // we don't break as there still might be a trust linker that complains
 				sometrustLinkerTrusts = true;
-			} else {
-				throw new CertPathValidatorException(this.result.getMessage());
 			}
 		}
 		if (false == sometrustLinkerTrusts) {
-			this.result = new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST, "no trust between "
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.NO_TRUST, "no trust between "
 							+ childCertificate.getSubjectX500Principal()
 							+ " and " + certificate.getSubjectX500Principal());
-			throw new CertPathValidatorException(this.result.getMessage());
 		}
 	}
 
 	private void checkSelfSignedTrust(X509Certificate certificate,
-			Date validationDate) throws CertPathValidatorException {
+			Date validationDate) throws TrustLinkerResultException {
 		try {
 			certificate.checkValidity(validationDate);
 		} catch (Exception e) {
-			this.result = new TrustLinkerResult(false,
+			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate validity error: " + e.getMessage());
-			throw new CertPathValidatorException(this.result.getMessage());
 		}
 		if (this.certificateRepository.isTrustPoint(certificate)) {
 			return;
 		}
-
-		this.result = new TrustLinkerResult(false,
-				TrustLinkerResultReason.INVALID_TRUST,
+		throw new TrustLinkerResultException(
+				TrustLinkerResultReason.ROOT,
 				"self-signed certificate not in repository: "
 						+ certificate.getSubjectX500Principal());
-		throw new CertPathValidatorException(this.result.getMessage());
 	}
 
 	/**

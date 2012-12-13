@@ -38,11 +38,11 @@ public class DefaultAlgorithmPolicy implements AlgorithmPolicy {
 
 	@Override
 	public void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws SignatureException {
+			throws TrustLinkerResultException {
 		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
-			throw new SignatureException("MD5 not allowed");
+			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_ALGORITHM, "MD5 not allowed");
 		}
 	}
 }

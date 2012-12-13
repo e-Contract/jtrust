@@ -18,12 +18,11 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +30,8 @@ import org.junit.Test;
 import test.unit.be.fedict.trust.TrustTestUtils;
 
 import be.fedict.trust.constraints.TSACertificateConstraint;
+
+import static org.junit.Assert.*;
 
 public class TSACertificateConstraintTest {
 
@@ -53,7 +54,7 @@ public class TSACertificateConstraintTest {
 				"SHA1withRSA", true);
 
 		// operate
-		assertTrue(this.testedInstance.check(certificate));
+		this.testedInstance.check(certificate);
 	}
 
 	@Test
@@ -68,6 +69,11 @@ public class TSACertificateConstraintTest {
 				"SHA1withRSA", false);
 
 		// operate
-		assertFalse(this.testedInstance.check(certificate));
+        try {
+            this.testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 }

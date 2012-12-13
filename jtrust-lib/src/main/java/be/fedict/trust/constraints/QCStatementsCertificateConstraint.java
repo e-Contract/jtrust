@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -52,11 +54,11 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		this.qcComplianceFilter = qcComplianceFilter;
 	}
 
-	public boolean check(X509Certificate certificate) {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException {
 		byte[] extensionValue = certificate
 				.getExtensionValue(X509Extension.qCStatements.getId());
 		if (null == extensionValue) {
-			return false;
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing QCStatements extension");
 		}
 		ASN1Sequence qcStatements;
 		try {
@@ -80,9 +82,8 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		}
 		if (null != this.qcComplianceFilter) {
 			if (qcCompliance != this.qcComplianceFilter) {
-				return false;
+				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "QCStatements not matching");
 			}
 		}
-		return true;
 	}
 }

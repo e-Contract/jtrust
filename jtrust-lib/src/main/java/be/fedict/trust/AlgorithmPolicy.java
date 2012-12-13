@@ -29,5 +29,5 @@ import java.security.SignatureException;
 public interface AlgorithmPolicy {
 
 	void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws SignatureException;
+			throws TrustLinkerResultException, Exception;
 }

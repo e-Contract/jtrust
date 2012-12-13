@@ -18,12 +18,6 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
@@ -31,6 +25,7 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
+import be.fedict.trust.*;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
@@ -38,12 +33,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.DefaultAlgorithmPolicy;
-import be.fedict.trust.RevocationData;
-import be.fedict.trust.TrustLinkerResult;
-import be.fedict.trust.TrustLinkerResultReason;
 import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
+
+import static org.junit.Assert.*;
 
 public class OcspTrustLinkerTest {
 
@@ -78,7 +71,7 @@ public class OcspTrustLinkerTest {
 				rootCertificate, null, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -114,7 +107,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -155,8 +148,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -197,8 +189,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -241,7 +232,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -278,15 +269,17 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
+		try {
+            ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
+                    e.getReason());
+        }
 
 		// verify
-		assertNotNull(result);
-		assertFalse(result.isValid());
-		assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE,
-				result.getReason());
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -327,7 +320,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -373,7 +366,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -409,13 +402,16 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
+        try {
+		    ocspTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS, e.getReason());
+        }
 
 		// verify
-		assertNotNull(result);
-		assertFalse(result.isValid());
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -467,8 +463,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -511,8 +506,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -556,8 +550,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 
@@ -609,7 +602,7 @@ public class OcspTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockOcspRepository);
 	}
 

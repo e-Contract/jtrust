@@ -18,23 +18,14 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.*;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import be.fedict.trust.AlgorithmPolicy;
-import be.fedict.trust.DefaultAlgorithmPolicy;
-import be.fedict.trust.FallbackTrustLinker;
-import be.fedict.trust.RevocationData;
-import be.fedict.trust.TrustLinker;
-import be.fedict.trust.TrustLinkerResult;
+import static org.junit.Assert.*;
 
 public class FallbackTrustLinkerTest {
 
@@ -50,7 +41,7 @@ public class FallbackTrustLinkerTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq((RevocationData) null),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -62,8 +53,7 @@ public class FallbackTrustLinkerTest {
 				validationDate, null, new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockTrustLinker);
 	}
 
@@ -78,8 +68,8 @@ public class FallbackTrustLinkerTest {
 						EasyMock.eq((X509Certificate) null),
 						EasyMock.eq(validationDate),
 						EasyMock.eq((RevocationData) null),
-						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(false));
+						EasyMock.anyObject(AlgorithmPolicy.class))).andThrow(
+                new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -87,12 +77,15 @@ public class FallbackTrustLinkerTest {
 		EasyMock.replay(mockTrustLinker);
 
 		// operate
-		TrustLinkerResult result = fallbackTrustLinker.hasTrustLink(null, null,
+		try {
+            fallbackTrustLinker.hasTrustLink(null, null,
 				validationDate, null, new DefaultAlgorithmPolicy());
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+        }
 
 		// verify
-		assertNotNull(result);
-		assertFalse(result.isValid());
 		EasyMock.verify(mockTrustLinker);
 	}
 
@@ -106,7 +99,7 @@ public class FallbackTrustLinkerTest {
 				null, null, new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNull(result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 	}
 
 	@Test
@@ -121,7 +114,7 @@ public class FallbackTrustLinkerTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq((RevocationData) null),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				null);
+				TrustLinkerResult.UNDECIDED);
 		TrustLinker mockTrustLinker2 = EasyMock.createMock(TrustLinker.class);
 		EasyMock.expect(
 				mockTrustLinker2.hasTrustLink(
@@ -130,7 +123,7 @@ public class FallbackTrustLinkerTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq((RevocationData) null),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker1);
@@ -143,8 +136,7 @@ public class FallbackTrustLinkerTest {
 				validationDate, null, new DefaultAlgorithmPolicy());
 
 		// verify
-		assertNotNull(result);
-		assertTrue(result.isValid());
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockTrustLinker1, mockTrustLinker2);
 	}
 }

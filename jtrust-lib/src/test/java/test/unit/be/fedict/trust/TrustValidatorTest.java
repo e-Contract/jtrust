@@ -57,11 +57,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(new LinkedList<X509Certificate>());
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.UNSPECIFIED, e.getReason());
 		}
 	}
 
@@ -88,11 +86,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.ROOT, e.getReason());
 		}
 	}
 
@@ -121,7 +117,6 @@ public class TrustValidatorTest {
 
 		trustValidator.isTrusted(certificatePath);
 
-		assertTrue(trustValidator.getResult().isValid());
 		EasyMock.verify(mockCertificateRepository);
 	}
 
@@ -150,7 +145,6 @@ public class TrustValidatorTest {
 
 		trustValidator.isTrusted(certificatePath);
 
-		assertTrue(trustValidator.getResult().isValid());
 		EasyMock.verify(mockCertificateRepository);
 	}
 
@@ -180,11 +174,10 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
 			assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
-					trustValidator.getResult().getReason());
+					e.getReason());
 			EasyMock.verify(mockCertificateRepository);
 		}
 	}
@@ -214,7 +207,6 @@ public class TrustValidatorTest {
 
 		trustValidator.isTrusted(certificatePath, notBefore.plusWeeks(2)
 				.toDate());
-		assertTrue(trustValidator.getResult().isValid());
 	}
 
 	@Test
@@ -245,11 +237,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
 			EasyMock.verify(mockCertificateRepository);
 		}
 	}
@@ -282,11 +272,10 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
 			assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE,
-					trustValidator.getResult().getReason());
+					e.getReason());
 			EasyMock.verify(mockCertificateRepository);
 		}
 	}
@@ -323,11 +312,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
 			EasyMock.verify(mockCertificateRepository);
 		}
 	}
@@ -368,14 +355,13 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
 
 		trustValidator.isTrusted(certificatePath, validationDate);
 
-		assertTrue(trustValidator.getResult().isValid());
 		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 	}
 
@@ -414,7 +400,7 @@ public class TrustValidatorTest {
 				mockTrustLinker.hasTrustLink(certificate, rootCertificate,
 						validationDate, trustValidator.getRevocationData(),
 						new DefaultAlgorithmPolicy())).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
@@ -422,11 +408,10 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_SIGNATURE,
-					trustValidator.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
+					e.getReason());
 		}
 	}
 
@@ -467,7 +452,7 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
@@ -481,8 +466,6 @@ public class TrustValidatorTest {
 		});
 
 		trustValidator.isTrusted(certificatePath, validationDate);
-
-		assertTrue(trustValidator.getResult().isValid());
 	}
 
 	@Test
@@ -521,13 +504,12 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		CertificateConstraint mockCertificateConstraint = EasyMock
 				.createMock(CertificateConstraint.class);
-		EasyMock.expect(mockCertificateConstraint.check(certificate))
-				.andReturn(true);
+		mockCertificateConstraint.check(certificate);
 		trustValidator.addCertificateConstrain(mockCertificateConstraint);
 
 		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
@@ -535,14 +517,12 @@ public class TrustValidatorTest {
 
 		trustValidator.isTrusted(certificatePath, validationDate);
 
-		assertTrue(trustValidator.getResult().isValid());
 		EasyMock.verify(mockCertificateRepository, mockCertificateConstraint,
 				mockTrustLinker);
 	}
 
 	@Test
 	public void trustInvalidCertificateConstraint() throws Exception {
-
 		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
@@ -576,13 +556,13 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		CertificateConstraint mockCertificateConstraint = EasyMock
 				.createMock(CertificateConstraint.class);
-		EasyMock.expect(mockCertificateConstraint.check(certificate))
-				.andReturn(false);
+		mockCertificateConstraint.check(certificate);
+        EasyMock.expectLastCall().andThrow(new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION));
 		trustValidator.addCertificateConstrain(mockCertificateConstraint);
 
 		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
@@ -591,11 +571,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
 			EasyMock.verify(mockCertificateRepository,
 					mockCertificateConstraint, mockTrustLinker);
 		}
@@ -644,21 +622,19 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		EasyMock.expect(
 				mockTrustLinker.hasTrustLink(EasyMock.eq(certificate),
 						EasyMock.eq(interCertificate),
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
 
 		trustValidator.isTrusted(certificatePath, validationDate);
-
-		assertTrue(trustValidator.getResult().isValid());
 
 		EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 	}
@@ -699,7 +675,7 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(false));
+				TrustLinkerResult.UNDECIDED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
@@ -707,9 +683,8 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
 			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 		}
 	}
@@ -750,7 +725,7 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(true));
+				TrustLinkerResult.TRUSTED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		TrustLinker mockTrustLinker2 = EasyMock.createMock(TrustLinker.class);
@@ -760,21 +735,13 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(false));
+				TrustLinkerResult.UNDECIDED);
 		trustValidator.addTrustLinker(mockTrustLinker2);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker,
 				mockTrustLinker2);
 
-		try {
-			trustValidator.isTrusted(certificatePath, validationDate);
-			fail();
-		} catch (CertPathValidatorException e) {
-			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			EasyMock.verify(mockCertificateRepository, mockTrustLinker,
-					mockTrustLinker2);
-		}
+	    trustValidator.isTrusted(certificatePath, validationDate);
 	}
 
 	@Test
@@ -813,7 +780,7 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				null);
+				TrustLinkerResult.UNDECIDED);
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
@@ -821,11 +788,9 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
-			assertEquals(TrustLinkerResultReason.INVALID_TRUST, trustValidator
-					.getResult().getReason());
+			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
 			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 		}
 	}
@@ -865,10 +830,10 @@ public class TrustValidatorTest {
 						EasyMock.eq(rootCertificate),
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
-						EasyMock.anyObject(AlgorithmPolicy.class))).andReturn(
-				new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
-						"revoked"));
+						EasyMock.anyObject(AlgorithmPolicy.class))).andThrow(
+                new TrustLinkerResultException(
+                        TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+                        "revoked"));
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);
@@ -876,11 +841,10 @@ public class TrustValidatorTest {
 		try {
 			trustValidator.isTrusted(certificatePath, validationDate);
 			fail();
-		} catch (CertPathValidatorException e) {
+		} catch (TrustLinkerResultException e) {
 			// expected
-			assertFalse(trustValidator.getResult().isValid());
 			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
-					trustValidator.getResult().getReason());
+					e.getReason());
 			EasyMock.verify(mockCertificateRepository, mockTrustLinker);
 		}
 	}

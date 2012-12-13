@@ -20,6 +20,8 @@ package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.tsp.TSPUtil;
@@ -45,19 +47,14 @@ public class TSACertificateConstraint implements CertificateConstraint {
 	public TSACertificateConstraint() {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean check(X509Certificate certificate) {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException {
 
 		// check ExtendedKeyUsage extension: id-kp-timeStamping
 		try {
 			TSPUtil.validateCertificate(certificate);
 		} catch (TSPValidationException e) {
 			LOG.error("ExtendedKeyUsage extension with value \"id-kp-timeStamping\" not present.");
-			return false;
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "id-kp-timeStamping ExtendedKeyUsage not present");
 		}
-
-		return true;
 	}
 }

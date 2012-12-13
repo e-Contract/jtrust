@@ -18,17 +18,18 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
+
+import static org.junit.Assert.*;
 
 public class QCStatementsCertificateConstraintTest {
 
@@ -47,7 +48,12 @@ public class QCStatementsCertificateConstraintTest {
 						notAfter);
 
 		// operate
-		assertFalse(testedInstance.check(certificate));
+        try {
+            testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 
 	@Test
@@ -66,7 +72,7 @@ public class QCStatementsCertificateConstraintTest {
 				"SHA1withRSA", false, false, false, null, null, Boolean.TRUE);
 
 		// operate
-		assertTrue(testedInstance.check(certificate));
+		testedInstance.check(certificate);
 	}
 
 	@Test
@@ -85,7 +91,12 @@ public class QCStatementsCertificateConstraintTest {
 				"SHA1withRSA", false, false, false, null, null, Boolean.FALSE);
 
 		// operate
-		assertFalse(testedInstance.check(certificate));
+        try {
+            testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 
 	@Test
@@ -104,6 +115,6 @@ public class QCStatementsCertificateConstraintTest {
 				"SHA1withRSA", false, false, false, null, null, Boolean.TRUE);
 
 		// operate
-		assertTrue(testedInstance.check(certificate));
+		testedInstance.check(certificate);
 	}
 }

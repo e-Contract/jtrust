@@ -38,7 +38,7 @@ public class AllowAllAlgorithmPolicy implements AlgorithmPolicy {
 
 	@Override
 	public void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws SignatureException {
+			throws Exception {
 		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {

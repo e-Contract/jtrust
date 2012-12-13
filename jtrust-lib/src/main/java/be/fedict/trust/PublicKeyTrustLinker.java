@@ -47,7 +47,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
 			LOG.debug("child certificate issuer not the same as the issuer certificate subject");
@@ -56,27 +56,22 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
 			LOG.debug("child certificate issuer: "
 					+ childCertificate.getIssuerX500Principal());
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.NO_TRUST,
 					"child certificate issuer not the same as the issuer certificate subject");
 		}
 		try {
 			childCertificate.verify(certificate.getPublicKey());
 		} catch (Exception e) {
 			LOG.debug("verification error: " + e.getMessage(), e);
-			return new TrustLinkerResult(false,
+			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_SIGNATURE,
 					"verification error: " + e.getMessage());
 		}
 
-		try {
-			algorithmPolicy.checkSignatureAlgorithm(childCertificate
+	    algorithmPolicy.checkSignatureAlgorithm(childCertificate
 					.getSigAlgOID());
-		} catch (SignatureException e) {
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_SIGNATURE,
-					"algorithm error: " + e.getMessage());
-		}
+
 
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
@@ -95,13 +90,13 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		}
 		if (true == validationDate.before(childCertificate.getNotBefore())) {
 			LOG.debug("certificate is not yet valid");
-			return new TrustLinkerResult(false,
+			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate is not yet valid");
 		}
 		if (true == validationDate.after(childCertificate.getNotAfter())) {
 			LOG.debug("certificate already expired");
-			return new TrustLinkerResult(false,
+			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate already expired");
 		}
@@ -116,16 +111,16 @@ public class PublicKeyTrustLinker implements TrustLinker {
 				certificate.verify(certificate.getPublicKey());
 				LOG.warn("allowing self-signed Root CA without CA flag set");
 			} catch (Exception e) {
-				return new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_TRUST,
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.NO_TRUST,
 						"certificate not a CA");
 			}
 		}
 		if (0 == certificate.getBasicConstraints()
 				&& -1 != childCertificate.getBasicConstraints()) {
 			LOG.debug("child should not be a CA");
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.NO_TRUST,
 					"child should not be a CA");
 		}
 
@@ -143,8 +138,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 		if (isCa && null == subjectKeyIdentifierData) {
 			LOG.debug("certificate is CA and MUST contain a Subject Key Identifier");
-			return new TrustLinkerResult(false,
-					TrustLinkerResultReason.INVALID_TRUST,
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.NO_TRUST,
 					"certificate is CA and  MUST contain a Subject Key Identifier");
 		}
 
@@ -165,8 +160,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 						authorityKeyIdentifierData);
 			} catch (IOException e) {
 				LOG.debug("Error parsing authority key identifier structure");
-				return new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_TRUST,
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.NO_TRUST,
 						"Error parsing authority key identifier structure");
 			}
 			String akidId = new String(
@@ -179,8 +174,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 						subjectKeyIdentifierData);
 			} catch (IOException e) {
 				LOG.debug("Error parsing subject key identifier structure");
-				return new TrustLinkerResult(false,
-						TrustLinkerResultReason.INVALID_TRUST,
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.NO_TRUST,
 						"Error parsing subject key identifier structure");
 			}
 			String skidId = new String(
@@ -189,9 +184,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 			if (!skidId.equals(akidId)) {
 				LOG.debug("certificate's subject key identifier does not match child certificate's authority key identifier");
-				return new TrustLinkerResult(
-						false,
-						TrustLinkerResultReason.INVALID_TRUST,
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.NO_TRUST,
 						"certificate's subject key identifier does not match child certificate's authority key identifier");
 			}
 		}
@@ -200,7 +194,10 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		 * We don't check pathLenConstraint since this one is only there to
 		 * protect the PKI business.
 		 */
-		return null;
+        /*
+         * Keep in mind that this trust linker can never return TRUSTED.
+         */
+		return TrustLinkerResult.UNDECIDED;
 	}
 
 	private boolean isCa(X509Certificate certificate) {

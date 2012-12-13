@@ -18,18 +18,19 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.EndEntityCertificateConstraint;
+
+import static org.junit.Assert.*;
 
 public class EndEntityCertificateConstraintTest {
 
@@ -38,20 +39,6 @@ public class EndEntityCertificateConstraintTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testedInstance = new EndEntityCertificateConstraint();
-	}
-
-	@Test
-	public void testSelfSigned() throws Exception {
-		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
-
-		// operate
-		assertTrue(this.testedInstance.check(certificate));
 	}
 
 	@Test
@@ -72,7 +59,12 @@ public class EndEntityCertificateConstraintTest {
 						false, 0, null, null);
 
 		// operate
-		assertFalse(this.testedInstance.check(certificate));
+        try {
+            this.testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 
 	@Test
@@ -100,7 +92,12 @@ public class EndEntityCertificateConstraintTest {
 		this.testedInstance.addEndEntity(endCertificate);
 
 		// operate
-		assertFalse(this.testedInstance.check(certificate));
+        try {
+            this.testedInstance.check(certificate);
+            fail();
+        } catch (TrustLinkerResultException e) {
+            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+        }
 	}
 
 	@Test
@@ -123,6 +120,6 @@ public class EndEntityCertificateConstraintTest {
 		this.testedInstance.addEndEntity(certificate);
 
 		// operate
-		assertTrue(this.testedInstance.check(certificate));
+		this.testedInstance.check(certificate);
 	}
 }
