@@ -18,6 +18,8 @@
 
 package test.integ.be.fedict.trust;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.Security;
 import java.security.cert.CertStore;
@@ -28,10 +30,12 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import be.fedict.trust.constraints.TSACertificateConstraint;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -39,6 +43,7 @@ import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -123,4 +128,35 @@ public class TSATest {
 
 		trustValidator.isTrusted(certificateChain);
 	}
+
+    @Test
+    public void testTSA2013() throws Exception {
+         LOG.debug("test TSA 2013");
+        InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
+        byte[] data = IOUtils.toByteArray(inputStream);
+        byte[] derData = Base64.decode(data);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory.generateCertificates(new ByteArrayInputStream(derData));
+        List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+        for (X509Certificate certificate : certificates) {
+            certificateChain.add(0, certificate);
+        }
+
+        MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
+        X509Certificate gsCert = (X509Certificate) certificateFactory
+                .generateCertificate(TSATest.class
+                        .getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
+        certificateRepository.addTrustPoint(gsCert);
+        TrustValidator trustValidator = new TrustValidator(
+                certificateRepository);
+        NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
+                8080);
+        TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
+                networkConfig);
+        trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+        trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+
+        trustValidator.isTrusted(certificateChain);
+    }
 }
