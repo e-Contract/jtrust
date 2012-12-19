@@ -117,16 +117,9 @@ public class OcspTrustLinker implements TrustLinker {
 			return TrustLinkerResult.UNDECIDED;
 		}
 
-		Object responseObject;
-		try {
-			responseObject = ocspResp.getResponseObject();
-		} catch (OCSPException e) {
-			LOG.debug("OCSP exception: " + e.getMessage(), e);
-			return TrustLinkerResult.UNDECIDED;
-		}
+		Object responseObject = ocspResp.getResponseObject();
 		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
 
-		try {
             X509CertificateHolder[] responseCertificates = basicOCSPResp
 					.getCerts();
 			for (X509CertificateHolder responseCertificate : responseCertificates) {
@@ -162,7 +155,7 @@ public class OcspTrustLinker implements TrustLinker {
 				boolean verificationResult = basicOCSPResp.isSignatureValid(contentVerifierProvider);
 				if (false == verificationResult) {
 					LOG.debug("OCSP Responser response signature invalid");
-					return null;
+					return TrustLinkerResult.UNDECIDED;
 				}
                     if (false == Arrays.equals(certificate.getEncoded(),
                             ocspResponderCertificate.getEncoded())) {
@@ -188,7 +181,7 @@ public class OcspTrustLinker implements TrustLinker {
                              */
                             if (false == certificate.equals(issuingCaCertificate)) {
                                 LOG.debug("OCSP responder certificate not issued by CA");
-                                return null;
+                                return TrustLinkerResult.UNDECIDED;
                             }
                         }
                         // check certificate signature
@@ -214,16 +207,8 @@ public class OcspTrustLinker implements TrustLinker {
                              */
                             return TrustLinkerResult.UNDECIDED;
                         }
-                        List<String> extendedKeyUsage;
-                        try {
-                            extendedKeyUsage = x509OcspResponderCertificate
+                        List<String> extendedKeyUsage = x509OcspResponderCertificate
                                     .getExtendedKeyUsage();
-                        } catch (CertificateParsingException e) {
-                            LOG.debug(
-                                    "OCSP Responder parsing error: "
-                                            + e.getMessage(), e);
-                            return TrustLinkerResult.UNDECIDED;
-                        }
                         if (null == extendedKeyUsage) {
                             LOG.debug("OCSP Responder certificate has no extended key usage extension");
                             return TrustLinkerResult.UNDECIDED;
@@ -238,36 +223,10 @@ public class OcspTrustLinker implements TrustLinker {
                         // and the CA certificate is already trusted at this point
                     }
             }
-		} catch (OCSPException e) {
-			LOG.debug("OCSP exception: " + e.getMessage(), e);
-			return TrustLinkerResult.UNDECIDED;
-		} catch (CertificateEncodingException e) {
-			LOG.debug("certificate encoding error: " + e.getMessage(), e);
-			return TrustLinkerResult.UNDECIDED;
-		}
 
-        DigestCalculatorProvider digCalcProv;
-        try {
-            digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-        } catch (OperatorCreationException e) {
-            throw new RuntimeException(e);
-        }
-        CertificateID certificateId;
-		try {
-            try {
-                try {
-                    certificateId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
+        DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+        CertificateID certificateId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
                             new JcaX509CertificateHolder(certificate), childCertificate.getSerialNumber());
-                } catch (CertificateEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-            } catch (OperatorCreationException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (OCSPException e) {
-			LOG.debug("OCSP exception: " + e.getMessage(), e);
-			return null;
-		}
 
 		SingleResp[] singleResps = basicOCSPResp.getResponses();
 		for (SingleResp singleResp : singleResps) {
@@ -306,43 +265,35 @@ public class OcspTrustLinker implements TrustLinker {
 	}
 
 	private void addRevocationData(RevocationData revocationData,
-			OCSPResp ocspResp, URI uri) {
-		if (null != revocationData) {
-			try {
-				OCSPRevocationData ocspRevocationData = new OCSPRevocationData(
-						ocspResp.getEncoded(), uri.toString());
-				revocationData.getOcspRevocationData().add(ocspRevocationData);
-			} catch (IOException e) {
-				LOG.error("IOException: " + e.getMessage(), e);
-				throw new RuntimeException("IOException : " + e.getMessage(), e);
-			}
-		}
+			OCSPResp ocspResp, URI uri) throws IOException {
+        if (null == revocationData) {
+            return;
+        }
+		OCSPRevocationData ocspRevocationData = new OCSPRevocationData(
+				ocspResp.getEncoded(), uri.toString());
+		revocationData.getOcspRevocationData().add(ocspRevocationData);
 	}
 
-	private URI getOcspUri(X509Certificate certificate) {
+	private URI getOcspUri(X509Certificate certificate) throws IOException, URISyntaxException {
 		URI ocspURI = getAccessLocation(certificate,
 				X509ObjectIdentifiers.ocspAccessMethod);
 		return ocspURI;
 	}
 
 	private URI getAccessLocation(X509Certificate certificate,
-			DERObjectIdentifier accessMethod) {
+			DERObjectIdentifier accessMethod) throws IOException, URISyntaxException {
 		byte[] authInfoAccessExtensionValue = certificate
 				.getExtensionValue(X509Extension.authorityInfoAccess.getId());
 		if (null == authInfoAccessExtensionValue) {
 			return null;
 		}
 		AuthorityInformationAccess authorityInformationAccess;
-		try {
-			DEROctetString oct = (DEROctetString) (new ASN1InputStream(
-					new ByteArrayInputStream(authInfoAccessExtensionValue))
-					.readObject());
-			authorityInformationAccess =
-                    AuthorityInformationAccess.getInstance(new ASN1InputStream(oct.getOctets())
-                            .readObject());
-		} catch (IOException e) {
-			throw new RuntimeException("IO error: " + e.getMessage(), e);
-		}
+		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
+				new ByteArrayInputStream(authInfoAccessExtensionValue))
+				.readObject());
+		authorityInformationAccess =
+                  AuthorityInformationAccess.getInstance(new ASN1InputStream(oct.getOctets())
+                           .readObject());
 		AccessDescription[] accessDescriptions = authorityInformationAccess
 				.getAccessDescriptions();
 		for (AccessDescription accessDescription : accessDescriptions) {
@@ -367,13 +318,8 @@ public class OcspTrustLinker implements TrustLinker {
 		return null;
 	}
 
-	private URI toURI(String str) {
-		try {
+	private URI toURI(String str) throws URISyntaxException {
 			URI uri = new URI(str);
 			return uri;
-		} catch (URISyntaxException e) {
-			throw new InvalidParameterException("URI syntax error: "
-					+ e.getMessage());
-		}
 	}
 }

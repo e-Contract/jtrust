@@ -20,17 +20,24 @@ package test.unit.be.fedict.trust;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v2CRLBuilder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.cert.ocsp.jcajce.JcaBasicOCSPRespBuilder;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.*;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.*;
@@ -38,6 +45,7 @@ import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.joda.time.DateTime;
+import sun.security.x509.IssuerAlternativeNameExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -56,8 +64,8 @@ public class TrustTestUtils {
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, true);
 	}
@@ -66,8 +74,8 @@ public class TrustTestUtils {
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey, boolean caFlag) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag, -1);
 	}
@@ -76,8 +84,8 @@ public class TrustTestUtils {
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength)
-			throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            throws IOException, InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
 				pathLength, null);
@@ -88,8 +96,8 @@ public class TrustTestUtils {
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
 			String crlUri) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
 				pathLength, crlUri, null);
@@ -100,8 +108,8 @@ public class TrustTestUtils {
 			DateTime notAfter, X509Certificate issuerCertificate,
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
 			String crlUri, String ocspUri) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
 				subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null,
@@ -115,8 +123,8 @@ public class TrustTestUtils {
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
 			String crlUri, String ocspUri, KeyUsage keyUsage,
 			String signatureAlgorithm) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -130,8 +138,8 @@ public class TrustTestUtils {
 			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength,
 			String crlUri, String ocspUri, KeyUsage keyUsage,
 			String signatureAlgorithm, boolean tsa) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -146,8 +154,8 @@ public class TrustTestUtils {
 			String crlUri, String ocspUri, KeyUsage keyUsage,
 			String signatureAlgorithm, boolean tsa, boolean includeSKID,
 			boolean includeAKID) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -162,8 +170,8 @@ public class TrustTestUtils {
 			String crlUri, String ocspUri, KeyUsage keyUsage,
 			String signatureAlgorithm, boolean tsa, boolean includeSKID,
 			boolean includeAKID, PublicKey akidPublicKey) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -179,8 +187,8 @@ public class TrustTestUtils {
 			String signatureAlgorithm, boolean tsa, boolean includeSKID,
 			boolean includeAKID, PublicKey akidPublicKey,
 			String certificatePolicy) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -197,8 +205,8 @@ public class TrustTestUtils {
 			String signatureAlgorithm, boolean tsa, boolean includeSKID,
 			boolean includeAKID, PublicKey akidPublicKey,
 			String certificatePolicy, Boolean qcCompliance) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore,
 				notAfter, issuerCertificate, issuerPrivateKey, caFlag,
@@ -207,7 +215,6 @@ public class TrustTestUtils {
 				qcCompliance, false);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static X509Certificate generateCertificate(
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
 			DateTime notAfter, X509Certificate issuerCertificate,
@@ -217,69 +224,69 @@ public class TrustTestUtils {
 			boolean includeAKID, PublicKey akidPublicKey,
 			String certificatePolicy, Boolean qcCompliance,
 			boolean ocspResponder) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 
-		X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-		certificateGenerator.reset();
-		certificateGenerator.setPublicKey(subjectPublicKey);
-		certificateGenerator.setSignatureAlgorithm(signatureAlgorithm);
-		certificateGenerator.setNotBefore(notBefore.toDate());
-		certificateGenerator.setNotAfter(notAfter.toDate());
-		X509Principal issuerDN;
-		if (null != issuerCertificate) {
-			issuerDN = new X509Principal(issuerCertificate
-					.getSubjectX500Principal().toString());
-		} else {
-			issuerDN = new X509Principal(subjectDn);
-		}
-		certificateGenerator.setIssuerDN(issuerDN);
-		certificateGenerator.setSubjectDN(new X509Principal(subjectDn));
-		certificateGenerator.setSerialNumber(new BigInteger(128,
-				new SecureRandom()));
+        X500Name issuerName;
+        if (null != issuerCertificate) {
+            issuerName = new X500Name(issuerCertificate.getSubjectX500Principal().toString());
+        } else {
+            issuerName = new X500Name(subjectDn);
+        }
+        X500Name subjectName = new X500Name(subjectDn);
+        BigInteger serial = new BigInteger(128, new SecureRandom());
+        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo
+                .getInstance(subjectPublicKey.getEncoded());
+        X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial, notBefore.toDate(), notAfter.toDate(),
+                subjectName, publicKeyInfo);
 
+        JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		if (includeSKID) {
-			certificateGenerator.addExtension(
-					X509Extensions.SubjectKeyIdentifier, false,
-					createSubjectKeyId(subjectPublicKey));
+            x509v3CertificateBuilder.addExtension(
+                    X509Extension.subjectKeyIdentifier, false, extensionUtils
+                    .createSubjectKeyIdentifier(subjectPublicKey));
 		}
 
 		if (includeAKID) {
-			PublicKey issuerPublicKey;
+
+			PublicKey authorityPublicKey;
 			if (null != akidPublicKey) {
-				issuerPublicKey = akidPublicKey;
+                authorityPublicKey = akidPublicKey;
 			} else if (null != issuerCertificate) {
-				issuerPublicKey = issuerCertificate.getPublicKey();
+                authorityPublicKey = issuerCertificate.getPublicKey();
 			} else {
-				issuerPublicKey = subjectPublicKey;
+                authorityPublicKey = subjectPublicKey;
 			}
-			certificateGenerator.addExtension(
-					X509Extensions.AuthorityKeyIdentifier, false,
-					createAuthorityKeyId(issuerPublicKey));
+            x509v3CertificateBuilder.addExtension(
+                    X509Extension.authorityKeyIdentifier, false, extensionUtils
+                    .createAuthorityKeyIdentifier(authorityPublicKey));
 		}
 
 		if (caFlag) {
 			if (-1 == pathLength) {
-				certificateGenerator.addExtension(
-						X509Extensions.BasicConstraints, false,
-						new BasicConstraints(true));
+                x509v3CertificateBuilder.addExtension(
+                        X509Extension.basicConstraints, true, new BasicConstraints(
+                        2147483647));
 			} else {
-				certificateGenerator.addExtension(
-						X509Extensions.BasicConstraints, false,
-						new BasicConstraints(pathLength));
+                x509v3CertificateBuilder.addExtension(
+                        X509Extension.basicConstraints, true, new BasicConstraints(
+                        pathLength));
 			}
 		}
 
 		if (null != crlUri) {
-			GeneralName gn = new GeneralName(
-					GeneralName.uniformResourceIdentifier, new DERIA5String(
-							crlUri));
-			GeneralNames gns = new GeneralNames(gn);
-			DistributionPointName dpn = new DistributionPointName(0, gns);
-			DistributionPoint distp = new DistributionPoint(dpn, null, null);
-			certificateGenerator.addExtension(
-					X509Extensions.CRLDistributionPoints, false,
-					new DERSequence(distp));
+            GeneralName generalName = new GeneralName(
+                    GeneralName.uniformResourceIdentifier, new DERIA5String(
+                    crlUri));
+            GeneralNames generalNames = new GeneralNames(generalName);
+            DistributionPointName distPointName = new DistributionPointName(
+                    generalNames);
+            DistributionPoint distPoint = new DistributionPoint(distPointName,
+                    null, null);
+            DistributionPoint[] crlDistPoints = new DistributionPoint[] { distPoint };
+            CRLDistPoint crlDistPoint = new CRLDistPoint(crlDistPoints);
+            x509v3CertificateBuilder.addExtension(
+                    X509Extension.cRLDistributionPoints, false, crlDistPoint);
 		}
 
 		if (null != ocspUri) {
@@ -287,22 +294,22 @@ public class TrustTestUtils {
 					GeneralName.uniformResourceIdentifier, ocspUri);
 			AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(
 					X509ObjectIdentifiers.ocspAccessMethod, ocspName);
-			certificateGenerator.addExtension(
-					X509Extensions.AuthorityInfoAccess.getId(), false,
+            x509v3CertificateBuilder.addExtension(
+					X509Extension.authorityInfoAccess, false,
 					authorityInformationAccess);
 		}
 
 		if (null != keyUsage) {
-			certificateGenerator.addExtension(X509Extensions.KeyUsage, true,
-					keyUsage);
+            x509v3CertificateBuilder.addExtension(X509Extension.keyUsage, true,
+                    keyUsage);
 		}
 
 		if (null != certificatePolicy) {
             ASN1ObjectIdentifier policyObjectIdentifier = new ASN1ObjectIdentifier(certificatePolicy);
             PolicyInformation policyInformation = new PolicyInformation(policyObjectIdentifier);
-			certificateGenerator.addExtension(
-                    X509Extension.certificatePolicies, true,
-					new CertificatePolicies(policyInformation));
+            x509v3CertificateBuilder.addExtension(
+                    X509Extension.certificatePolicies, false, new DERSequence(
+                    policyInformation));
 		}
 
 		if (null != qcCompliance) {
@@ -312,42 +319,47 @@ public class TrustTestUtils {
 			} else {
 				vec.add(new QCStatement(QCStatement.id_etsi_qcs_RetentionPeriod));
 			}
-			certificateGenerator.addExtension(X509Extensions.QCStatements,
+            x509v3CertificateBuilder.addExtension(X509Extension.qCStatements,
 					true, new DERSequence(vec));
 
 		}
 
 		if (tsa) {
-			certificateGenerator
-					.addExtension(X509Extensions.ExtendedKeyUsage, true,
+            x509v3CertificateBuilder
+					.addExtension(X509Extension.extendedKeyUsage, true,
 							new ExtendedKeyUsage(
 									KeyPurposeId.id_kp_timeStamping));
 		}
 
 		if (ocspResponder) {
-			certificateGenerator.addExtension(
+            x509v3CertificateBuilder.addExtension(
 					OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false,
 					new DERNull());
 
-			certificateGenerator.addExtension(X509Extensions.ExtendedKeyUsage,
+            x509v3CertificateBuilder.addExtension(X509Extension.extendedKeyUsage,
 					true, new ExtendedKeyUsage(KeyPurposeId.id_kp_OCSPSigning));
 		}
 
-		X509Certificate certificate;
-		certificate = certificateGenerator.generate(issuerPrivateKey);
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+                .find(signatureAlgorithm);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder()
+                .find(sigAlgId);
+        AsymmetricKeyParameter
+            asymmetricKeyParameter = PrivateKeyFactory
+                    .createKey(issuerPrivateKey.getEncoded());
 
-		/*
-		 * Next certificate factory trick is needed to make sure that the
-		 * certificate delivered to the caller is provided by the default
-		 * security provider instead of BouncyCastle. If we don't do this trick
-		 * we might run into trouble when trying to use the CertPath validator.
-		 */
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
-		certificate = (X509Certificate) certificateFactory
-				.generateCertificate(new ByteArrayInputStream(certificate
-						.getEncoded()));
-		return certificate;
+        ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
+                    .build(asymmetricKeyParameter);
+        X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder
+                .build(contentSigner);
+
+        byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate certificate = (X509Certificate) certificateFactory
+                    .generateCertificate(new ByteArrayInputStream(
+                            encodedCertificate));
+        return certificate;
 	}
 
 	public static KeyPair generateKeyPair() throws Exception {
@@ -359,31 +371,11 @@ public class TrustTestUtils {
 		return keyPair;
 	}
 
-	private static SubjectKeyIdentifier createSubjectKeyId(PublicKey publicKey)
-			throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(
-				publicKey.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
-		return new SubjectKeyIdentifier(info);
-	}
-
-	private static AuthorityKeyIdentifier createAuthorityKeyId(
-			PublicKey publicKey) throws IOException {
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(
-				publicKey.getEncoded());
-		SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-				(ASN1Sequence) new ASN1InputStream(bais).readObject());
-
-		return new AuthorityKeyIdentifier(info);
-	}
-
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag, int pathLength, String crlUri)
-			throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            throws IOException, InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
 				notAfter, caFlag, pathLength, crlUri, null);
 	}
@@ -392,8 +384,8 @@ public class TrustTestUtils {
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag, int pathLength, String crlUri,
 			KeyUsage keyUsage) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 		PublicKey subjectPublicKey = keyPair.getPublic();
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
@@ -406,8 +398,8 @@ public class TrustTestUtils {
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag, int pathLength, String crlUri,
 			KeyUsage keyUsage, String signatureAlgorithm) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		PublicKey subjectPublicKey = keyPair.getPublic();
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
 		X509Certificate certificate = generateCertificate(subjectPublicKey,
@@ -419,8 +411,8 @@ public class TrustTestUtils {
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag, int pathLength)
-			throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            throws IOException, InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
 				notAfter, caFlag, pathLength, null);
 	}
@@ -428,8 +420,8 @@ public class TrustTestUtils {
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, boolean caFlag) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
 				notAfter, caFlag, -1);
 	}
@@ -437,8 +429,8 @@ public class TrustTestUtils {
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter, String crlUri) throws IOException,
-			InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException {
+            InvalidKeyException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
 				notAfter, true, -1, crlUri);
 	}
@@ -446,8 +438,8 @@ public class TrustTestUtils {
 	public static X509Certificate generateSelfSignedCertificate(
 			KeyPair keyPair, String subjectDn, DateTime notBefore,
 			DateTime notAfter) throws IOException, InvalidKeyException,
-			IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException {
+            IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore,
 				notAfter, true);
 	}
@@ -466,9 +458,9 @@ public class TrustTestUtils {
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, BigInteger... revokedCertificateSerialNumbers)
-			throws InvalidKeyException, CRLException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException,
-			CertificateParsingException {
+            throws InvalidKeyException, CRLException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException,
+            CertificateException, OperatorCreationException, IOException {
 
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
 				nextUpdate, "SHA1withRSA", revokedCertificateSerialNumbers);
@@ -478,9 +470,9 @@ public class TrustTestUtils {
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, String signatureAlgorithm,
 			BigInteger... revokedCertificateSerialNumbers)
-			throws InvalidKeyException, CRLException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException,
-			CertificateParsingException {
+            throws InvalidKeyException, CRLException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException,
+            CertificateException, OperatorCreationException, IOException {
 
 		List<RevokedCertificate> revokedCertificates = new LinkedList<RevokedCertificate>();
 		for (BigInteger revokedCertificateSerialNumber : revokedCertificateSerialNumbers) {
@@ -495,9 +487,9 @@ public class TrustTestUtils {
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, List<RevokedCertificate> revokedCertificates)
-			throws InvalidKeyException, CRLException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException,
-			CertificateParsingException {
+            throws InvalidKeyException, CRLException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException,
+            CertificateException, OperatorCreationException, IOException {
 
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
 				nextUpdate, null, false, revokedCertificates, "SHA1withRSA");
@@ -507,9 +499,9 @@ public class TrustTestUtils {
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, List<String> deltaCrlUris,
 			List<RevokedCertificate> revokedCertificates)
-			throws InvalidKeyException, CRLException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException,
-			CertificateParsingException {
+            throws InvalidKeyException, CRLException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException,
+            CertificateException, OperatorCreationException, IOException {
 
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
 				nextUpdate, deltaCrlUris, false, revokedCertificates,
@@ -520,9 +512,9 @@ public class TrustTestUtils {
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates)
-			throws InvalidKeyException, CRLException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException,
-			CertificateParsingException {
+            throws InvalidKeyException, CRLException, IllegalStateException,
+            NoSuchAlgorithmException, SignatureException,
+            CertificateException, OperatorCreationException, IOException {
 
 		return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate,
 				nextUpdate, deltaCrlUris, deltaCrl, revokedCertificates,
@@ -534,24 +526,25 @@ public class TrustTestUtils {
 			DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates,
 			String signatureAlgorithm) throws InvalidKeyException,
-			CRLException, IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateParsingException {
+            CRLException, IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, IOException, OperatorCreationException {
 
-		X509V2CRLGenerator crlGenerator = new X509V2CRLGenerator();
-		crlGenerator.setThisUpdate(thisUpdate.toDate());
-		crlGenerator.setNextUpdate(nextUpdate.toDate());
-		crlGenerator.setSignatureAlgorithm(signatureAlgorithm);
-		crlGenerator.setIssuerDN(issuerCertificate.getSubjectX500Principal());
+        X500Name issuerName = new X500Name(issuerCertificate.getSubjectX500Principal().toString());
+        X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName,
+                thisUpdate.toDate());
+        x509v2crlBuilder.setNextUpdate(nextUpdate.toDate());
 
 		for (RevokedCertificate revokedCertificate : revokedCertificates) {
-			crlGenerator.addCRLEntry(revokedCertificate.serialNumber,
+            x509v2crlBuilder.addCRLEntry(revokedCertificate.serialNumber,
 					revokedCertificate.revocationDate.toDate(),
 					CRLReason.privilegeWithdrawn);
 		}
 
-		crlGenerator.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
-				new AuthorityKeyIdentifierStructure(issuerCertificate));
-		crlGenerator.addExtension(X509Extensions.CRLNumber, false,
+
+        JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+        x509v2crlBuilder.addExtension(X509Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(issuerCertificate));
+        x509v2crlBuilder.addExtension(X509Extension.cRLNumber, false,
 				new CRLNumber(BigInteger.ONE));
 
 		if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
@@ -562,17 +555,31 @@ public class TrustTestUtils {
 			}
 			CRLDistPoint crlDistPoint = new CRLDistPoint(
 					(DistributionPoint[]) deltaCrlDps);
-			crlGenerator.addExtension(X509Extensions.FreshestCRL, false,
+            x509v2crlBuilder.addExtension(X509Extension.freshestCRL, false,
 					crlDistPoint);
 		}
 
 		if (deltaCrl) {
-			crlGenerator.addExtension(X509Extensions.DeltaCRLIndicator, true,
+            x509v2crlBuilder.addExtension(X509Extension.deltaCRLIndicator, true,
 					new CRLNumber(BigInteger.ONE));
 		}
 
-		X509CRL x509Crl = crlGenerator.generate(issuerPrivateKey);
-		return x509Crl;
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+                .find(signatureAlgorithm);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder()
+                .find(sigAlgId);
+        AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+                    .createKey(issuerPrivateKey.getEncoded());
+
+        ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
+                    .build(asymmetricKeyParameter);
+
+        X509CRLHolder x509crlHolder = x509v2crlBuilder.build(contentSigner);
+        byte[] crlValue = x509crlHolder.getEncoded();
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509CRL crl = (X509CRL) certificateFactory
+                .generateCRL(new ByteArrayInputStream(crlValue));
+		return crl;
 	}
 
 	public static DistributionPoint getDistributionPoint(String uri) {

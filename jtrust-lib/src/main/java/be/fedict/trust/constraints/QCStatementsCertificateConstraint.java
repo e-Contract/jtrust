@@ -54,21 +54,16 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		this.qcComplianceFilter = qcComplianceFilter;
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
 				.getExtensionValue(X509Extension.qCStatements.getId());
 		if (null == extensionValue) {
 			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing QCStatements extension");
 		}
-		ASN1Sequence qcStatements;
-		try {
-			DEROctetString oct = (DEROctetString) (new ASN1InputStream(
+	    DEROctetString oct = (DEROctetString) (new ASN1InputStream(
 					new ByteArrayInputStream(extensionValue)).readObject());
-			qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
+        ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
 					.readObject();
-		} catch (IOException e) {
-			throw new RuntimeException("IO error: " + e.getMessage(), e);
-		}
 		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
 		boolean qcCompliance = false;
 		while (qcStatementEnum.hasMoreElements()) {
