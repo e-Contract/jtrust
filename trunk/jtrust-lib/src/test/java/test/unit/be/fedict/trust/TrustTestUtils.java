@@ -521,11 +521,22 @@ public class TrustTestUtils {
 				"SHA1withRSA");
 	}
 
+    public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
+                                      X509Certificate issuerCertificate, DateTime thisUpdate,
+                                      DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+                                      List<RevokedCertificate> revokedCertificates,
+                                      String signatureAlgorithm) throws InvalidKeyException,
+            CRLException, IllegalStateException, NoSuchAlgorithmException,
+            SignatureException, CertificateException, IOException, OperatorCreationException {
+            return generateCrl(issuerPrivateKey, issuerCertificate, thisUpdate, nextUpdate, deltaCrlUris, deltaCrl,
+                    revokedCertificates, signatureAlgorithm, -1);
+    }
+
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey,
 			X509Certificate issuerCertificate, DateTime thisUpdate,
 			DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates,
-			String signatureAlgorithm) throws InvalidKeyException,
+			String signatureAlgorithm, long numberOfRevokedCertificates) throws InvalidKeyException,
             CRLException, IllegalStateException, NoSuchAlgorithmException,
             SignatureException, CertificateException, IOException, OperatorCreationException {
 
@@ -539,6 +550,16 @@ public class TrustTestUtils {
 					revokedCertificate.revocationDate.toDate(),
 					CRLReason.privilegeWithdrawn);
 		}
+        if (-1 != numberOfRevokedCertificates) {
+            SecureRandom secureRandom = new SecureRandom();
+            while (numberOfRevokedCertificates-- > 0) {
+                BigInteger serialNumber = new BigInteger(128, secureRandom);
+                Date revocationDate = new Date();
+                x509v2crlBuilder.addCRLEntry(serialNumber,
+                        revocationDate,
+                        CRLReason.privilegeWithdrawn);
+            }
+        }
 
 
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
