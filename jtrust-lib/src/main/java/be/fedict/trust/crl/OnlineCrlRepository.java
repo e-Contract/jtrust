@@ -113,8 +113,11 @@ public class OnlineCrlRepository implements CrlRepository {
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance(
 				"X.509", "BC");
+        LOG.debug("certificate factory provider: " + certificateFactory.getProvider().getName());
+        LOG.debug("certificate factory class: " + certificateFactory.getClass().getName());
 		X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
 				.getResponseBodyAsStream());
+        LOG.debug("X509CRL class: " + crl.getClass().getName());
 		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
 		return crl;
 	}
