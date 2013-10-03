@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.List;
 
 import be.fedict.trust.*;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -192,6 +194,9 @@ public class OcspTrustLinker implements TrustLinker {
                         PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
                         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
                         X509Certificate x509OcspResponderCertificate =(X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(ocspResponderCertificate.getEncoded()));
+                        LOG.debug("OCSP Responder public key fingerprint: "
+        						+ DigestUtils.shaHex(x509OcspResponderCertificate
+        								.getPublicKey().getEncoded()));
                         publicKeyTrustLinker
                                 .hasTrustLink(x509OcspResponderCertificate,
                                         issuingCaCertificate, validationDate,
