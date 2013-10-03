@@ -19,27 +19,34 @@
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import be.fedict.trust.constraints.TSACertificateConstraint;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -49,8 +56,10 @@ import org.junit.Test;
 
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
+import be.fedict.trust.TrustLinkerResultException;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
+import be.fedict.trust.constraints.TSACertificateConstraint;
 
 public class TSATest {
 
@@ -65,7 +74,19 @@ public class TSATest {
 
 	@Test
 	public void testTSAViaJTrust() throws Exception {
+		testTimestampServerTrust(TSA_LOCATION);
+	}
 
+	@Test
+	public void testStarfieldTechTrust() throws Exception {
+		testTimestampServerTrust("http://tsa.starfieldtech.com");
+	}
+
+	private void testTimestampServerTrust(String tsaLocation)
+			throws IOException, HttpException, Exception, TSPException,
+			NoSuchAlgorithmException, NoSuchProviderException, CMSException,
+			CertStoreException, CertificateException,
+			TrustLinkerResultException {
 		// setup
 		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
 		requestGen.setCertReq(true);
@@ -75,7 +96,7 @@ public class TSATest {
 
 		HttpClient httpClient = new HttpClient();
 		httpClient.getHostConfiguration().setProxy("proxy.yourict.net", 8080);
-		PostMethod postMethod = new PostMethod(TSA_LOCATION);
+		PostMethod postMethod = new PostMethod(tsaLocation);
 		postMethod.setRequestEntity(new ByteArrayRequestEntity(requestData,
 				"application/timestamp-query"));
 
@@ -109,6 +130,7 @@ public class TSATest {
 
 		for (X509Certificate cert : certificateChain) {
 			LOG.debug("certificate subject: " + cert.getSubjectX500Principal());
+			LOG.debug("certificate issuer: " + cert.getIssuerX500Principal());
 		}
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
@@ -129,34 +151,37 @@ public class TSATest {
 		trustValidator.isTrusted(certificateChain);
 	}
 
-    @Test
-    public void testTSA2013() throws Exception {
-         LOG.debug("test TSA 2013");
-        InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
-        byte[] data = IOUtils.toByteArray(inputStream);
-        byte[] derData = Base64.decode(data);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory.generateCertificates(new ByteArrayInputStream(derData));
-        List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
-        for (X509Certificate certificate : certificates) {
-            certificateChain.add(0, certificate);
-        }
+	@Test
+	public void testTSA2013() throws Exception {
+		LOG.debug("test TSA 2013");
+		InputStream inputStream = TSATest.class
+				.getResourceAsStream("/Fedict-2013.txt");
+		byte[] data = IOUtils.toByteArray(inputStream);
+		byte[] derData = Base64.decode(data);
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory
+				.generateCertificates(new ByteArrayInputStream(derData));
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		for (X509Certificate certificate : certificates) {
+			certificateChain.add(0, certificate);
+		}
 
-        MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-        X509Certificate gsCert = (X509Certificate) certificateFactory
-                .generateCertificate(TSATest.class
-                        .getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
-        certificateRepository.addTrustPoint(gsCert);
-        TrustValidator trustValidator = new TrustValidator(
-                certificateRepository);
-        NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-                8080);
-        TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-                networkConfig);
-        trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
+		X509Certificate gsCert = (X509Certificate) certificateFactory
+				.generateCertificate(TSATest.class
+						.getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
+		certificateRepository.addTrustPoint(gsCert);
+		TrustValidator trustValidator = new TrustValidator(
+				certificateRepository);
+		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
+				8080);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
+				networkConfig);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-        trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
 
-        trustValidator.isTrusted(certificateChain);
-    }
+		trustValidator.isTrusted(certificateChain);
+	}
 }
