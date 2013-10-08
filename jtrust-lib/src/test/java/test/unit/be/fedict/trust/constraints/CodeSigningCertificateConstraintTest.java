@@ -18,8 +18,8 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.constraints.CodeSigningCertificateConstraint;
 import org.joda.time.DateTime;
 import org.junit.Before;

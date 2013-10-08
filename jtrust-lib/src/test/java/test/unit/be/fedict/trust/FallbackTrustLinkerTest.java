@@ -18,6 +18,11 @@
 
 package test.unit.be.fedict.trust;
 
+import be.fedict.trust.linker.FallbackTrustLinker;
+import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.revocation.RevocationData;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.policy.AlgorithmPolicy;

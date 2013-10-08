@@ -21,8 +21,8 @@ package test.unit.be.fedict.trust.constraints;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Test;
 

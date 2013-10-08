@@ -18,7 +18,7 @@
 
 package be.fedict.trust.policy;
 
-import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultException;
 
 /**
  * Interface for algorithm policy validation components.

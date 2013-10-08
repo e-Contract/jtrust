@@ -16,8 +16,9 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.constraints;
 
+import be.fedict.trust.linker.TrustLinkerResultException;
 import java.security.cert.X509Certificate;
 
 /**

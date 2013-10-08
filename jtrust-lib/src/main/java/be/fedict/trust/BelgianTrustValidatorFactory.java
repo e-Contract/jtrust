@@ -18,6 +18,7 @@
 
 package be.fedict.trust;
 
+import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.repository.CertificateRepository;
 import java.io.InputStream;

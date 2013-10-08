@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.linker;
 
 /**
  * Used by {@link TrustLinker}'s to return the result of trust validation with

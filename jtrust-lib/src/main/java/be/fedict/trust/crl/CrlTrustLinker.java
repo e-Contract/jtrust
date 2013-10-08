@@ -50,10 +50,10 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.revocation.CRLRevocationData;
 import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.TrustLinker;
-import be.fedict.trust.TrustLinkerResult;
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * Trust linker implementation based on CRL revocation information.

@@ -33,9 +33,8 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extension;
 
-import be.fedict.trust.CertificateConstraint;
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * Certificate Policies certificate constraint implementation.

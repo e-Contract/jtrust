@@ -20,12 +20,11 @@ package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import be.fedict.trust.CertificateConstraint;
 
 /**
  * Key Usage Certificate Constraint implementation.

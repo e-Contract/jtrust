@@ -16,8 +16,12 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.linker;
 
+import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.revocation.RevocationData;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import java.io.IOException;

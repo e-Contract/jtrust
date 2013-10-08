@@ -36,13 +36,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.trust.policy.AlgorithmPolicy;
-import be.fedict.trust.CertificateConstraint;
+import be.fedict.trust.constraints.CertificateConstraint;
 import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
-import be.fedict.trust.TrustLinker;
-import be.fedict.trust.TrustLinkerResult;
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.TrustValidator;
 
 public class TrustValidatorTest {
