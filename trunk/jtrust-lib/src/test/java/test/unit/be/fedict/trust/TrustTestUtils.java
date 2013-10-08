@@ -391,7 +391,7 @@ public class TrustTestUtils {
 		if (ocspResponder) {
 			x509v3CertificateBuilder.addExtension(
 					OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false,
-					new DERNull());
+					DERNull.INSTANCE);
 
 			x509v3CertificateBuilder.addExtension(
 					X509Extension.extendedKeyUsage, true, new ExtendedKeyUsage(
