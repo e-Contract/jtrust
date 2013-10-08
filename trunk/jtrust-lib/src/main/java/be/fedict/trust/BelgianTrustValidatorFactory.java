@@ -18,6 +18,8 @@
 
 package be.fedict.trust;
 
+import be.fedict.trust.repository.MemoryCertificateRepository;
+import be.fedict.trust.repository.CertificateRepository;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;

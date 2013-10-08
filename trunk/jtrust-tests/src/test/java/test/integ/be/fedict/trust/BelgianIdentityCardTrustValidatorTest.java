@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.BelgianTrustValidatorFactory;
-import be.fedict.trust.CertificateRepository;
+import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.PublicKeyTrustLinker;
 import be.fedict.trust.TrustValidator;

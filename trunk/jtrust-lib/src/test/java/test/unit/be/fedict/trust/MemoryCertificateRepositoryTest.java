@@ -32,7 +32,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import be.fedict.trust.MemoryCertificateRepository;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class MemoryCertificateRepositoryTest {
 

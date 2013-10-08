@@ -34,7 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import be.fedict.trust.policy.AllowAllAlgorithmPolicy;
-import be.fedict.trust.MemoryCertificateRepository;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustLinkerResultException;
 import be.fedict.trust.TrustValidator;

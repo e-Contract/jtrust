@@ -37,7 +37,7 @@ import org.junit.Test;
 
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.CertificateConstraint;
-import be.fedict.trust.CertificateRepository;
+import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
