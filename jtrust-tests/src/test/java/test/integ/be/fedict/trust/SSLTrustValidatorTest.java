@@ -36,7 +36,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.CertificatePathBuilder;
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;

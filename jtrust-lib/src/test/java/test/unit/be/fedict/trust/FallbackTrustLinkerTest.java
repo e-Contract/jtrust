@@ -18,6 +18,8 @@
 
 package test.unit.be.fedict.trust;
 
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 

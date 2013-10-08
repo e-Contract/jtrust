@@ -16,31 +16,36 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.policy;
 
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.policy.AlgorithmPolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * An algorithm policy implementation that allows everything.
+ * A default implementation of an algorithm policy.
  * <p/>
- * Gives a log warning on MD5.
+ * Per default we kick out MD5 RSA signatures.
  * 
  * @author Frank Cornelis
  * 
  */
-public class AllowAllAlgorithmPolicy implements AlgorithmPolicy {
+public class DefaultAlgorithmPolicy implements AlgorithmPolicy {
 
 	private static final Log LOG = LogFactory
-			.getLog(AllowAllAlgorithmPolicy.class);
+			.getLog(DefaultAlgorithmPolicy.class);
 
 	@Override
 	public void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws Exception {
+			throws TrustLinkerResultException {
 		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
-			LOG.warn("MD5 being used");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.INVALID_ALGORITHM,
+					"MD5 not allowed");
 		}
 	}
 }

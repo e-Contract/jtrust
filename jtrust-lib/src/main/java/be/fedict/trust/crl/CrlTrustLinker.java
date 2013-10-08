@@ -47,7 +47,7 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extension;
 
-import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.CRLRevocationData;
 import be.fedict.trust.RevocationData;
 import be.fedict.trust.TrustLinker;

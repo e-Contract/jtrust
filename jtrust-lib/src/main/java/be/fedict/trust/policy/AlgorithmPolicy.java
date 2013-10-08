@@ -16,7 +16,9 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.policy;
+
+import be.fedict.trust.TrustLinkerResultException;
 
 /**
  * Interface for algorithm policy validation components.

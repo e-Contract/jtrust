@@ -18,6 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
