@@ -18,12 +18,12 @@
 
 package be.fedict.trust;
 
-import be.fedict.trust.linker.PublicKeyTrustLinker;
-import be.fedict.trust.linker.FallbackTrustLinker;
-import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.linker.FallbackTrustLinker;
+import be.fedict.trust.linker.PublicKeyTrustLinker;
+import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
 

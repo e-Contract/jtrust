@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.cert.ocsp.OCSPResp;
 
 import be.fedict.trust.NetworkConfig;
-import org.bouncycastle.cert.ocsp.OCSPResp;
 
 /**
  * An implementation on an online OCSP repository where you can override the
@@ -59,7 +59,7 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 
 	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-                                                                X509Certificate issuerCertificate) {
+			X509Certificate issuerCertificate) {
 		URI overrideOcspUri = this.overrideURIs.get(ocspUri);
 		if (null != overrideOcspUri) {
 			LOG.debug("Overriding OCSP URI: " + ocspUri + " with "

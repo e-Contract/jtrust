@@ -18,20 +18,8 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.DefaultAlgorithmPolicy;
-import be.fedict.trust.*;
-import be.fedict.trust.crl.CrlRepository;
-import be.fedict.trust.crl.CrlTrustLinker;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.easymock.EasyMock;
-import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.security.KeyPair;
@@ -41,7 +29,20 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.easymock.EasyMock;
+import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+
+import be.fedict.trust.crl.CrlRepository;
+import be.fedict.trust.crl.CrlTrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 public class CrlTrustLinkerTest {
 
@@ -102,7 +103,7 @@ public class CrlTrustLinkerTest {
 		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, null, new RevocationData(),
 				new DefaultAlgorithmPolicy());
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -211,7 +212,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.TRUSTED, result);
+		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -249,7 +250,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -287,7 +288,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -324,7 +325,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -361,7 +362,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -399,7 +400,7 @@ public class CrlTrustLinkerTest {
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
-        assertEquals(TrustLinkerResult.UNDECIDED, result);
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
 
@@ -435,14 +436,14 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		try {
-            crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData(),
-				new DefaultAlgorithmPolicy());
-            fail();
-        }
-        catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS, e.getReason());
-        }
+			crlTrustLinker.hasTrustLink(certificate, rootCertificate,
+					validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+					e.getReason());
+		}
 
 		EasyMock.verify(mockCrlRepository);
 	}
@@ -479,13 +480,14 @@ public class CrlTrustLinkerTest {
 		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		try {
-            crlTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData(),
-				new DefaultAlgorithmPolicy());
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM, e.getReason());
-        }
+			crlTrustLinker.hasTrustLink(certificate, rootCertificate,
+					validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
+					e.getReason());
+		}
 
 		EasyMock.verify(mockCrlRepository);
 	}

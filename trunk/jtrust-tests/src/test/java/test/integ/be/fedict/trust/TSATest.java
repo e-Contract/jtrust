@@ -54,12 +54,12 @@ import org.bouncycastle.util.encoders.Base64;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
-import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
 import be.fedict.trust.constraints.TSACertificateConstraint;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class TSATest {
 

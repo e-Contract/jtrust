@@ -18,13 +18,9 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.ocsp.OfflineOcspRepository;
-import org.bouncycastle.cert.ocsp.OCSPResp;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.net.URI;
 import java.security.KeyPair;
@@ -32,7 +28,14 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.joda.time.DateTime;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import be.fedict.trust.ocsp.OfflineOcspRepository;
 
 public class OfflineOcspRepositoryTest {
 

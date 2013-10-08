@@ -18,7 +18,24 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.crl.OnlineCrlRepository;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,20 +47,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.testing.ServletTester;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-
-import static org.junit.Assert.*;
+import be.fedict.trust.crl.OnlineCrlRepository;
 
 public class OnlineCrlRepositoryTest {
 

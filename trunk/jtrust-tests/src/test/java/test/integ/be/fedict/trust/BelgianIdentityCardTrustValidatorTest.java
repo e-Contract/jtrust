@@ -27,15 +27,15 @@ import org.junit.Test;
 
 import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.BelgianTrustValidatorFactory;
-import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.NetworkConfig;
-import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
+import be.fedict.trust.repository.CertificateRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
 

@@ -18,10 +18,11 @@
 
 package be.fedict.trust.linker;
 
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 /**
  * Interface for trust linker components.
@@ -50,5 +51,6 @@ public interface TrustLinker {
 	 */
 	TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception;
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
+			throws TrustLinkerResultException, Exception;
 }

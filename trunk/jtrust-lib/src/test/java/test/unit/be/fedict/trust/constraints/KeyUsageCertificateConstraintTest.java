@@ -18,11 +18,12 @@
 
 package test.unit.be.fedict.trust.constraints;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -30,8 +31,8 @@ import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
-
-import static org.junit.Assert.*;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 public class KeyUsageCertificateConstraintTest {
 
@@ -53,12 +54,13 @@ public class KeyUsageCertificateConstraintTest {
 						notAfter);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -74,12 +76,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setNonRepudiationFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -95,12 +98,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setNonRepudiationFilter(true);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -153,12 +157,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setKeyEnciphermentFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -176,12 +181,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setDataEnciphermentFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -198,12 +204,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setKeyAgreementFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -220,12 +227,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setKeyCertificateSigningFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -242,12 +250,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setCRLSigningFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -264,12 +273,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setEncipherOnlyFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -286,12 +296,13 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setDecipherOnlyFilter(false);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -308,11 +319,12 @@ public class KeyUsageCertificateConstraintTest {
 		this.testedInstance.setCRLSigningFilter(true);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 }

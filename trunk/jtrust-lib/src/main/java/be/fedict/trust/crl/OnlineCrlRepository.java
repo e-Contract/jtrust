@@ -18,8 +18,17 @@
 
 package be.fedict.trust.crl;
 
-import be.fedict.trust.Credentials;
-import be.fedict.trust.NetworkConfig;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.security.NoSuchProviderException;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -28,12 +37,8 @@ import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.security.NoSuchProviderException;
-import java.security.cert.*;
-import java.util.Date;
+import be.fedict.trust.Credentials;
+import be.fedict.trust.NetworkConfig;
 
 /**
  * Online CRL repository. This CRL repository implementation will download the
@@ -113,11 +118,13 @@ public class OnlineCrlRepository implements CrlRepository {
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance(
 				"X.509", "BC");
-        LOG.debug("certificate factory provider: " + certificateFactory.getProvider().getName());
-        LOG.debug("certificate factory class: " + certificateFactory.getClass().getName());
+		LOG.debug("certificate factory provider: "
+				+ certificateFactory.getProvider().getName());
+		LOG.debug("certificate factory class: "
+				+ certificateFactory.getClass().getName());
 		X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
 				.getResponseBodyAsStream());
-        LOG.debug("X509CRL class: " + crl.getClass().getName());
+		LOG.debug("X509CRL class: " + crl.getClass().getName());
 		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
 		return crl;
 	}

@@ -35,15 +35,15 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.TrustValidator;
 import be.fedict.trust.constraints.CertificateConstraint;
-import be.fedict.trust.repository.CertificateRepository;
-import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.linker.TrustLinkerResult;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.TrustValidator;
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.repository.CertificateRepository;
 
 public class TrustValidatorTest {
 
@@ -571,7 +571,9 @@ public class TrustValidatorTest {
 		CertificateConstraint mockCertificateConstraint = EasyMock
 				.createMock(CertificateConstraint.class);
 		mockCertificateConstraint.check(certificate);
-        EasyMock.expectLastCall().andThrow(new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION));
+		EasyMock.expectLastCall().andThrow(
+				new TrustLinkerResultException(
+						TrustLinkerResultReason.CONSTRAINT_VIOLATION));
 		trustValidator.addCertificateConstrain(mockCertificateConstraint);
 
 		EasyMock.replay(mockCertificateRepository, mockCertificateConstraint,
@@ -582,7 +584,8 @@ public class TrustValidatorTest {
 			fail();
 		} catch (TrustLinkerResultException e) {
 			// expected
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
 			EasyMock.verify(mockCertificateRepository,
 					mockCertificateConstraint, mockTrustLinker);
 		}
@@ -750,7 +753,7 @@ public class TrustValidatorTest {
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker,
 				mockTrustLinker2);
 
-	    trustValidator.isTrusted(certificatePath, validationDate);
+		trustValidator.isTrusted(certificatePath, validationDate);
 	}
 
 	@Test
@@ -840,9 +843,9 @@ public class TrustValidatorTest {
 						EasyMock.eq(validationDate),
 						EasyMock.eq(trustValidator.getRevocationData()),
 						EasyMock.anyObject(AlgorithmPolicy.class))).andThrow(
-                new TrustLinkerResultException(
-                        TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
-                        "revoked"));
+				new TrustLinkerResultException(
+						TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+						"revoked"));
 		trustValidator.addTrustLinker(mockTrustLinker);
 
 		EasyMock.replay(mockCertificateRepository, mockTrustLinker);

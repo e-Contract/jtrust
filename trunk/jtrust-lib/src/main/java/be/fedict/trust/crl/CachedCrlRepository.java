@@ -18,10 +18,6 @@
 
 package be.fedict.trust.crl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.security.cert.X509CRL;
@@ -30,6 +26,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 
 /**
  * A cached CRL repository implementation. This CRL repository will cache CRLs

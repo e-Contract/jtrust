@@ -18,22 +18,23 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.linker.FallbackTrustLinker;
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.DefaultAlgorithmPolicy;
-import be.fedict.trust.policy.AlgorithmPolicy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import be.fedict.trust.*;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import be.fedict.trust.linker.FallbackTrustLinker;
+import be.fedict.trust.linker.TrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 public class FallbackTrustLinkerTest {
 
@@ -76,8 +77,10 @@ public class FallbackTrustLinkerTest {
 						EasyMock.eq((X509Certificate) null),
 						EasyMock.eq(validationDate),
 						EasyMock.eq((RevocationData) null),
-						EasyMock.anyObject(AlgorithmPolicy.class))).andThrow(
-                new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST));
+						EasyMock.anyObject(AlgorithmPolicy.class)))
+				.andThrow(
+						new TrustLinkerResultException(
+								TrustLinkerResultReason.NO_TRUST));
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		fallbackTrustLinker.addTrustLinker(mockTrustLinker);
@@ -86,12 +89,12 @@ public class FallbackTrustLinkerTest {
 
 		// operate
 		try {
-            fallbackTrustLinker.hasTrustLink(null, null,
-				validationDate, null, new DefaultAlgorithmPolicy());
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-        }
+			fallbackTrustLinker.hasTrustLink(null, null, validationDate, null,
+					new DefaultAlgorithmPolicy());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
+		}
 
 		// verify
 		EasyMock.verify(mockTrustLinker);

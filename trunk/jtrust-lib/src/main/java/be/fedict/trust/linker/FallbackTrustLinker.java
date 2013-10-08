@@ -18,11 +18,6 @@
 
 package be.fedict.trust.linker;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
@@ -30,6 +25,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 /**
  * Fallback trust linker. Implements a trust linker fallback strategy.
@@ -63,7 +61,8 @@ public class FallbackTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
+			throws TrustLinkerResultException, Exception {
 		for (TrustLinker trustLinker : this.trustLinkers) {
 			LOG.debug("trying trust linker: "
 					+ trustLinker.getClass().getSimpleName());
@@ -73,9 +72,9 @@ public class FallbackTrustLinker implements TrustLinker {
 			if (null == result) {
 				continue;
 			}
-            if (TrustLinkerResult.UNDECIDED == result) {
-                continue;
-            }
+			if (TrustLinkerResult.UNDECIDED == result) {
+				continue;
+			}
 			return result;
 		}
 		return TrustLinkerResult.UNDECIDED;
