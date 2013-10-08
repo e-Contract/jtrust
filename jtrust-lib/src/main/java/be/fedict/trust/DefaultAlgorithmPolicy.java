@@ -18,8 +18,6 @@
 
 package be.fedict.trust;
 
-import java.security.SignatureException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,7 +40,9 @@ public class DefaultAlgorithmPolicy implements AlgorithmPolicy {
 		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
-			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_ALGORITHM, "MD5 not allowed");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.INVALID_ALGORITHM,
+					"MD5 not allowed");
 		}
 	}
 }

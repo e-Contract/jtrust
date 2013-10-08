@@ -18,9 +18,12 @@
 
 package be.fedict.trust.constraints;
 
-import be.fedict.trust.CertificateConstraint;
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import java.io.ByteArrayInputStream;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -30,12 +33,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extension;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import be.fedict.trust.CertificateConstraint;
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * Certificate Policies certificate constraint implementation.
@@ -67,16 +67,19 @@ public class CertificatePoliciesCertificateConstraint implements
 		this.certificatePolicies.add(certificatePolicy);
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
 				.getExtensionValue(X509Extension.certificatePolicies.getId());
 		if (null == extensionValue) {
-			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing certificate policies X509 extension");
-        }
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"missing certificate policies X509 extension");
+		}
 		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
-					new ByteArrayInputStream(extensionValue)).readObject());
-        ASN1Sequence certPolicies = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
-					.readObject();
+				new ByteArrayInputStream(extensionValue)).readObject());
+		ASN1Sequence certPolicies = (ASN1Sequence) new ASN1InputStream(
+				oct.getOctets()).readObject();
 		Enumeration<?> certPoliciesEnum = certPolicies.getObjects();
 		while (certPoliciesEnum.hasMoreElements()) {
 			PolicyInformation policyInfo = PolicyInformation
@@ -89,6 +92,8 @@ public class CertificatePoliciesCertificateConstraint implements
 				return;
 			}
 		}
-        throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "required policy OID not present");
+		throw new TrustLinkerResultException(
+				TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+				"required policy OID not present");
 	}
 }

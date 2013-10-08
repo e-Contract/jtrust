@@ -21,7 +21,6 @@ package be.fedict.trust;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -39,10 +38,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 
 /**
  * Certificate path builder. Helper class to complete partial certificate chains
@@ -153,33 +155,35 @@ public class CertificatePathBuilder {
 	}
 
 	private String getSubjectKeyIdentifier(X509Certificate certificate) {
-        JcaX509ExtensionUtils utils;
-        try {
-            utils = new JcaX509ExtensionUtils();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        SubjectKeyIdentifier subjectKeyIdentifier = utils.createSubjectKeyIdentifier(certificate.getPublicKey());
-		String skidId = new String(Hex.encodeHex(subjectKeyIdentifier.getKeyIdentifier()));
+		JcaX509ExtensionUtils utils;
+		try {
+			utils = new JcaX509ExtensionUtils();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		SubjectKeyIdentifier subjectKeyIdentifier = utils
+				.createSubjectKeyIdentifier(certificate.getPublicKey());
+		String skidId = new String(Hex.encodeHex(subjectKeyIdentifier
+				.getKeyIdentifier()));
 		return skidId;
 	}
 
 	private String getAuthorityKeyIdentifier(X509Certificate certificate) {
 		byte[] authorityKeyIdentifierData = certificate
-				.getExtensionValue(X509Extension.authorityKeyIdentifier
-						.getId());
+				.getExtensionValue(X509Extension.authorityKeyIdentifier.getId());
 		if (null == authorityKeyIdentifierData) {
 			return null;
 		}
-        JcaX509ExtensionUtils utils;
-        try {
-            utils = new JcaX509ExtensionUtils();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(authorityKeyIdentifierData);
-		String akidId = new String(
-				Hex.encodeHex(authorityKeyIdentifier.getKeyIdentifier()));
+		JcaX509ExtensionUtils utils;
+		try {
+			utils = new JcaX509ExtensionUtils();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(
+				authorityKeyIdentifierData);
+		String akidId = new String(Hex.encodeHex(authorityKeyIdentifier
+				.getKeyIdentifier()));
 		return akidId;
 	}
 

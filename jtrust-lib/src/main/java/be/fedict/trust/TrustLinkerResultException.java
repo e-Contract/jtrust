@@ -27,6 +27,8 @@ package be.fedict.trust;
  */
 public class TrustLinkerResultException extends Exception {
 
+	private static final long serialVersionUID = 1L;
+
 	private final TrustLinkerResultReason reason;
 
 	/**
@@ -34,22 +36,22 @@ public class TrustLinkerResultException extends Exception {
 	 */
 	public TrustLinkerResultException() {
 		super();
-        this.reason = null;
+		this.reason = null;
 	}
 
-    public TrustLinkerResultException(String message) {
-        super(message);
-        this.reason = null;
-    }
+	public TrustLinkerResultException(String message) {
+		super(message);
+		this.reason = null;
+	}
 
-    public TrustLinkerResultException(String message, Throwable cause) {
-        super(message, cause);
-        this.reason = null;
-    }
+	public TrustLinkerResultException(String message, Throwable cause) {
+		super(message, cause);
+		this.reason = null;
+	}
 
 	/**
 	 * Main constructor
-	 *
+	 * 
 	 * @param reason
 	 *            the reason for being invalid
 	 * @param message
@@ -57,18 +59,19 @@ public class TrustLinkerResultException extends Exception {
 	 */
 	public TrustLinkerResultException(TrustLinkerResultReason reason,
 			String message) {
-        super(message);
+		super(message);
 		this.reason = reason;
 	}
 
-    public TrustLinkerResultException(TrustLinkerResultReason reason, String message, Throwable cause) {
-        super(message, cause);
-        this.reason = reason;
-    }
+	public TrustLinkerResultException(TrustLinkerResultReason reason,
+			String message, Throwable cause) {
+		super(message, cause);
+		this.reason = reason;
+	}
 
-    public TrustLinkerResultException(TrustLinkerResultReason reason) {
-        this.reason = reason;
-    }
+	public TrustLinkerResultException(TrustLinkerResultReason reason) {
+		this.reason = reason;
+	}
 
 	/**
 	 * Returns the optional reason. Returns <code>null</code> if no reason set.
