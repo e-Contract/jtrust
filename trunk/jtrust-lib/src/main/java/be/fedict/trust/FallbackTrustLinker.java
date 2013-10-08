@@ -18,6 +18,7 @@
 
 package be.fedict.trust;
 
+import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;

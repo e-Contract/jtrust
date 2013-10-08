@@ -18,6 +18,8 @@
 
 package be.fedict.trust;
 
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
