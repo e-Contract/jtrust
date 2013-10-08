@@ -18,6 +18,8 @@
 
 package test.integ.be.fedict.trust;
 
+import static org.junit.Assert.fail;
+
 import java.io.InputStream;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
@@ -34,6 +36,7 @@ import org.junit.Test;
 import be.fedict.trust.AllowAllAlgorithmPolicy;
 import be.fedict.trust.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
+import be.fedict.trust.TrustLinkerResultException;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
 
@@ -136,7 +139,12 @@ public class CodeSigningTest {
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
 				null, true);
 
-		trustValidator.isTrusted(certChain);
+		try {
+			trustValidator.isTrusted(certChain);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+		}
 	}
 
 	@Test
@@ -220,7 +228,7 @@ public class CodeSigningTest {
 		certificateRepository.addTrustPoint(gsCert);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
-		
+
 		trustValidator.setAlgorithmPolicy(new AllowAllAlgorithmPolicy());
 
 		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",

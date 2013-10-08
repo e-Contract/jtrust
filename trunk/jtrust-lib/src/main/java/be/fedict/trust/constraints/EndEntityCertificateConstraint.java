@@ -28,7 +28,6 @@ import java.util.Set;
 import be.fedict.trust.CertificateConstraint;
 import be.fedict.trust.TrustLinkerResultException;
 import be.fedict.trust.TrustLinkerResultReason;
-import be.fedict.trust.TrustValidator;
 
 /**
  * End-Entity Certificate Constraint implementation. This CertificateConstraint
@@ -82,15 +81,20 @@ public class EndEntityCertificateConstraint implements CertificateConstraint {
 		issuerSerials.add(serialNumber);
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException {
 		String issuerName = certificate.getIssuerX500Principal().getName();
 		Set<BigInteger> issuerSerials = this.endEntities.get(issuerName);
 		if (null == issuerSerials) {
-			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "unknown issuer");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"unknown issuer");
 		}
 		BigInteger serialNumber = certificate.getSerialNumber();
-        if (false == issuerSerials.contains(serialNumber)) {
-            throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "unknown serial number");
-        }
+		if (false == issuerSerials.contains(serialNumber)) {
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"unknown serial number");
+		}
 	}
 }

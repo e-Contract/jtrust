@@ -18,8 +18,6 @@
 
 package be.fedict.trust;
 
-import java.security.SignatureException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

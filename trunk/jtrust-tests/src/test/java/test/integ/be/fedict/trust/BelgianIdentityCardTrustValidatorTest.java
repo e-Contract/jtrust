@@ -18,21 +18,26 @@
 
 package test.integ.be.fedict.trust;
 
-import be.fedict.commons.eid.jca.BeIDProvider;
-import be.fedict.trust.*;
-import be.fedict.trust.crl.CachedCrlRepository;
-import be.fedict.trust.crl.CrlTrustLinker;
-import be.fedict.trust.crl.OnlineCrlRepository;
-import be.fedict.trust.ocsp.OcspTrustLinker;
-import be.fedict.trust.ocsp.OnlineOcspRepository;
+import java.security.KeyStore;
+import java.security.Security;
+import java.security.cert.Certificate;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 
-import java.security.KeyStore;
-import java.security.Security;
-import java.security.cert.Certificate;
+import be.fedict.commons.eid.jca.BeIDProvider;
+import be.fedict.trust.BelgianTrustValidatorFactory;
+import be.fedict.trust.CertificateRepository;
+import be.fedict.trust.NetworkConfig;
+import be.fedict.trust.PublicKeyTrustLinker;
+import be.fedict.trust.TrustValidator;
+import be.fedict.trust.crl.CachedCrlRepository;
+import be.fedict.trust.crl.CrlTrustLinker;
+import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.ocsp.OcspTrustLinker;
+import be.fedict.trust.ocsp.OnlineOcspRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
 
@@ -41,10 +46,11 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 	@Test
 	public void testValidity() throws Exception {
-        Security.addProvider(new BeIDProvider());
-        KeyStore keyStore = KeyStore.getInstance("BeID");
-        keyStore.load(null);
-        Certificate[] authnCertificateChain = keyStore.getCertificateChain("Authentication");
+		Security.addProvider(new BeIDProvider());
+		KeyStore keyStore = KeyStore.getInstance("BeID");
+		keyStore.load(null);
+		Certificate[] authnCertificateChain = keyStore
+				.getCertificateChain("Authentication");
 
 		Security.addProvider(new BouncyCastleProvider());
 
@@ -75,5 +81,4 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 		trustValidator.isTrusted(authnCertificateChain);
 	}
-
 }

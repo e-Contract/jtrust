@@ -19,12 +19,9 @@
 package be.fedict.trust.constraints;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -35,6 +32,8 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 
 import be.fedict.trust.CertificateConstraint;
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * QCStatements certificate constraint.
@@ -54,16 +53,19 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		this.qcComplianceFilter = qcComplianceFilter;
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
 				.getExtensionValue(X509Extension.qCStatements.getId());
 		if (null == extensionValue) {
-			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing QCStatements extension");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"missing QCStatements extension");
 		}
-	    DEROctetString oct = (DEROctetString) (new ASN1InputStream(
-					new ByteArrayInputStream(extensionValue)).readObject());
-        ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets())
-					.readObject();
+		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
+				new ByteArrayInputStream(extensionValue)).readObject());
+		ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(
+				oct.getOctets()).readObject();
 		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
 		boolean qcCompliance = false;
 		while (qcStatementEnum.hasMoreElements()) {
@@ -77,7 +79,9 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		}
 		if (null != this.qcComplianceFilter) {
 			if (qcCompliance != this.qcComplianceFilter) {
-				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "QCStatements not matching");
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+						"QCStatements not matching");
 			}
 		}
 	}

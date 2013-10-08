@@ -19,7 +19,6 @@
 package be.fedict.trust;
 
 import java.io.IOException;
-import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -47,7 +46,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
+			throws TrustLinkerResultException, Exception {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
 			LOG.debug("child certificate issuer not the same as the issuer certificate subject");
@@ -69,9 +69,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"verification error: " + e.getMessage());
 		}
 
-	    algorithmPolicy.checkSignatureAlgorithm(childCertificate
-					.getSigAlgOID());
-
+		algorithmPolicy
+				.checkSignatureAlgorithm(childCertificate.getSigAlgOID());
 
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
@@ -133,8 +132,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		byte[] subjectKeyIdentifierData = certificate
 				.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
 		byte[] authorityKeyIdentifierData = childCertificate
-				.getExtensionValue(X509Extension.authorityKeyIdentifier
-						.getId());
+				.getExtensionValue(X509Extension.authorityKeyIdentifier.getId());
 
 		if (isCa && null == subjectKeyIdentifierData) {
 			LOG.debug("certificate is CA and MUST contain a Subject Key Identifier");
@@ -146,9 +144,9 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		if (isChildCa && null == authorityKeyIdentifierData
 				&& null != subjectKeyIdentifierData) {
 			LOG.error("child certificate is CA and MUST contain an Authority Key Identifier");
-			//return new TrustLinkerResult(false,
-			//		TrustLinkerResultReason.INVALID_TRUST,
-			//		"child certificate is CA and MUST contain an Authority Key Identifier");
+			// return new TrustLinkerResult(false,
+			// TrustLinkerResultReason.INVALID_TRUST,
+			// "child certificate is CA and MUST contain an Authority Key Identifier");
 		}
 
 		if (null != subjectKeyIdentifierData
@@ -194,9 +192,9 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		 * We don't check pathLenConstraint since this one is only there to
 		 * protect the PKI business.
 		 */
-        /*
-         * Keep in mind that this trust linker can never return TRUSTED.
-         */
+		/*
+		 * Keep in mind that this trust linker can never return TRUSTED.
+		 */
 		return TrustLinkerResult.UNDECIDED;
 	}
 
@@ -221,8 +219,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			return false;
 		}
 		ASN1Sequence basicConstraintsSequence = (ASN1Sequence) basicConstraintsDecoded;
-		BasicConstraints basicConstraints = BasicConstraints.getInstance(
-				basicConstraintsSequence);
+		BasicConstraints basicConstraints = BasicConstraints
+				.getInstance(basicConstraintsSequence);
 		return basicConstraints.isCA();
 	}
 }

@@ -18,7 +18,6 @@
 
 package be.fedict.trust.ocsp;
 
-import java.io.IOException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -32,9 +31,6 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import be.fedict.trust.Credentials;
-import be.fedict.trust.NetworkConfig;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.OCSPReq;
@@ -42,8 +38,10 @@ import org.bouncycastle.cert.ocsp.OCSPReqBuilder;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+
+import be.fedict.trust.Credentials;
+import be.fedict.trust.NetworkConfig;
 
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder
@@ -89,28 +87,29 @@ public class OnlineOcspRepository implements OcspRepository {
 	}
 
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-                                     X509Certificate issuerCertificate) {
-            OCSPResp ocspResp = null;
-            try {
-                ocspResp = getOcspResponse(ocspUri, certificate,
-                        issuerCertificate);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return ocspResp;
+			X509Certificate issuerCertificate) {
+		OCSPResp ocspResp = null;
+		try {
+			ocspResp = getOcspResponse(ocspUri, certificate, issuerCertificate);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return ocspResp;
 	}
 
 	private OCSPResp getOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate) throws Exception {
 		LOG.debug("OCSP URI: " + ocspUri);
-        OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
-        DigestCalculatorProvider
-            digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
-        CertificateID certId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
-                new JcaX509CertificateHolder(issuerCertificate), certificate.getSerialNumber());
-        ocspReqBuilder.addRequest(certId);
+		OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
+		DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder()
+				.setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+		CertificateID certId = new CertificateID(
+				digCalcProv.get(CertificateID.HASH_SHA1),
+				new JcaX509CertificateHolder(issuerCertificate),
+				certificate.getSerialNumber());
+		ocspReqBuilder.addRequest(certId);
 
-        OCSPReq ocspReq = ocspReqBuilder.build();
+		OCSPReq ocspReq = ocspReqBuilder.build();
 		byte[] ocspReqData = ocspReq.getEncoded();
 
 		PostMethod postMethod = new PostMethod(ocspUri.toString());

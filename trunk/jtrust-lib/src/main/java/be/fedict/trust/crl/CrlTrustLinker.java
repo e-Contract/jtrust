@@ -24,14 +24,12 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
-import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import be.fedict.trust.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -48,6 +46,14 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extension;
+
+import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.CRLRevocationData;
+import be.fedict.trust.RevocationData;
+import be.fedict.trust.TrustLinker;
+import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -73,7 +79,8 @@ public class CrlTrustLinker implements TrustLinker {
 
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
-			RevocationData revocationData, AlgorithmPolicy algorithmPolicy) throws TrustLinkerResultException, Exception {
+			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
+			throws TrustLinkerResultException, Exception {
 
 		URI crlUri = getCrlUri(childCertificate);
 		if (null == crlUri) {
@@ -115,8 +122,9 @@ public class CrlTrustLinker implements TrustLinker {
 				revocationData.getCrlRevocationData().add(crlRevocationData);
 			} catch (CRLException e) {
 				LOG.error("CRLException: " + e.getMessage(), e);
-				throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "CRLException : " + e.getMessage(),
-						e);
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.UNSPECIFIED, "CRLException : "
+								+ e.getMessage(), e);
 			}
 		}
 
@@ -148,9 +156,9 @@ public class CrlTrustLinker implements TrustLinker {
 							new ByteArrayInputStream(reasonCodeExtension))
 							.readObject());
 					byte[] octets = octetString.getOctets();
-					CRLReason crlReason = CRLReason.getInstance(
-                            DEREnumerated.getInstance(new ASN1InputStream(
-                                    octets).readObject()));
+					CRLReason crlReason = CRLReason.getInstance(DEREnumerated
+							.getInstance(new ASN1InputStream(octets)
+									.readObject()));
 					BigInteger crlReasonValue = crlReason.getValue();
 					LOG.debug("CRL reason value: " + crlReasonValue);
 					switch (crlReasonValue.intValue()) {
@@ -161,7 +169,9 @@ public class CrlTrustLinker implements TrustLinker {
 										+ crlEntry.getSerialNumber());
 					}
 				} catch (IOException e) {
-					throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "IO error: " + e.getMessage(), e);
+					throw new TrustLinkerResultException(
+							TrustLinkerResultReason.UNSPECIFIED, "IO error: "
+									+ e.getMessage(), e);
 				}
 			}
 		}

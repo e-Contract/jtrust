@@ -18,8 +18,6 @@
 
 package be.fedict.trust;
 
-import java.security.SignatureException;
-
 /**
  * Interface for algorithm policy validation components.
  * 
