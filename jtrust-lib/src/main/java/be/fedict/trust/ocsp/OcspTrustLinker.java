@@ -57,9 +57,9 @@ import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import be.fedict.trust.policy.AlgorithmPolicy;
-import be.fedict.trust.OCSPRevocationData;
+import be.fedict.trust.revocation.OCSPRevocationData;
 import be.fedict.trust.PublicKeyTrustLinker;
-import be.fedict.trust.RevocationData;
+import be.fedict.trust.revocation.RevocationData;
 import be.fedict.trust.TrustLinker;
 import be.fedict.trust.TrustLinkerResult;
 import be.fedict.trust.TrustLinkerResultException;
