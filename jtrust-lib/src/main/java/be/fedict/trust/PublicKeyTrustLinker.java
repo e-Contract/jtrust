@@ -20,17 +20,18 @@ package be.fedict.trust;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
@@ -151,36 +152,14 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 		if (null != subjectKeyIdentifierData
 				&& null != authorityKeyIdentifierData) {
-
-			AuthorityKeyIdentifierStructure authorityKeyIdentifierStructure;
-			try {
-				authorityKeyIdentifierStructure = new AuthorityKeyIdentifierStructure(
-						authorityKeyIdentifierData);
-			} catch (IOException e) {
-				LOG.debug("Error parsing authority key identifier structure");
-				throw new TrustLinkerResultException(
-						TrustLinkerResultReason.NO_TRUST,
-						"Error parsing authority key identifier structure");
-			}
-			String akidId = new String(
-					Hex.encodeHex(authorityKeyIdentifierStructure
-							.getKeyIdentifier()));
-
-			SubjectKeyIdentifierStructure subjectKeyIdentifierStructure;
-			try {
-				subjectKeyIdentifierStructure = new SubjectKeyIdentifierStructure(
-						subjectKeyIdentifierData);
-			} catch (IOException e) {
-				LOG.debug("Error parsing subject key identifier structure");
-				throw new TrustLinkerResultException(
-						TrustLinkerResultReason.NO_TRUST,
-						"Error parsing subject key identifier structure");
-			}
-			String skidId = new String(
-					Hex.encodeHex(subjectKeyIdentifierStructure
-							.getKeyIdentifier()));
-
-			if (!skidId.equals(akidId)) {
+			AuthorityKeyIdentifier authorityKeyIdentifier = AuthorityKeyIdentifier
+					.getInstance(JcaX509ExtensionUtils
+							.parseExtensionValue(authorityKeyIdentifierData));
+			SubjectKeyIdentifier subjectKeyIdentifier = SubjectKeyIdentifier
+					.getInstance(JcaX509ExtensionUtils
+							.parseExtensionValue(subjectKeyIdentifierData));
+			if (!Arrays.equals(authorityKeyIdentifier.getKeyIdentifier(),
+					subjectKeyIdentifier.getKeyIdentifier())) {
 				LOG.debug("certificate's subject key identifier does not match child certificate's authority key identifier");
 				throw new TrustLinkerResultException(
 						TrustLinkerResultReason.NO_TRUST,
