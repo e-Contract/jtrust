@@ -22,8 +22,6 @@ import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 
@@ -40,9 +38,6 @@ import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
-
-	private static final Log LOG = LogFactory
-			.getLog(BelgianIdentityCardTrustValidatorTest.class);
 
 	@Test
 	public void testValidity() throws Exception {

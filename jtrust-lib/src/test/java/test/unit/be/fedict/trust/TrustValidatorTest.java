@@ -18,23 +18,32 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.security.KeyPair;
+import java.security.Security;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.security.KeyPair;
-import java.security.Security;
-import java.security.SignatureException;
-import java.security.cert.CertPathValidatorException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import be.fedict.trust.AlgorithmPolicy;
+import be.fedict.trust.CertificateConstraint;
+import be.fedict.trust.CertificateRepository;
+import be.fedict.trust.DefaultAlgorithmPolicy;
+import be.fedict.trust.TrustLinker;
+import be.fedict.trust.TrustLinkerResult;
+import be.fedict.trust.TrustLinkerResultException;
+import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.TrustValidator;
 
 public class TrustValidatorTest {
 

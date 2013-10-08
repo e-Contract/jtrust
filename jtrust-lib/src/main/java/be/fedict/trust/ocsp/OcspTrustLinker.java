@@ -217,7 +217,7 @@ public class OcspTrustLinker implements TrustLinker {
 						.generateCertificate(new ByteArrayInputStream(
 								ocspResponderCertificate.getEncoded()));
 				LOG.debug("OCSP Responder public key fingerprint: "
-						+ DigestUtils.shaHex(x509OcspResponderCertificate
+						+ DigestUtils.sha1Hex(x509OcspResponderCertificate
 								.getPublicKey().getEncoded()));
 				publicKeyTrustLinker.hasTrustLink(x509OcspResponderCertificate,
 						issuingCaCertificate, validationDate, revocationData,

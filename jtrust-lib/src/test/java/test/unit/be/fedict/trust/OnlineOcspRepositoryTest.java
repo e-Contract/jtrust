@@ -159,7 +159,7 @@ public class OnlineOcspRepositoryTest {
 
 		// operate & verify
         try {
-		    OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
+		    this.testedInstance.findOcspResponse(this.ocspUri,
 				this.certificate, this.rootCertificate);
             fail();
         }
