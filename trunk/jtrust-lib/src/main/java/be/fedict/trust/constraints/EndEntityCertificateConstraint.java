@@ -25,9 +25,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import be.fedict.trust.CertificateConstraint;
-import be.fedict.trust.TrustLinkerResultException;
-import be.fedict.trust.TrustLinkerResultReason;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * End-Entity Certificate Constraint implementation. This CertificateConstraint

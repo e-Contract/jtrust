@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.linker;
 
 /**
  * Enumeration for trust linker positive results.
