@@ -174,12 +174,6 @@ public class CertificatePathBuilder {
 		if (null == authorityKeyIdentifierData) {
 			return null;
 		}
-		JcaX509ExtensionUtils utils;
-		try {
-			utils = new JcaX509ExtensionUtils();
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
 		AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(
 				authorityKeyIdentifierData);
 		String akidId = new String(Hex.encodeHex(authorityKeyIdentifier

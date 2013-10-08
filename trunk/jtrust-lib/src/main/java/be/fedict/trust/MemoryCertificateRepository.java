@@ -81,7 +81,7 @@ public class MemoryCertificateRepository implements CertificateRepository {
 			throw new IllegalArgumentException("certificate encoding error: "
 					+ e.getMessage(), e);
 		}
-		String fingerprint = DigestUtils.shaHex(encodedCertificate);
+		String fingerprint = DigestUtils.sha1Hex(encodedCertificate);
 		return fingerprint;
 	}
 }
