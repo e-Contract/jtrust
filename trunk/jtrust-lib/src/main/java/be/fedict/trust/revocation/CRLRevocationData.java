@@ -16,27 +16,27 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.revocation;
 
 /**
- * Data object for OCSP revocation data.
+ * Data object for CRL revocation data.
  * 
  * @author Frank Cornelis
  * 
  */
-public class OCSPRevocationData {
+public class CRLRevocationData {
 
-	private final byte[] ocsp;
+	private final byte[] crl;
 
 	private final String uri;
 
-	public OCSPRevocationData(byte[] ocsp, String uri) {
-		this.ocsp = ocsp;
+	public CRLRevocationData(byte[] crl, String uri) {
+		this.crl = crl;
 		this.uri = uri;
 	}
 
-	public byte[] getOCSP() {
-		return this.ocsp;
+	public byte[] getCRL() {
+		return this.crl;
 	}
 
 	public String getURI() {

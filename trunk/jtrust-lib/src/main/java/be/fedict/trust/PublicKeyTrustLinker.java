@@ -18,6 +18,7 @@
 
 package be.fedict.trust;
 
+import be.fedict.trust.revocation.RevocationData;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import java.io.IOException;
 import java.security.cert.X509Certificate;

@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package be.fedict.trust;
+package be.fedict.trust.revocation;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -18,6 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
+import be.fedict.trust.revocation.RevocationData;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.*;
 import be.fedict.trust.crl.CrlRepository;
