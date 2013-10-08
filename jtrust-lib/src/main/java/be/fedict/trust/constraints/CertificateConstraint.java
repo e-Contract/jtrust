@@ -18,8 +18,9 @@
 
 package be.fedict.trust.constraints;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
 import java.security.cert.X509Certificate;
+
+import be.fedict.trust.linker.TrustLinkerResultException;
 
 /**
  * Interface for X509 certificate constraint components.
@@ -35,5 +36,6 @@ public interface CertificateConstraint {
 	 * @param certificate
 	 *            the X509 certificate.
 	 */
-	void check(X509Certificate certificate) throws TrustLinkerResultException, Exception;
+	void check(X509Certificate certificate) throws TrustLinkerResultException,
+			Exception;
 }

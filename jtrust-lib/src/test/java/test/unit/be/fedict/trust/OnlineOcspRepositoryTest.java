@@ -158,14 +158,13 @@ public class OnlineOcspRepositoryTest {
 		OcspResponderTestServlet.setOcspData("foobar".getBytes());
 
 		// operate & verify
-        try {
-		    this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate);
-            fail();
-        }
-        catch(Exception e) {
-            // expected
-        }
+		try {
+			this.testedInstance.findOcspResponse(this.ocspUri,
+					this.certificate, this.rootCertificate);
+			fail();
+		} catch (Exception e) {
+			// expected
+		}
 	}
 
 	@Test

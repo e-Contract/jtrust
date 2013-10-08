@@ -18,15 +18,6 @@
 
 package be.fedict.trust;
 
-import be.fedict.trust.constraints.CertificateConstraint;
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.repository.CertificateRepository;
-import be.fedict.trust.policy.DefaultAlgorithmPolicy;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -36,6 +27,16 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import be.fedict.trust.constraints.CertificateConstraint;
+import be.fedict.trust.linker.TrustLinker;
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.repository.CertificateRepository;
+import be.fedict.trust.revocation.RevocationData;
 
 /**
  * Trust Validator.

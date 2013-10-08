@@ -18,11 +18,11 @@
 
 package be.fedict.trust.policy;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * A default implementation of an algorithm policy.

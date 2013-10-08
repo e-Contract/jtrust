@@ -20,13 +20,13 @@ package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TSPValidationException;
 
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * TSA Certificate Constraint implementation. This CertificateConstraint
@@ -46,14 +46,17 @@ public class TSACertificateConstraint implements CertificateConstraint {
 	public TSACertificateConstraint() {
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException {
 
 		// check ExtendedKeyUsage extension: id-kp-timeStamping
 		try {
 			TSPUtil.validateCertificate(certificate);
 		} catch (TSPValidationException e) {
 			LOG.error("ExtendedKeyUsage extension with value \"id-kp-timeStamping\" not present.");
-			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "id-kp-timeStamping ExtendedKeyUsage not present");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"id-kp-timeStamping ExtendedKeyUsage not present");
 		}
 	}
 }

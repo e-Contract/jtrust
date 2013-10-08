@@ -36,12 +36,12 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.CertificatePathBuilder;
-import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class SSLTrustValidatorTest {
 

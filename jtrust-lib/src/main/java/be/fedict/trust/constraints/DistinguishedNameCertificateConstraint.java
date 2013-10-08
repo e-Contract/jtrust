@@ -22,11 +22,11 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * Distinguished Name Certificate Constraint implemenation.
@@ -46,13 +46,15 @@ public class DistinguishedNameCertificateConstraint implements
 		this.acceptedSubject = new X500Principal(acceptedSubjectName);
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException {
 		X500Principal certificateSubject = certificate
 				.getSubjectX500Principal();
 		LOG.debug("accepted subject: " + this.acceptedSubject);
 		if (this.acceptedSubject.equals(certificateSubject)) {
-            return;
-        }
-        throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "DN mismatch");
+			return;
+		}
+		throw new TrustLinkerResultException(
+				TrustLinkerResultReason.CONSTRAINT_VIOLATION, "DN mismatch");
 	}
 }

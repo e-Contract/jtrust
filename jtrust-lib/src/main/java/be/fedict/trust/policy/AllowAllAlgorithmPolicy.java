@@ -18,7 +18,6 @@
 
 package be.fedict.trust.policy;
 
-import be.fedict.trust.policy.AlgorithmPolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

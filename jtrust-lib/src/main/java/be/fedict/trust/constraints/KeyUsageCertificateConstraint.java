@@ -20,11 +20,11 @@ package be.fedict.trust.constraints;
 
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 /**
  * Key Usage Certificate Constraint implementation.
@@ -92,12 +92,15 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 		this.mask[DECIPHER_ONLY_IDX] = flag;
 	}
 
-	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+	public void check(X509Certificate certificate)
+			throws TrustLinkerResultException {
 		boolean[] keyUsage = certificate.getKeyUsage();
 		if (null == keyUsage) {
 			LOG.debug("no key usage extension for certificate: "
 					+ certificate.getSubjectX500Principal());
-			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing key usage extension");
+			throw new TrustLinkerResultException(
+					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					"missing key usage extension");
 		}
 		for (int idx = 0; idx < this.mask.length; idx++) {
 			Boolean flag = this.mask[idx];
@@ -107,12 +110,16 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 			if (false == flag) {
 				if (keyUsage[idx]) {
 					LOG.debug("should not have key usage: " + idx);
-					throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "should not have key usage flag: " + idx);
+					throw new TrustLinkerResultException(
+							TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+							"should not have key usage flag: " + idx);
 				}
 			} else {
 				if (false == keyUsage[idx]) {
 					LOG.debug("missing key usage: " + idx);
-					throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "missing key usage flag: " + idx);
+					throw new TrustLinkerResultException(
+							TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+							"missing key usage flag: " + idx);
 				}
 			}
 		}

@@ -19,19 +19,20 @@
 package be.fedict.trust.linker;
 
 /**
- * Enumeration for trust linker positive results.
- * A negative result should be expressed via a {@link TrustLinkerResultException}.
- *
- * @author  Frank Cornelis
+ * Enumeration for trust linker positive results. A negative result should be
+ * expressed via a {@link TrustLinkerResultException}.
+ * 
+ * @author Frank Cornelis
  */
 public enum TrustLinkerResult {
-    /**
-     * This trust linker cannot decided on the trust in the child certificate.
-     */
-    UNDECIDED,
+	/**
+	 * This trust linker cannot decided on the trust in the child certificate.
+	 */
+	UNDECIDED,
 
-    /**
-     * This trust linker has achieved a positive trust link between the certificate and the child certificate.
-     */
-    TRUSTED
+	/**
+	 * This trust linker has achieved a positive trust link between the
+	 * certificate and the child certificate.
+	 */
+	TRUSTED
 }

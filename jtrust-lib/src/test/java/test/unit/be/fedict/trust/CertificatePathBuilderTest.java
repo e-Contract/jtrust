@@ -60,5 +60,5 @@ public class CertificatePathBuilderTest {
 		assertEquals(1, result.size());
 		assertEquals(result.get(0), certificate);
 	}
-	
+
 }

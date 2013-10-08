@@ -18,9 +18,6 @@
 
 package be.fedict.trust;
 
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.repository.MemoryCertificateRepository;
-import be.fedict.trust.repository.CertificateRepository;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -34,6 +31,9 @@ import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.constraints.TSACertificateConstraint;
+import be.fedict.trust.linker.TrustLinker;
+import be.fedict.trust.repository.CertificateRepository;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 
 /**
  * Trust Validator Factory for Belgian (eID) PKI.
@@ -146,6 +146,21 @@ public class BelgianTrustValidatorFactory {
 				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null);
 
 		return trustValidator;
+	}
+
+	/**
+	 * Creates a trust validator according to Belgian PKI rules for TSA
+	 * certificates.
+	 * 
+	 * @param networkConfig
+	 *            the optional network configuration to be used.
+	 * @param externalTrustLinker
+	 *            the optional external trust linker to be used.
+	 * @return a trust validator instance.
+	 */
+	public static TrustValidator createTSATrustValidator(
+			NetworkConfig networkConfig) {
+		return createTSATrustValidator(networkConfig, null);
 	}
 
 	/**

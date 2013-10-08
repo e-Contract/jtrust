@@ -18,12 +18,6 @@
 
 package be.fedict.trust.linker;
 
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -39,6 +33,9 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
+import be.fedict.trust.policy.AlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 /**
  * Public key trust linker implementation. Performs simple sanity checks based

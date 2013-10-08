@@ -18,11 +18,9 @@
 
 package test.unit.be.fedict.trust;
 
-import be.fedict.trust.linker.TrustLinkerResultReason;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
@@ -30,7 +28,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
-import be.fedict.trust.*;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
@@ -38,10 +35,13 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.linker.TrustLinkerResult;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
-
-import static org.junit.Assert.*;
+import be.fedict.trust.policy.DefaultAlgorithmPolicy;
+import be.fedict.trust.revocation.RevocationData;
 
 public class OcspTrustLinkerTest {
 
@@ -275,14 +275,14 @@ public class OcspTrustLinkerTest {
 
 		// operate
 		try {
-            ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData(),
-				new DefaultAlgorithmPolicy());
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
-                    e.getReason());
-        }
+			ocspTrustLinker.hasTrustLink(certificate, rootCertificate,
+					validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
+					e.getReason());
+		}
 
 		// verify
 		EasyMock.verify(mockOcspRepository);
@@ -407,14 +407,15 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-        try {
-		    ocspTrustLinker.hasTrustLink(certificate,
-				rootCertificate, validationDate, new RevocationData(),
-				new DefaultAlgorithmPolicy());
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS, e.getReason());
-        }
+		try {
+			ocspTrustLinker.hasTrustLink(certificate, rootCertificate,
+					validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
+					e.getReason());
+		}
 
 		// verify
 		EasyMock.verify(mockOcspRepository);

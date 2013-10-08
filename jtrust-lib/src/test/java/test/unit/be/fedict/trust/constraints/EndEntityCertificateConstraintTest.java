@@ -18,19 +18,20 @@
 
 package test.unit.be.fedict.trust.constraints;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
 import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.EndEntityCertificateConstraint;
-
-import static org.junit.Assert.*;
+import be.fedict.trust.linker.TrustLinkerResultException;
+import be.fedict.trust.linker.TrustLinkerResultReason;
 
 public class EndEntityCertificateConstraintTest {
 
@@ -59,12 +60,13 @@ public class EndEntityCertificateConstraintTest {
 						false, 0, null, null);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test
@@ -92,12 +94,13 @@ public class EndEntityCertificateConstraintTest {
 		this.testedInstance.addEndEntity(endCertificate);
 
 		// operate
-        try {
-            this.testedInstance.check(certificate);
-            fail();
-        } catch (TrustLinkerResultException e) {
-            assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-        }
+		try {
+			this.testedInstance.check(certificate);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+					e.getReason());
+		}
 	}
 
 	@Test

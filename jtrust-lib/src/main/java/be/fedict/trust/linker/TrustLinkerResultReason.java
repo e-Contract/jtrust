@@ -26,42 +26,45 @@ package be.fedict.trust.linker;
 public enum TrustLinkerResultReason {
 
 	/**
-	 * The exact reason is unspecified, or further specified in the exception message.
+	 * The exact reason is unspecified, or further specified in the exception
+	 * message.
 	 */
 	UNSPECIFIED,
 
-    /**
-     * The root certificate was not trusted.
-     */
-    ROOT,
+	/**
+	 * The root certificate was not trusted.
+	 */
+	ROOT,
 
-    /**
-     * Used to indicate that no trust between two certificates could be established.
-     */
-    NO_TRUST,
+	/**
+	 * Used to indicate that no trust between two certificates could be
+	 * established.
+	 */
+	NO_TRUST,
 
-    /**
-     * Used to indicate that the end-entity certificate violated some constraint.
-     */
-    CONSTRAINT_VIOLATION,
+	/**
+	 * Used to indicate that the end-entity certificate violated some
+	 * constraint.
+	 */
+	CONSTRAINT_VIOLATION,
 
 	/**
 	 * Certificate Signature verification failed
 	 */
 	INVALID_SIGNATURE,
 
-    /**
-     * An invalid algorithm was used.
-     */
-    INVALID_ALGORITHM,
+	/**
+	 * An invalid algorithm was used.
+	 */
+	INVALID_ALGORITHM,
 
-    /**
+	/**
 	 * The requested time instant was before or after the certificate chain
 	 * validity interval
 	 */
 	INVALID_VALIDITY_INTERVAL,
 
-    /**
+	/**
 	 * Certificate status returned revoked or suspended.
 	 */
 	INVALID_REVOCATION_STATUS
