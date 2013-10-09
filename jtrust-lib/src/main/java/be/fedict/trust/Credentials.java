@@ -21,9 +21,9 @@ package be.fedict.trust;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 
 /**
  * Stores credentials required to access protected online PKI services.
@@ -64,16 +64,17 @@ public class Credentials {
 	 * Initializes the Commons HTTPClient state using the credentials stores in
 	 * this credential store.
 	 * 
-	 * @param httpState
+	 * @param credentialsProvider
 	 */
-	public void init(HttpState httpState) {
+	public void init(CredentialsProvider credentialsProvider) {
 		for (Credential credential : this.credentials) {
 			AuthScope authScope = new AuthScope(credential.getHost(),
 					credential.getPort(), credential.getRealm(),
 					credential.getScheme());
 			UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(
 					credential.getUsername(), credential.getPassword());
-			httpState.setCredentials(authScope, usernamePasswordCredentials);
+			credentialsProvider.setCredentials(authScope,
+					usernamePasswordCredentials);
 		}
 	}
 }

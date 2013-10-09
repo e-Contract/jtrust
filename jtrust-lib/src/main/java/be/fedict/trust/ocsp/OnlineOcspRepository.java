@@ -23,14 +23,18 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.CertificateID;
 import org.bouncycastle.cert.ocsp.OCSPReq;
@@ -112,27 +116,30 @@ public class OnlineOcspRepository implements OcspRepository {
 		OCSPReq ocspReq = ocspReqBuilder.build();
 		byte[] ocspReqData = ocspReq.getEncoded();
 
-		PostMethod postMethod = new PostMethod(ocspUri.toString());
-		RequestEntity requestEntity = new ByteArrayRequestEntity(ocspReqData,
-				"application/ocsp-request");
-		postMethod.addRequestHeader("User-Agent", "jTrust OCSP Client");
-		postMethod.setRequestEntity(requestEntity);
+		HttpPost httpPost = new HttpPost(ocspUri.toString());
+		ContentType contentType = ContentType
+				.create("application/ocsp-request");
+		HttpEntity requestEntity = new ByteArrayEntity(ocspReqData, contentType);
+		httpPost.addHeader("User-Agent", "jTrust OCSP Client");
+		httpPost.setEntity(requestEntity);
 
-		HttpClient httpClient = new HttpClient();
+		DefaultHttpClient httpClient = new DefaultHttpClient();
 		if (null != this.networkConfig) {
-			httpClient.getHostConfiguration().setProxy(
-					this.networkConfig.getProxyHost(),
+			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(),
 					this.networkConfig.getProxyPort());
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					proxy);
 		}
 		if (null != this.credentials) {
-			HttpState httpState = httpClient.getState();
-			this.credentials.init(httpState);
+			this.credentials.init(httpClient.getCredentialsProvider());
 		}
 
+		HttpResponse httpResponse;
 		int responseCode;
 		try {
-			httpClient.executeMethod(postMethod);
-			responseCode = postMethod.getStatusCode();
+			httpResponse = httpClient.execute(httpPost);
+			StatusLine statusLine = httpResponse.getStatusLine();
+			responseCode = statusLine.getStatusCode();
 		} catch (ConnectException e) {
 			LOG.debug("OCSP responder is down");
 			return null;
@@ -143,8 +150,8 @@ public class OnlineOcspRepository implements OcspRepository {
 			return null;
 		}
 
-		Header responseContentTypeHeader = postMethod
-				.getResponseHeader("Content-Type");
+		Header responseContentTypeHeader = httpResponse
+				.getFirstHeader("Content-Type");
 		if (null == responseContentTypeHeader) {
 			LOG.debug("no Content-Type response header");
 			return null;
@@ -155,8 +162,8 @@ public class OnlineOcspRepository implements OcspRepository {
 			return null;
 		}
 
-		Header responseContentLengthHeader = postMethod
-				.getResponseHeader("Content-Length");
+		Header responseContentLengthHeader = httpResponse
+				.getFirstHeader("Content-Length");
 		if (null != responseContentLengthHeader) {
 			String resultContentLength = responseContentLengthHeader.getValue();
 			if ("0".equals(resultContentLength)) {
@@ -165,7 +172,8 @@ public class OnlineOcspRepository implements OcspRepository {
 			}
 		}
 
-		OCSPResp ocspResp = new OCSPResp(postMethod.getResponseBody());
+		HttpEntity httpEntity = httpResponse.getEntity();
+		OCSPResp ocspResp = new OCSPResp(httpEntity.getContent());
 		LOG.debug("OCSP response size: " + ocspResp.getEncoded().length
 				+ " bytes");
 		return ocspResp;

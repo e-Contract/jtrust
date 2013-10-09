@@ -18,7 +18,7 @@
 
 package be.fedict.trust;
 
-import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.http.auth.AuthScope;
 
 /**
  * Stores a credential required to access a protected PKI online service.
