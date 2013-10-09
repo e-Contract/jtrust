@@ -221,10 +221,19 @@ public class BelgianTrustValidatorFactory {
 
 	public static CertificateRepository createCertificateRepository() {
 		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+
 		X509Certificate rootCaCertificate = loadCertificate("be/fedict/trust/belgiumrca.crt");
 		memoryCertificateRepository.addTrustPoint(rootCaCertificate);
+
 		X509Certificate rootCa2Certificate = loadCertificate("be/fedict/trust/belgiumrca2.crt");
 		memoryCertificateRepository.addTrustPoint(rootCa2Certificate);
+
+		X509Certificate rootCa3Certificate = loadCertificate("be/fedict/trust/belgiumrca3.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa3Certificate);
+
+		X509Certificate rootCa4Certificate = loadCertificate("be/fedict/trust/belgiumrca4.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa4Certificate);
+
 		return memoryCertificateRepository;
 	}
 
@@ -279,6 +288,18 @@ public class BelgianTrustValidatorFactory {
 			// RootCA2 foreigner authn
 			certificatePoliciesCertificateConstraint
 					.addCertificatePolicy("2.16.56.9.1.1.7.2");
+			// RootCA3 citizen authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.10.1.1.2.2");
+			// RootCA3 foreigner authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.10.1.1.7.2");
+			// RootCA4 citizen authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.12.1.1.2.2");
+			// RootCA4 foreigner authn
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.12.1.1.7.2");
 			break;
 		case SIGN:
 			// RootCA citizen sign
@@ -293,6 +314,18 @@ public class BelgianTrustValidatorFactory {
 			// RootCA2 foreigner sign
 			certificatePoliciesCertificateConstraint
 					.addCertificatePolicy("2.16.56.9.1.1.7.1");
+			// RootCA3 citizen sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.10.1.1.2.1");
+			// RootCA3 foreigner sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.10.1.1.7.1");
+			// RootCA4 citizen sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.12.1.1.2.1");
+			// RootCA4 foreigner sign
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.12.1.1.7.1");
 			break;
 		case NATIONAL_REGISTRY:
 			certificatePoliciesCertificateConstraint
