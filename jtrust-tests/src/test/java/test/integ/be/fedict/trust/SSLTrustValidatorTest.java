@@ -36,7 +36,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import be.fedict.trust.CertificatePathBuilder;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -83,10 +82,6 @@ public class SSLTrustValidatorTest {
 			LOG.debug("certificate issuer: "
 					+ x509Cert.getIssuerX500Principal());
 		}
-
-		CertificatePathBuilder certificatePathBuilder = new CertificatePathBuilder();
-		// certificateChain =
-		// certificatePathBuilder.buildPath(certificateChain);
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		certificateRepository.addTrustPoint(certificateChain
