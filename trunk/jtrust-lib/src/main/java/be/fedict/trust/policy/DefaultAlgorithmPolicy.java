@@ -18,6 +18,8 @@
 
 package be.fedict.trust.policy;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,8 +40,8 @@ public class DefaultAlgorithmPolicy implements AlgorithmPolicy {
 			.getLog(DefaultAlgorithmPolicy.class);
 
 	@Override
-	public void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws TrustLinkerResultException {
+	public void checkSignatureAlgorithm(String signatureAlgorithm,
+			Date validationDate) throws TrustLinkerResultException {
 		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
 		if (signatureAlgorithm.contains("MD5")
 				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {

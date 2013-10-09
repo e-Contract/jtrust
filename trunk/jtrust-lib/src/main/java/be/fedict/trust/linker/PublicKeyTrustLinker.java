@@ -73,8 +73,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"verification error: " + e.getMessage());
 		}
 
-		algorithmPolicy
-				.checkSignatureAlgorithm(childCertificate.getSigAlgOID());
+		algorithmPolicy.checkSignatureAlgorithm(
+				childCertificate.getSigAlgOID(), validationDate);
 
 		if (true == childCertificate.getNotAfter().after(
 				certificate.getNotAfter())) {
