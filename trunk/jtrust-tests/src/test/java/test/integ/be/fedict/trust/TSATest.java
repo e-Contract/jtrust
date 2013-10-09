@@ -19,34 +19,32 @@
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.net.HttpURLConnection;
 import java.security.Security;
 import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bouncycastle.cms.CMSException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
-import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -58,7 +56,6 @@ import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
 import be.fedict.trust.constraints.TSACertificateConstraint;
-import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class TSATest {
@@ -82,11 +79,7 @@ public class TSATest {
 		testTimestampServerTrust("http://tsa.starfieldtech.com");
 	}
 
-	private void testTimestampServerTrust(String tsaLocation)
-			throws IOException, HttpException, Exception, TSPException,
-			NoSuchAlgorithmException, NoSuchProviderException, CMSException,
-			CertStoreException, CertificateException,
-			TrustLinkerResultException {
+	private void testTimestampServerTrust(String tsaLocation) throws Exception {
 		// setup
 		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
 		requestGen.setCertReq(true);
@@ -94,24 +87,32 @@ public class TSATest {
 				new byte[20], BigInteger.valueOf(100));
 		byte[] requestData = request.getEncoded();
 
-		HttpClient httpClient = new HttpClient();
-		httpClient.getHostConfiguration().setProxy("proxy.yourict.net", 8080);
-		PostMethod postMethod = new PostMethod(tsaLocation);
-		postMethod.setRequestEntity(new ByteArrayRequestEntity(requestData,
-				"application/timestamp-query"));
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
+		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+				proxy);
+		HttpPost postMethod = new HttpPost(tsaLocation);
+		ContentType contentType = ContentType
+				.create("application/timestamp-query");
+		HttpEntity requestEntity = new ByteArrayEntity(requestData, contentType);
+		postMethod.addHeader("User-Agent", "jTrust TSP Client");
+		postMethod.setEntity(requestEntity);
 
 		// operate
 		long t0 = System.currentTimeMillis();
-		int statusCode = httpClient.executeMethod(postMethod);
+		HttpResponse httpResponse = httpClient.execute(postMethod);
+		StatusLine statusLine = httpResponse.getStatusLine();
+		int statusCode = statusLine.getStatusCode();
 		long t1 = System.currentTimeMillis();
 		LOG.debug("dt TSP: " + (t1 - t0) + " ms");
-		if (statusCode != HttpStatus.SC_OK) {
+		if (statusCode != HttpURLConnection.HTTP_OK) {
 			LOG.error("Error contacting TSP server " + TSA_LOCATION);
 			throw new Exception("Error contacting TSP server " + TSA_LOCATION);
 		}
 
+		HttpEntity httpEntity = httpResponse.getEntity();
 		TimeStampResponse tspResponse = new TimeStampResponse(
-				postMethod.getResponseBodyAsStream());
+				httpEntity.getContent());
 		postMethod.releaseConnection();
 
 		CertStore certStore = tspResponse.getTimeStampToken()

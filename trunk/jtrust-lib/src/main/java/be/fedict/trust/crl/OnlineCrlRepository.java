@@ -29,11 +29,15 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
 
@@ -96,21 +100,23 @@ public class OnlineCrlRepository implements CrlRepository {
 	private X509CRL getCrl(URI crlUri) throws IOException,
 			CertificateException, CRLException, NoSuchProviderException,
 			NoSuchParserException, StreamParsingException {
-		HttpClient httpClient = new HttpClient();
+		DefaultHttpClient httpClient = new DefaultHttpClient();
 		if (null != this.networkConfig) {
-			httpClient.getHostConfiguration().setProxy(
-					this.networkConfig.getProxyHost(),
+			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(),
 					this.networkConfig.getProxyPort());
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					proxy);
 		}
 		if (null != this.credentials) {
-			HttpState httpState = httpClient.getState();
-			this.credentials.init(httpState);
+			this.credentials.init(httpClient.getCredentialsProvider());
 		}
 		String downloadUrl = crlUri.toURL().toString();
 		LOG.debug("downloading CRL from: " + downloadUrl);
-		GetMethod getMethod = new GetMethod(downloadUrl);
-		getMethod.addRequestHeader("User-Agent", "jTrust CRL Client");
-		int statusCode = httpClient.executeMethod(getMethod);
+		HttpGet httpGet = new HttpGet(downloadUrl);
+		httpGet.addHeader("User-Agent", "jTrust CRL Client");
+		HttpResponse httpResponse = httpClient.execute(httpGet);
+		StatusLine statusLine = httpResponse.getStatusLine();
+		int statusCode = statusLine.getStatusCode();
 		if (HttpURLConnection.HTTP_OK != statusCode) {
 			LOG.debug("HTTP status code: " + statusCode);
 			return null;
@@ -122,8 +128,9 @@ public class OnlineCrlRepository implements CrlRepository {
 				+ certificateFactory.getProvider().getName());
 		LOG.debug("certificate factory class: "
 				+ certificateFactory.getClass().getName());
-		X509CRL crl = (X509CRL) certificateFactory.generateCRL(getMethod
-				.getResponseBodyAsStream());
+		HttpEntity httpEntity = httpResponse.getEntity();
+		X509CRL crl = (X509CRL) certificateFactory.generateCRL(httpEntity
+				.getContent());
 		LOG.debug("X509CRL class: " + crl.getClass().getName());
 		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
 		return crl;
