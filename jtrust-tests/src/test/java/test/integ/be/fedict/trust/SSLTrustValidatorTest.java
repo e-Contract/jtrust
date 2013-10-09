@@ -25,6 +25,7 @@ import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -91,8 +92,8 @@ public class SSLTrustValidatorTest {
 		trustValidator.setAlgorithmPolicy(new AlgorithmPolicy() {
 
 			@Override
-			public void checkSignatureAlgorithm(String signatureAlgorithm)
-					throws SignatureException {
+			public void checkSignatureAlgorithm(String signatureAlgorithm,
+					Date validationDate) throws SignatureException {
 				// allow all
 			}
 		});

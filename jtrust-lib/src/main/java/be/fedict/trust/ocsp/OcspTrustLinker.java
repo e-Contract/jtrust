@@ -141,7 +141,7 @@ public class OcspTrustLinker implements TrustLinker {
 		}
 
 		algorithmPolicy.checkSignatureAlgorithm(basicOCSPResp
-				.getSignatureAlgOID().getId());
+				.getSignatureAlgOID().getId(), validationDate);
 
 		if (0 == responseCertificates.length) {
 			/*
@@ -178,9 +178,9 @@ public class OcspTrustLinker implements TrustLinker {
 			if (false == Arrays.equals(certificate.getEncoded(),
 					ocspResponderCertificate.getEncoded())) {
 				// check certificate signature algorithm
-				algorithmPolicy
-						.checkSignatureAlgorithm(ocspResponderCertificate
-								.getSignatureAlgorithm().getAlgorithm().getId());
+				algorithmPolicy.checkSignatureAlgorithm(
+						ocspResponderCertificate.getSignatureAlgorithm()
+								.getAlgorithm().getId(), validationDate);
 
 				X509Certificate issuingCaCertificate;
 				if (responseCertificates.length < 2) {
@@ -207,8 +207,8 @@ public class OcspTrustLinker implements TrustLinker {
 					}
 				}
 				// check certificate signature
-				algorithmPolicy.checkSignatureAlgorithm(issuingCaCertificate
-						.getSigAlgOID());
+				algorithmPolicy.checkSignatureAlgorithm(
+						issuingCaCertificate.getSigAlgOID(), validationDate);
 
 				PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 				CertificateFactory certificateFactory = CertificateFactory

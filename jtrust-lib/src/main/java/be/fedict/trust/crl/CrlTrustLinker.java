@@ -104,7 +104,8 @@ public class CrlTrustLinker implements TrustLinker {
 		}
 
 		// check CRL signature algorithm
-		algorithmPolicy.checkSignatureAlgorithm(x509crl.getSigAlgOID());
+		algorithmPolicy.checkSignatureAlgorithm(x509crl.getSigAlgOID(),
+				validationDate);
 
 		// we don't support indirect CRLs
 		if (isIndirectCRL(x509crl)) {

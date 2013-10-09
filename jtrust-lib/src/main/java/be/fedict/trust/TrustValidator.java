@@ -201,10 +201,11 @@ public class TrustValidator {
 		}
 	}
 
-	private void checkSignatureAlgorithm(String signatureAlgorithm)
-			throws TrustLinkerResultException {
+	private void checkSignatureAlgorithm(String signatureAlgorithm,
+			Date validationDate) throws TrustLinkerResultException {
 		try {
-			this.algorithmPolicy.checkSignatureAlgorithm(signatureAlgorithm);
+			this.algorithmPolicy.checkSignatureAlgorithm(signatureAlgorithm,
+					validationDate);
 		} catch (TrustLinkerResultException e) {
 			// re-wrapping this type of exception doesn't bring anything
 			throw e;
@@ -240,7 +241,7 @@ public class TrustValidator {
 				+ certificate.getSubjectX500Principal());
 		checkSelfSigned(certificate);
 		// check certificate signature
-		checkSignatureAlgorithm(certificate.getSigAlgName());
+		checkSignatureAlgorithm(certificate.getSigAlgName(), validationDate);
 		checkSelfSignedTrust(certificate, validationDate);
 
 		certIdx--;
@@ -281,7 +282,8 @@ public class TrustValidator {
 			return;
 		}
 		// check certificate signature
-		checkSignatureAlgorithm(childCertificate.getSigAlgName());
+		checkSignatureAlgorithm(childCertificate.getSigAlgName(),
+				validationDate);
 
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {

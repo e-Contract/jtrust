@@ -468,8 +468,8 @@ public class TrustValidatorTest {
 
 		trustValidator.setAlgorithmPolicy(new AlgorithmPolicy() {
 			@Override
-			public void checkSignatureAlgorithm(String signatureAlgorithm)
-					throws SignatureException {
+			public void checkSignatureAlgorithm(String signatureAlgorithm,
+					Date validationDate) throws SignatureException {
 				// allow all
 			}
 		});

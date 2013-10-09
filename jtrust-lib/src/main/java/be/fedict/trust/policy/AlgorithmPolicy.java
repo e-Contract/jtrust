@@ -18,6 +18,8 @@
 
 package be.fedict.trust.policy;
 
+import java.util.Date;
+
 import be.fedict.trust.linker.TrustLinkerResultException;
 
 /**
@@ -28,6 +30,14 @@ import be.fedict.trust.linker.TrustLinkerResultException;
  */
 public interface AlgorithmPolicy {
 
-	void checkSignatureAlgorithm(String signatureAlgorithm)
+	/**
+	 * Check a given signature algorithm. This check can be made time-dependent.
+	 * 
+	 * @param signatureAlgorithm
+	 * @param validationDate
+	 * @throws TrustLinkerResultException
+	 * @throws Exception
+	 */
+	void checkSignatureAlgorithm(String signatureAlgorithm, Date validationDate)
 			throws TrustLinkerResultException, Exception;
 }
