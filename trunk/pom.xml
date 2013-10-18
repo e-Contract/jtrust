@@ -233,8 +233,7 @@
 		</repository>
 	</repositories>
 	<distributionManagement>
-		<downloadUrl>http://code.google.com/p/jtrust/downloads/list
-        </downloadUrl>
+		<downloadUrl>http://code.google.com/p/jtrust/downloads/list</downloadUrl>
 		<repository>
 			<id>e-contract-deploy</id>
 			<url>scp://e-contract.be/maven2</url>
@@ -242,7 +241,7 @@
 		</repository>
 		<site>
 			<id>e-contract-jtrust-site</id>
-			<url>scp://e-contract.be/jtrust-site</url>
+			<url>scp://e-contract.be/sites/jtrust/</url>
 		</site>
 	</distributionManagement>
 	<issueManagement>
