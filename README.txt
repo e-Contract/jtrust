@@ -1,17 +1,17 @@
-README for FedICT jTrust Project
-================================
+README for jTrust Project
+=========================
 
 === 1. Introduction
 
-This project contains the source code tree of the FedICT jTrust library.
+This project contains the source code tree of the jTrust library.
 The source code is hosted at: http://code.google.com/p/jtrust/
 
 
 === 2. Requirements
 
 The following is required for compiling the jTrust software:
-* Oracle Java 1.6.0_37+
-* Apache Maven 3.0.4+
+* Oracle Java 1.6.0_45+
+* Apache Maven 3.1.1+
 
 
 === 3. Build

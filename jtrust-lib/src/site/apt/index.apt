@@ -15,4 +15,8 @@ TrustValidator trustValidator =
 trustValidator.isTrusted(certificateChain);
 +--
 
- Note: the BouncyCastle Security provider should be registered in the JCA. 
+ Note: the BouncyCastle Security provider should be registered in the JCA.
+
+Javadoc API
+
+ {{{./apidocs/index.html}Javadoc API documentation}}
