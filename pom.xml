@@ -129,10 +129,6 @@
 			<id>java.net</id>
 			<url>http://download.java.net/maven/2/</url>
 		</pluginRepository>
-		<pluginRepository>
-			<id>jboss.org</id>
-			<url>http://repository.jboss.org/maven2/</url>
-		</pluginRepository>
 	</pluginRepositories>
 	<dependencyManagement>
 		<dependencies>
