@@ -1,7 +1,6 @@
 README for jTrust Project
 =========================
 
-commit test
 
 === 1. Introduction
 
