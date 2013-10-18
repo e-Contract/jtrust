@@ -72,6 +72,7 @@
 					<configuration>
 						<tagBase>https://jtrust.googlecode.com/svn/tags/</tagBase>
 						<preparationGoals>clean install</preparationGoals>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
 					</configuration>
 				</plugin>
 				<plugin>
