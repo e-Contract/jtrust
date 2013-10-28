@@ -49,8 +49,8 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 		Security.addProvider(new BouncyCastleProvider());
 
-		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-				8080);
+		NetworkConfig networkConfig = null; 
+		//new NetworkConfig("proxy.yourict.net", 8080);
 		CertificateRepository certificateRepository = BelgianTrustValidatorFactory
 				.createCertificateRepository();
 		TrustValidator trustValidator = new TrustValidator(

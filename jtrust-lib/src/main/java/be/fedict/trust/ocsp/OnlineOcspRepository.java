@@ -176,6 +176,7 @@ public class OnlineOcspRepository implements OcspRepository {
 		OCSPResp ocspResp = new OCSPResp(httpEntity.getContent());
 		LOG.debug("OCSP response size: " + ocspResp.getEncoded().length
 				+ " bytes");
+		httpPost.releaseConnection();
 		return ocspResp;
 	}
 }
