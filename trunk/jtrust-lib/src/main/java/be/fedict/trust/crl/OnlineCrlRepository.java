@@ -131,6 +131,7 @@ public class OnlineCrlRepository implements CrlRepository {
 		HttpEntity httpEntity = httpResponse.getEntity();
 		X509CRL crl = (X509CRL) certificateFactory.generateCRL(httpEntity
 				.getContent());
+		httpGet.releaseConnection();
 		LOG.debug("X509CRL class: " + crl.getClass().getName());
 		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
 		return crl;
