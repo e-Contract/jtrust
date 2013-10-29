@@ -18,18 +18,26 @@
 
 package test.integ.be.fedict.trust;
 
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +45,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -54,17 +63,81 @@ public class SSLTrustValidatorTest {
 	}
 
 	@Test
+	public void testTestEIDBelgiumBe() throws Exception {
+		Security.addProvider(new BeIDProvider());
+
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory
+				.getInstance("BeID");
+
+		keyManagerFactory.init(null);
+		SecureRandom secureRandom = new SecureRandom();
+		sslContext.init(keyManagerFactory.getKeyManagers(),
+				new TrustManager[] { new ClientTestX509TrustManager() },
+				secureRandom);
+		SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+		SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(
+				"test.eid.belgium.be", 443);
+		LOG.debug("socket created");
+		SSLSession sslSession = sslSocket.getSession();
+		Certificate[] peerCertificates = sslSession.getPeerCertificates();
+		for (Certificate peerCertificate : peerCertificates) {
+			LOG.debug("peer certificate: "
+					+ ((X509Certificate) peerCertificate)
+							.getSubjectX500Principal());
+		}
+
+		MemoryCertificateRepository repository = new MemoryCertificateRepository();
+		repository
+				.addTrustPoint((X509Certificate) peerCertificates[peerCertificates.length - 1]);
+
+		TrustValidator trustValidator = new TrustValidator(repository);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
+				null);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+		trustValidator.isTrusted(peerCertificates);
+	}
+
+	private static final class ClientTestX509TrustManager implements
+			X509TrustManager {
+
+		private static final Log LOG = LogFactory
+				.getLog(ClientTestX509TrustManager.class);
+
+		@Override
+		public void checkClientTrusted(final X509Certificate[] chain,
+				final String authType) throws CertificateException {
+			LOG.debug("checkClientTrusted");
+		}
+
+		@Override
+		public void checkServerTrusted(final X509Certificate[] chain,
+				final String authType) throws CertificateException {
+			LOG.debug("checkServerTrusted: " + authType);
+		}
+
+		@Override
+		public X509Certificate[] getAcceptedIssuers() {
+			LOG.debug("getAcceptedIssuers");
+			return null;
+		}
+
+	}
+
+	@Test
 	public void testValidation() throws Exception {
-		// Proxy proxy = Proxy.NO_PROXY;
-		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
-				"proxy.yourict.net", 8080));
-		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-				8080);
+		Proxy proxy = Proxy.NO_PROXY;
+		// Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
+		// "proxy.yourict.net", 8080));
+		NetworkConfig networkConfig = null; // new
+											// NetworkConfig("proxy.yourict.net",
+											// 8080);
 		// URL url = new URL("https://eid.belgium.be/"); // OK
 		// URL url = new URL("https://www.fortisbanking.be"); // OK
 		// URL url = new URL("https://www.e-contract.be/"); // OK
 		// URL url = new URL("https://idp.services.belgium.be"); // OK
-		URL url = new URL("https://idp.int.belgium.be"); // OK
+		// URL url = new URL("https://idp.int.belgium.be"); // OK
+		URL url = new URL("https://test.eid.belgium.be/");
 
 		// URL url = new URL("https://www.facebook.com");
 		// URL url = new URL("https://www.twitter.com");
