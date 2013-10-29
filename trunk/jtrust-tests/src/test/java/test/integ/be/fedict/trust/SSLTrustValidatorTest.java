@@ -92,8 +92,7 @@ public class SSLTrustValidatorTest {
 				.addTrustPoint((X509Certificate) peerCertificates[peerCertificates.length - 1]);
 
 		TrustValidator trustValidator = new TrustValidator(repository);
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				null);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 		trustValidator.isTrusted(peerCertificates);
 	}

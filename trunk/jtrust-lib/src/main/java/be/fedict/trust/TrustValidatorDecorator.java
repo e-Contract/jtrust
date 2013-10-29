@@ -49,6 +49,13 @@ public class TrustValidatorDecorator {
 	}
 
 	/**
+	 * Convenience constructor.
+	 */
+	public TrustValidatorDecorator() {
+		this(null);
+	}
+
+	/**
 	 * Adds a default trust linker configuration to a given trust validator.
 	 * 
 	 * @param trustValidator
