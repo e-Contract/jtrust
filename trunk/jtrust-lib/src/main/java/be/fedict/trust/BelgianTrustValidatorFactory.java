@@ -176,12 +176,10 @@ public class BelgianTrustValidatorFactory {
 	public static TrustValidator createTSATrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 
-		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
-		X509Certificate rootTsaCertificate = loadCertificate("be/fedict/trust/belgiumtsa.crt");
-		memoryCertificateRepository.addTrustPoint(rootTsaCertificate);
+		CertificateRepository certificateRepository = createTSACertificateRepository();
 
 		TrustValidator trustValidator = new TrustValidator(
-				memoryCertificateRepository);
+				certificateRepository);
 
 		// add trust linkers
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
@@ -233,6 +231,14 @@ public class BelgianTrustValidatorFactory {
 
 		X509Certificate rootCa4Certificate = loadCertificate("be/fedict/trust/belgiumrca4.crt");
 		memoryCertificateRepository.addTrustPoint(rootCa4Certificate);
+
+		return memoryCertificateRepository;
+	}
+
+	public static CertificateRepository createTSACertificateRepository() {
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		X509Certificate rootTsaCertificate = loadCertificate("be/fedict/trust/belgiumtsa.crt");
+		memoryCertificateRepository.addTrustPoint(rootTsaCertificate);
 
 		return memoryCertificateRepository;
 	}
