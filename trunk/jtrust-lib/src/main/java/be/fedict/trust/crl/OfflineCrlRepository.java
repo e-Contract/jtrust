@@ -35,9 +35,11 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Off line CRL repository. This implementation receives a list of
- * {@link X509CRL} objects.
+ * {@link X509CRL} objects. If multiple CRLs match, one within the given
+ * validation date is returned. This behavior is important for the historical
+ * validation of certain types of signatures.
  * 
- * @author wvdhaute
+ * @author Frank Cornelis
  */
 public class OfflineCrlRepository implements CrlRepository {
 
@@ -70,18 +72,49 @@ public class OfflineCrlRepository implements CrlRepository {
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
 
+		List<X509CRL> matchingCrls = new LinkedList<X509CRL>();
 		for (X509CRL crl : this.crls) {
 			if (crl.getIssuerX500Principal().equals(
 					issuerCertificate.getSubjectX500Principal())) {
 				LOG.debug("CRL found for issuer "
 						+ issuerCertificate.getSubjectX500Principal()
 								.toString());
-				return crl;
+				matchingCrls.add(crl);
 			}
 		}
 
-		LOG.debug("CRL not found for issuer "
-				+ issuerCertificate.getSubjectX500Principal().toString());
+		if (matchingCrls.isEmpty()) {
+			LOG.debug("CRL not found for issuer "
+					+ issuerCertificate.getSubjectX500Principal().toString());
+			return null;
+		}
+
+		if (matchingCrls.size() == 1) {
+			return matchingCrls.get(0);
+		}
+
+		LOG.debug("multiple matching CRLs found");
+		for (X509CRL crl : matchingCrls) {
+			if (isCrlInValidationDate(crl, validationDate)) {
+				return crl;
+			}
+		}
 		return null;
+	}
+
+	private boolean isCrlInValidationDate(X509CRL crl, Date validationDate) {
+		Date thisUpdate = crl.getThisUpdate();
+		LOG.debug("validation date: " + validationDate);
+		LOG.debug("CRL this update: " + thisUpdate);
+		if (thisUpdate.after(validationDate)) {
+			LOG.warn("CRL too young");
+			return false;
+		}
+		LOG.debug("CRL next update: " + crl.getNextUpdate());
+		if (validationDate.after(crl.getNextUpdate())) {
+			LOG.debug("CRL too old");
+			return false;
+		}
+		return true;
 	}
 }

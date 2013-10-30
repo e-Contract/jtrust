@@ -22,6 +22,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,7 +92,7 @@ public class OnlineOcspRepository implements OcspRepository {
 	}
 
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate) {
+			X509Certificate issuerCertificate, Date validationDate) {
 		OCSPResp ocspResp = null;
 		try {
 			ocspResp = getOcspResponse(ocspUri, certificate, issuerCertificate);

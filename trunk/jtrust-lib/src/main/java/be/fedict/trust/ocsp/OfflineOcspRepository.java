@@ -21,6 +21,7 @@ package be.fedict.trust.ocsp;
 import java.io.IOException;
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,8 +41,11 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 /**
  * Off line OCSP repository. This implementation receives a list of
  * {@link OCSPResp} objects.
+ * <p/>
+ * TODO: when multiple OCSPs match, we should return the one closest to the
+ * validation date.
  * 
- * @author wvdhaute
+ * @author Frank Cornelis
  */
 public class OfflineOcspRepository implements OcspRepository {
 
@@ -68,7 +72,7 @@ public class OfflineOcspRepository implements OcspRepository {
 	}
 
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate) {
+			X509Certificate issuerCertificate, Date validationDate) {
 
 		LOG.debug("find OCSP response");
 
@@ -80,21 +84,18 @@ public class OfflineOcspRepository implements OcspRepository {
 			throw new RuntimeException(e);
 		}
 
+		CertificateID certId;
+		try {
+			certId = new CertificateID(
+					digCalcProv.get(CertificateID.HASH_SHA1),
+					new JcaX509CertificateHolder(issuerCertificate),
+					certificate.getSerialNumber());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 		try {
 			for (OCSPResp ocspResp : this.ocspResponses) {
-
-				CertificateID certId =
-
-				null;
-				try {
-					certId = new CertificateID(
-							digCalcProv.get(CertificateID.HASH_SHA1),
-							new JcaX509CertificateHolder(issuerCertificate),
-							certificate.getSerialNumber());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-
 				BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
 						.getResponseObject();
 				for (SingleResp singleResp : basicOCSPResp.getResponses()) {
@@ -112,5 +113,4 @@ public class OfflineOcspRepository implements OcspRepository {
 		LOG.debug("OCSP response not found");
 		return null;
 	}
-
 }

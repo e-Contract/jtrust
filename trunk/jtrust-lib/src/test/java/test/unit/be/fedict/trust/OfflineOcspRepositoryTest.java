@@ -27,6 +27,7 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -81,7 +82,8 @@ public class OfflineOcspRepositoryTest {
 
 		// operate
 		OCSPResp resultOcspResp = testedInstance.findOcspResponse(new URI(
-				"htpp://foo.org/bar"), this.certificate, this.rootCertificate);
+				"htpp://foo.org/bar"), this.certificate, this.rootCertificate,
+				new Date());
 
 		// verify
 		assertNotNull(resultOcspResp);
@@ -108,7 +110,8 @@ public class OfflineOcspRepositoryTest {
 
 		// operate
 		OCSPResp resultOcspResp = testedInstance.findOcspResponse(new URI(
-				"htpp://foo.org/bar"), this.certificate, this.rootCertificate);
+				"htpp://foo.org/bar"), this.certificate, this.rootCertificate,
+				new Date());
 
 		// verify
 		assertNull(resultOcspResp);
