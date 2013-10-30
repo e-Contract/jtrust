@@ -20,6 +20,7 @@ package be.fedict.trust.ocsp;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
 
@@ -40,8 +41,10 @@ public interface OcspRepository {
 	 *            the X509 certificate.
 	 * @param issuerCertificate
 	 *            the X509 issuer certificate.
+	 * @param validationDate
+	 *            the validation date.
 	 * @return the OCSP response, or <code>null</code> if not found.
 	 */
 	OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate);
+			X509Certificate issuerCertificate, Date validationDate);
 }

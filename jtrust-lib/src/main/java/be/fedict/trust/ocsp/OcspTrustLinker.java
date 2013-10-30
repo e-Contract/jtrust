@@ -118,7 +118,7 @@ public class OcspTrustLinker implements TrustLinker {
 		LOG.debug("OCSP URI: " + ocspUri);
 
 		OCSPResp ocspResp = this.ocspRepository.findOcspResponse(ocspUri,
-				childCertificate, certificate);
+				childCertificate, certificate, validationDate);
 		if (null == ocspResp) {
 			LOG.debug("OCSP response not found");
 			return TrustLinkerResult.UNDECIDED;

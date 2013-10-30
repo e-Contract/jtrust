@@ -28,6 +28,7 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -103,7 +104,7 @@ public class OnlineOcspRepositoryTest {
 
 		// operate
 		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate);
+				this.certificate, this.rootCertificate, new Date());
 
 		// verify
 		assertNull(ocspResp);
@@ -116,7 +117,7 @@ public class OnlineOcspRepositoryTest {
 
 		// operate
 		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate);
+				this.certificate, this.rootCertificate, new Date());
 
 		// verify
 		assertNull(ocspResp);
@@ -130,7 +131,7 @@ public class OnlineOcspRepositoryTest {
 
 		// operate
 		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate);
+				this.certificate, this.rootCertificate, new Date());
 
 		// verify
 		assertNull(ocspResp);
@@ -144,7 +145,7 @@ public class OnlineOcspRepositoryTest {
 
 		// operate
 		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate);
+				this.certificate, this.rootCertificate, new Date());
 
 		// verify
 		assertNull(ocspResp);
@@ -160,7 +161,7 @@ public class OnlineOcspRepositoryTest {
 		// operate & verify
 		try {
 			this.testedInstance.findOcspResponse(this.ocspUri,
-					this.certificate, this.rootCertificate);
+					this.certificate, this.rootCertificate, new Date());
 			fail();
 		} catch (Exception e) {
 			// expected
@@ -181,7 +182,8 @@ public class OnlineOcspRepositoryTest {
 
 		// operate
 		OCSPResp resultOcspResp = this.testedInstance.findOcspResponse(
-				this.ocspUri, this.certificate, this.rootCertificate);
+				this.ocspUri, this.certificate, this.rootCertificate,
+				new Date());
 
 		// verify
 		assertNotNull(resultOcspResp);

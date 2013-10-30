@@ -20,6 +20,7 @@ package be.fedict.trust.ocsp;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 
 	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate) {
+			X509Certificate issuerCertificate, Date validationDate) {
 		URI overrideOcspUri = this.overrideURIs.get(ocspUri);
 		if (null != overrideOcspUri) {
 			LOG.debug("Overriding OCSP URI: " + ocspUri + " with "
@@ -68,6 +69,7 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 		} else {
 			LOG.debug("not overriding OCSP URI: " + ocspUri);
 		}
-		return super.findOcspResponse(ocspUri, certificate, issuerCertificate);
+		return super.findOcspResponse(ocspUri, certificate, issuerCertificate,
+				validationDate);
 	}
 }
