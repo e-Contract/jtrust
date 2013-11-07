@@ -88,9 +88,9 @@ public class TSATest {
 		byte[] requestData = request.getEncoded();
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
-		HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
-		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-				proxy);
+		//HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
+		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+		//		proxy);
 		HttpPost postMethod = new HttpPost(tsaLocation);
 		ContentType contentType = ContentType
 				.create("application/timestamp-query");
@@ -143,10 +143,10 @@ public class TSATest {
 		certificateRepository.addTrustPoint(gsCert);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
-		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-				8080);
+		//NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
+		//		8080);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				networkConfig);
+				null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
 		trustValidator.isTrusted(certificateChain);
