@@ -16,7 +16,7 @@
  * http://www.gnu.org/licenses/.
  */
 
-package test.unit.be.fedict.trust;
+package be.fedict.trust.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -102,7 +102,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.joda.time.DateTime;
 
-public class TrustTestUtils {
+public class PKITestUtils {
 
 	public static X509Certificate generateCertificate(
 			PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
@@ -823,7 +823,7 @@ public class TrustTestUtils {
 
 	public static X509Certificate loadCertificate(String resourceName)
 			throws CertificateException {
-		InputStream inputStream = TrustTestUtils.class
+		InputStream inputStream = PKITestUtils.class
 				.getResourceAsStream(resourceName);
 		CertificateFactory certificateFactory = CertificateFactory
 				.getInstance("X.509");

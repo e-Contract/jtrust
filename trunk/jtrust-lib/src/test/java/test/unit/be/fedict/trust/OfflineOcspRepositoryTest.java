@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.trust.ocsp.OfflineOcspRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class OfflineOcspRepositoryTest {
 
@@ -49,14 +50,14 @@ public class OfflineOcspRepositoryTest {
 	@Before
 	public void setUp() throws Exception {
 
-		this.rootKeyPair = TrustTestUtils.generateKeyPair();
+		this.rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		this.rootCertificate = TrustTestUtils.generateSelfSignedCertificate(
+		this.rootCertificate = PKITestUtils.generateSelfSignedCertificate(
 				this.rootKeyPair, "CN=TestRoot", notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		this.certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		this.certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				this.rootCertificate, this.rootKeyPair.getPrivate());
 
@@ -73,7 +74,7 @@ public class OfflineOcspRepositoryTest {
 	public void testOcspResponseFound() throws Exception {
 
 		// setup
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(this.certificate,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(this.certificate,
 				false, this.rootCertificate, this.rootCertificate,
 				this.rootKeyPair.getPrivate());
 
@@ -96,12 +97,12 @@ public class OfflineOcspRepositoryTest {
 		// setup
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate otherCertificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate otherCertificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=TestOther", notBefore, notAfter,
 				this.rootCertificate, this.rootKeyPair.getPrivate());
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(otherCertificate,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(otherCertificate,
 				false, this.rootCertificate, this.rootCertificate,
 				this.rootKeyPair.getPrivate());
 

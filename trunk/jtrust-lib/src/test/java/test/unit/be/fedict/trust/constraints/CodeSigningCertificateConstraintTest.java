@@ -28,10 +28,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.CodeSigningCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKITestUtils;
 
 public class CodeSigningCertificateConstraintTest {
 
@@ -45,7 +45,7 @@ public class CodeSigningCertificateConstraintTest {
 	@Test
 	public void testCodeSigningCertificatePasses() throws Exception {
 		// setup
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.loadCertificate("/code-signing-fedict.der");
 
 		// operate
@@ -55,10 +55,10 @@ public class CodeSigningCertificateConstraintTest {
 	@Test
 	public void testNonCodeSigningCertificateFails() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 

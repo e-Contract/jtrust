@@ -29,10 +29,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKITestUtils;
 
 public class KeyUsageCertificateConstraintTest {
 
@@ -46,10 +46,10 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testNoKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -66,10 +66,10 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnFalseNonRepudiationFilter() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -88,10 +88,10 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnTrueNonRepudiationFilter() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -110,11 +110,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testDigitalSignatureKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -127,11 +127,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testDigitalSignatureNoNonRepudiationKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -146,11 +146,11 @@ public class KeyUsageCertificateConstraintTest {
 	public void testFailingOnUnexpectedKeyUsageKeyEncipherment()
 			throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyEncipherment);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -170,11 +170,11 @@ public class KeyUsageCertificateConstraintTest {
 	public void testFailingOnUnexpectedKeyUsageDataEncipherment()
 			throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.dataEncipherment);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -193,11 +193,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageKeyAgreement() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyAgreement);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -216,11 +216,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageKeyCertSign() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyCertSign);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -239,11 +239,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageCrlSign() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.cRLSign);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -262,11 +262,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageEncypherOnly() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.encipherOnly);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -285,11 +285,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageDecypherOnly() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.decipherOnly);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 
@@ -308,11 +308,11 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnMissingKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.decipherOnly);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter, true, 0, null, keyUsage);
 

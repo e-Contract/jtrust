@@ -28,10 +28,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKITestUtils;
 
 public class CertificatePoliciesCertificateConstraintTest {
 
@@ -45,10 +45,10 @@ public class CertificatePoliciesCertificateConstraintTest {
 	@Test
 	public void testNoCertificatePolicies() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -65,10 +65,10 @@ public class CertificatePoliciesCertificateConstraintTest {
 	@Test
 	public void testCertificatePoliciesMismatch() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter, null,
 				keyPair.getPrivate(), true, -1, null, null, null,
 				"SHA1withRSA", false, true, true, null, "1.5.6.7");
@@ -89,10 +89,10 @@ public class CertificatePoliciesCertificateConstraintTest {
 	public void testCertificatePoliciesMatch() throws Exception {
 		// setup
 		String certificatePolicy = "1.2.3.4.5";
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter, null,
 				keyPair.getPrivate(), true, -1, null, null, null,
 				"SHA1withRSA", false, true, true, null, certificatePolicy);

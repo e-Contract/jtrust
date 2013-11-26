@@ -33,6 +33,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import be.fedict.trust.repository.MemoryCertificateRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class MemoryCertificateRepositoryTest {
 
@@ -45,8 +46,8 @@ public class MemoryCertificateRepositoryTest {
 		// setup
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -63,11 +64,11 @@ public class MemoryCertificateRepositoryTest {
 		// setup
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
-		X509Certificate certificate2 = TrustTestUtils
+		X509Certificate certificate2 = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test2", notBefore,
 						notAfter);
 
@@ -84,8 +85,8 @@ public class MemoryCertificateRepositoryTest {
 		// setup
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate trustPoint = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate trustPoint = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 		LOG.debug("trust point certificate impl class: "

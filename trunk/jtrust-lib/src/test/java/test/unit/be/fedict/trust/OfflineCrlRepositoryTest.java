@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.trust.crl.OfflineCrlRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class OfflineCrlRepositoryTest {
 
@@ -53,13 +54,13 @@ public class OfflineCrlRepositoryTest {
 	public void testCrlFound() throws Exception {
 
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
-		X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
+		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(),
 				certificate, notBefore, notAfter);
 
 		OfflineCrlRepository testedInstance = new OfflineCrlRepository(
@@ -81,17 +82,17 @@ public class OfflineCrlRepositoryTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
-		KeyPair otherKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate otherCertificate = TrustTestUtils
+		KeyPair otherKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate otherCertificate = PKITestUtils
 				.generateSelfSignedCertificate(otherKeyPair, "CN=TestOther",
 						notBefore, notAfter);
 
-		X509CRL crl = TrustTestUtils.generateCrl(otherKeyPair.getPrivate(),
+		X509CRL crl = PKITestUtils.generateCrl(otherKeyPair.getPrivate(),
 				otherCertificate, notBefore, notAfter);
 
 		OfflineCrlRepository testedInstance = new OfflineCrlRepository(

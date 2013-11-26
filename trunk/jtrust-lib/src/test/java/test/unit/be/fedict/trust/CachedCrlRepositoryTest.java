@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class CachedCrlRepositoryTest {
 
@@ -44,18 +45,18 @@ public class CachedCrlRepositoryTest {
 	@Before
 	public void setup() throws Exception {
 
-		this.testKeyPair = TrustTestUtils.generateKeyPair();
+		this.testKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
-		this.testCertificate = TrustTestUtils.generateCertificate(
+		this.testCertificate = PKITestUtils.generateCertificate(
 				this.testKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				null, this.testKeyPair.getPrivate(), true, 0, null, null);
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusHours(1);
-		this.testCrl = TrustTestUtils.generateCrl(
+		this.testCrl = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
-		this.testCrl2 = TrustTestUtils.generateCrl(
+		this.testCrl2 = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
 	}
@@ -125,13 +126,13 @@ public class CachedCrlRepositoryTest {
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusDays(7);
 		DateTime nextNextUpdate = nextUpdate.plusDays(7);
-		this.testCrl = TrustTestUtils.generateCrl(
+		this.testCrl = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
-		this.testCrl2 = TrustTestUtils.generateCrl(
+		this.testCrl2 = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
-		X509CRL testCrl3 = TrustTestUtils.generateCrl(
+		X509CRL testCrl3 = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				nextUpdate, nextNextUpdate);
 
@@ -189,7 +190,7 @@ public class CachedCrlRepositoryTest {
 		// setup
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusDays(7);
-		this.testCrl = TrustTestUtils.generateCrl(
+		this.testCrl = PKITestUtils.generateCrl(
 				this.testKeyPair.getPrivate(), this.testCertificate,
 				thisUpdate, nextUpdate);
 
