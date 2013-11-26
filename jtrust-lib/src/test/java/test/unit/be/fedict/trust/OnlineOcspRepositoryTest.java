@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mortbay.jetty.testing.ServletTester;
 
 import be.fedict.trust.ocsp.OnlineOcspRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class OnlineOcspRepositoryTest {
 
@@ -76,14 +77,14 @@ public class OnlineOcspRepositoryTest {
 
 		OcspResponderTestServlet.reset();
 
-		this.rootKeyPair = TrustTestUtils.generateKeyPair();
+		this.rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		this.rootCertificate = TrustTestUtils.generateSelfSignedCertificate(
+		this.rootCertificate = PKITestUtils.generateSelfSignedCertificate(
 				this.rootKeyPair, "CN=TestRoot", notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		this.certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		this.certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				this.rootCertificate, this.rootKeyPair.getPrivate());
 
@@ -174,7 +175,7 @@ public class OnlineOcspRepositoryTest {
 		OcspResponderTestServlet.setResponseStatus(HttpServletResponse.SC_OK);
 		OcspResponderTestServlet.setContentType("application/ocsp-response");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(this.certificate,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(this.certificate,
 				false, this.rootCertificate, this.rootCertificate,
 				this.rootKeyPair.getPrivate());
 

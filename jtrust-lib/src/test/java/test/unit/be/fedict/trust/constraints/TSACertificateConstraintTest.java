@@ -28,10 +28,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.TSACertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKITestUtils;
 
 public class TSACertificateConstraintTest {
 
@@ -45,10 +45,10 @@ public class TSACertificateConstraintTest {
 	@Test
 	public void testValidTSAConstraint() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=TestTSA", notBefore, notAfter, null,
 				keyPair.getPrivate(), true, -1, null, null, null,
 				"SHA1withRSA", true);
@@ -60,10 +60,10 @@ public class TSACertificateConstraintTest {
 	@Test
 	public void testInvalidTSAConstraint() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=TestTSA", notBefore, notAfter, null,
 				keyPair.getPrivate(), true, -1, null, null, null,
 				"SHA1withRSA", false);

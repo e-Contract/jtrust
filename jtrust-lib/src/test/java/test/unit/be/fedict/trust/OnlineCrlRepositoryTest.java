@@ -48,6 +48,7 @@ import org.junit.Test;
 import org.mortbay.jetty.testing.ServletTester;
 
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.test.PKITestUtils;
 
 public class OnlineCrlRepositoryTest {
 
@@ -116,13 +117,13 @@ public class OnlineCrlRepositoryTest {
 	@Test
 	public void testDownloadCrl() throws Exception {
 		// setup
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = TrustTestUtils
+		X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
-		X509CRL crl = TrustTestUtils.generateCrl(keyPair.getPrivate(),
+		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(),
 				certificate, notBefore, notAfter);
 		CrlRepositoryTestServlet.setCrlData(crl.getEncoded());
 

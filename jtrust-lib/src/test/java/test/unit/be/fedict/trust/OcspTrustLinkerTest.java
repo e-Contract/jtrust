@@ -42,6 +42,7 @@ import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.revocation.RevocationData;
+import be.fedict.trust.test.PKITestUtils;
 
 public class OcspTrustLinkerTest {
 
@@ -52,15 +53,15 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void noOcspUriInCertificate() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate());
 
@@ -82,15 +83,15 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void noOcspResponseInRepository() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
@@ -118,20 +119,20 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void validOcspResponse() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -161,20 +162,20 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponder() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -204,21 +205,21 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponseWronglySigned() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate,
 				ocspResponderKeyPair.getPrivate());
 
@@ -249,20 +250,20 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponseMD5Signature() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri", null, "MD5withRSA");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate(),
 				"MD5WITHRSA");
 
@@ -298,20 +299,20 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspNotFresh() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -341,25 +342,25 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void wrongOcspResponse() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		X509Certificate certificate2 = TrustTestUtils.generateCertificate(
+		X509Certificate certificate2 = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test2", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp2 = TrustTestUtils.createOcspResp(certificate2, false,
+		OCSPResp ocspResp2 = PKITestUtils.createOcspResp(certificate2, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -389,20 +390,20 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void revokedOcsp() throws Exception {
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = TrustTestUtils
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, true,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, true,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -441,26 +442,26 @@ public class OcspTrustLinkerTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate ocspResponderCertificate = TrustTestUtils
+		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate ocspResponderCertificate = PKITestUtils
 				.generateCertificate(ocspResponderKeyPair.getPublic(),
 						"CN=OCSPResp", notBefore, notAfter, rootCertificate,
 						rootKeyPair.getPrivate(), false, -1, null, null, null,
 						"SHA1withRSA", false, false, false, null, null, null,
 						true);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, ocspResponderCertificate,
 				ocspResponderKeyPair.getPrivate());
 
@@ -495,18 +496,18 @@ public class OcspTrustLinkerTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate());
 
 		OcspRepository mockOcspRepository = EasyMock
@@ -540,18 +541,18 @@ public class OcspTrustLinkerTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, rootCertificate, rootKeyPair.getPrivate(),
 				"SHA1withRSA", Collections.singletonList(rootCertificate));
 
@@ -586,26 +587,26 @@ public class OcspTrustLinkerTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair ocspResponderKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate ocspResponderCertificate = TrustTestUtils
+		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate ocspResponderCertificate = PKITestUtils
 				.generateCertificate(ocspResponderKeyPair.getPublic(),
 						"CN=OCSPResp", notBefore, notAfter, rootCertificate,
 						rootKeyPair.getPrivate(), false, -1, null, null, null,
 						"SHA1withRSA", false, false, false, null, null, null,
 						false);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils.generateCertificate(
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
 				"ocsp-uri");
 
-		OCSPResp ocspResp = TrustTestUtils.createOcspResp(certificate, false,
+		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false,
 				rootCertificate, ocspResponderCertificate,
 				ocspResponderKeyPair.getPrivate());
 

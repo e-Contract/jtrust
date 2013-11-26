@@ -28,10 +28,10 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import test.unit.be.fedict.trust.TrustTestUtils;
 import be.fedict.trust.constraints.EndEntityCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKITestUtils;
 
 public class EndEntityCertificateConstraintTest {
 
@@ -48,13 +48,13 @@ public class EndEntityCertificateConstraintTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
 						notAfter, rootCertificate, rootKeyPair.getPrivate(),
 						false, 0, null, null);
@@ -75,19 +75,19 @@ public class EndEntityCertificateConstraintTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
 						notAfter, rootCertificate, rootKeyPair.getPrivate(),
 						false, 0, null, null);
 
-		KeyPair endKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate endCertificate = TrustTestUtils.generateCertificate(
+		KeyPair endKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate endCertificate = PKITestUtils.generateCertificate(
 				endKeyPair.getPublic(), "CN=TestEnd", notBefore, notAfter,
 				certificate, keyPair.getPrivate(), false, 0, null, null);
 
@@ -109,13 +109,13 @@ public class EndEntityCertificateConstraintTest {
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
 
-		KeyPair rootKeyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate rootCertificate = TrustTestUtils
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = TrustTestUtils.generateKeyPair();
-		X509Certificate certificate = TrustTestUtils
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils
 				.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
 						notAfter, rootCertificate, rootKeyPair.getPrivate(),
 						false, 0, null, null);
