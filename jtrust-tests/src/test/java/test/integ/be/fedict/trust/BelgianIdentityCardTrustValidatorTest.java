@@ -22,6 +22,8 @@ import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 
@@ -39,6 +41,9 @@ import be.fedict.trust.repository.CertificateRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
 
+	private static final Log LOG = LogFactory
+			.getLog(BelgianIdentityCardTrustValidatorTest.class);
+
 	@Test
 	public void testValidity() throws Exception {
 		Security.addProvider(new BeIDProvider());
@@ -47,10 +52,12 @@ public class BelgianIdentityCardTrustValidatorTest {
 		Certificate[] authnCertificateChain = keyStore
 				.getCertificateChain("Authentication");
 
+		LOG.debug("authn cert: " + authnCertificateChain[0]);
+
 		Security.addProvider(new BouncyCastleProvider());
 
-		NetworkConfig networkConfig = null; 
-		//new NetworkConfig("proxy.yourict.net", 8080);
+		NetworkConfig networkConfig = null;
+		// new NetworkConfig("proxy.yourict.net", 8080);
 		CertificateRepository certificateRepository = BelgianTrustValidatorFactory
 				.createCertificateRepository();
 		TrustValidator trustValidator = new TrustValidator(
