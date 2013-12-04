@@ -55,6 +55,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.joda.time.DateTime;
 
 import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.linker.TrustLinker;
@@ -263,12 +264,19 @@ public class OcspTrustLinker implements TrustLinker {
 			if (false == certificateId.equals(responseCertificateId)) {
 				continue;
 			}
-			Date thisUpdate = singleResp.getThisUpdate();
+			DateTime thisUpdate = new DateTime(singleResp.getThisUpdate());
+			DateTime nextUpdate = new DateTime(singleResp.getNextUpdate());
 			LOG.debug("OCSP thisUpdate: " + thisUpdate);
-			LOG.debug("OCSP nextUpdate: " + singleResp.getNextUpdate());
-			long dt = Math.abs(thisUpdate.getTime() - validationDate.getTime());
-			if (dt > this.freshnessInterval) {
-				LOG.warn("freshness interval exceeded: " + dt + " milliseconds");
+			LOG.debug("OCSP nextUpdate: " + nextUpdate);
+			DateTime beginValidity = thisUpdate.minus(this.freshnessInterval);
+			DateTime endValidity = nextUpdate.plus(this.freshnessInterval);
+			DateTime validationDateTime = new DateTime(validationDate);
+			if (validationDateTime.isBefore(beginValidity)) {
+				LOG.warn("OCSP response not yet valid");
+				continue;
+			}
+			if (validationDateTime.isAfter(endValidity)) {
+				LOG.warn("OCSP response expired");
 				continue;
 			}
 			if (null == singleResp.getCertStatus()) {
