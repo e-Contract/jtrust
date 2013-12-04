@@ -214,9 +214,13 @@ public class CrlTrustLinker implements TrustLinker {
 			return false;
 		}
 		LOG.debug("CRL next update: " + x509crl.getNextUpdate());
-		if (validationDate.after(x509crl.getNextUpdate())) {
-			LOG.debug("CRL too old");
-			return false;
+		if (null != x509crl.getNextUpdate()) {
+			if (validationDate.after(x509crl.getNextUpdate())) {
+				LOG.debug("CRL too old");
+				return false;
+			}
+		} else {
+			LOG.warn("CRL has no nextUpdate");
 		}
 
 		// assert cRLSign KeyUsage bit
