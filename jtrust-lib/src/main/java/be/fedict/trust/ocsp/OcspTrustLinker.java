@@ -265,9 +265,15 @@ public class OcspTrustLinker implements TrustLinker {
 				continue;
 			}
 			DateTime thisUpdate = new DateTime(singleResp.getThisUpdate());
-			DateTime nextUpdate = new DateTime(singleResp.getNextUpdate());
+			DateTime nextUpdate;
+			if (null != singleResp.getNextUpdate()) {
+				nextUpdate = new DateTime(singleResp.getNextUpdate());
+			} else {
+				LOG.debug("no OCSP nextUpdate");
+				nextUpdate = thisUpdate;
+			}
 			LOG.debug("OCSP thisUpdate: " + thisUpdate);
-			LOG.debug("OCSP nextUpdate: " + nextUpdate);
+			LOG.debug("(OCSP) nextUpdate: " + nextUpdate);
 			DateTime beginValidity = thisUpdate.minus(this.freshnessInterval);
 			DateTime endValidity = nextUpdate.plus(this.freshnessInterval);
 			DateTime validationDateTime = new DateTime(validationDate);
