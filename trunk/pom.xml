@@ -254,6 +254,7 @@
 		</mailingList>
 	</mailingLists>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
 </project>
