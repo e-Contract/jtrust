@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
+ * Copyright (C) 2013 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,12 +20,15 @@
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -35,11 +39,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -49,13 +51,16 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import be.fedict.trust.NetworkConfig;
+import be.fedict.trust.BelgianTrustValidatorFactory;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
 import be.fedict.trust.constraints.TSACertificateConstraint;
+import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class TSATest {
@@ -88,9 +93,9 @@ public class TSATest {
 		byte[] requestData = request.getEncoded();
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
-		//HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
-		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-		//		proxy);
+		// HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
+		// httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+		// proxy);
 		HttpPost postMethod = new HttpPost(tsaLocation);
 		ContentType contentType = ContentType
 				.create("application/timestamp-query");
@@ -143,8 +148,8 @@ public class TSATest {
 		certificateRepository.addTrustPoint(gsCert);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
-		//NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-		//		8080);
+		// NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
+		// 8080);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
 				null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
@@ -175,13 +180,71 @@ public class TSATest {
 		certificateRepository.addTrustPoint(gsCert);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
-		NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-				8080);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				networkConfig);
+				null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
 		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+
+		trustValidator.isTrusted(certificateChain);
+	}
+
+	private X509Certificate loadCertificate(String pemResourceName)
+			throws IOException, CertificateException {
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		InputStream tsaCertInputStream = TSATest.class
+				.getResourceAsStream(pemResourceName);
+		PemReader pemReader = new PemReader(new InputStreamReader(
+				tsaCertInputStream));
+		PemObject pemObject = pemReader.readPemObject();
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(pemObject
+						.getContent()));
+		pemReader.close();
+		return certificate;
+	}
+
+	@Test
+	public void testTSA2014() throws Exception {
+		LOG.debug("test TSA 2014");
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+
+		certificateChain
+				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
+		certificateChain
+				.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
+		certificateChain
+				.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
+
+		CertificateRepository tsaCertificateRepository = BelgianTrustValidatorFactory
+				.createTSACertificateRepository();
+		TrustValidator trustValidator = new TrustValidator(
+				tsaCertificateRepository);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+
+		trustValidator.isTrusted(certificateChain);
+	}
+
+	@Test
+	public void testTSA2014_2() throws Exception {
+		LOG.debug("test TSA 2014");
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+
+		certificateChain
+				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
+		certificateChain
+				.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
+		certificateChain
+				.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
+
+		TrustValidator trustValidator = BelgianTrustValidatorFactory
+				.createTSATrustValidator(null);
 
 		trustValidator.isTrusted(certificateChain);
 	}

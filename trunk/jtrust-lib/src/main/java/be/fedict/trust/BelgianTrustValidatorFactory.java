@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2013 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,13 +19,18 @@
 
 package be.fedict.trust;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 
 import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
@@ -237,8 +243,12 @@ public class BelgianTrustValidatorFactory {
 
 	public static CertificateRepository createTSACertificateRepository() {
 		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+
 		X509Certificate rootTsaCertificate = loadCertificate("be/fedict/trust/belgiumtsa.crt");
 		memoryCertificateRepository.addTrustPoint(rootTsaCertificate);
+
+		X509Certificate newRootTsaCertificate = loadPemCertificate("be/fedict/trust/roots/Baltimore Cybertrust Root.pem");
+		memoryCertificateRepository.addTrustPoint(newRootTsaCertificate);
 
 		return memoryCertificateRepository;
 	}
@@ -357,6 +367,39 @@ public class BelgianTrustValidatorFactory {
 		}
 
 		return trustValidator;
+	}
+
+	private static X509Certificate loadPemCertificate(String pemResourceName) {
+		CertificateFactory certificateFactory;
+		try {
+			certificateFactory = CertificateFactory.getInstance("X.509");
+		} catch (CertificateException e) {
+			throw new RuntimeException(
+					"X.509 factory error: " + e.getMessage(), e);
+		}
+		Thread currentThread = Thread.currentThread();
+		ClassLoader classLoader = currentThread.getContextClassLoader();
+		InputStream certificateInputStream = classLoader
+				.getResourceAsStream(pemResourceName);
+		if (null == certificateInputStream) {
+			throw new IllegalArgumentException("resource not found: "
+					+ pemResourceName);
+		}
+		PemReader pemReader = new PemReader(new InputStreamReader(
+				certificateInputStream));
+		try {
+			PemObject pemObject;
+			pemObject = pemReader.readPemObject();
+			X509Certificate certificate = (X509Certificate) certificateFactory
+					.generateCertificate(new ByteArrayInputStream(pemObject
+							.getContent()));
+			pemReader.close();
+			return certificate;
+		} catch (IOException e) {
+			throw new RuntimeException("IO error: " + e.getMessage(), e);
+		} catch (CertificateException e) {
+			throw new RuntimeException("cert error: " + e.getMessage(), e);
+		}
 	}
 
 	private static X509Certificate loadCertificate(String resourceName) {
