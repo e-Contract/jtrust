@@ -20,6 +20,7 @@
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -228,6 +230,15 @@ public class TSATest {
 		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
 
 		trustValidator.isTrusted(certificateChain);
+	}
+
+	@Test
+	public void testReadTSA2014() throws Exception {
+		X509Certificate tsaCert = loadCertificate("/tsa2014/TimeStampingAuthority.pem");
+		LOG.debug("TSA cert: " + tsaCert);
+		File tmpFile = File.createTempFile("tsa-2014-", ".der");
+		FileUtils.writeByteArrayToFile(tmpFile, tsaCert.getEncoded());
+		LOG.debug("TSA cert file: " + tmpFile.getAbsolutePath());
 	}
 
 	@Test
