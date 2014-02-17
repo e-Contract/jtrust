@@ -27,12 +27,11 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.security.Security;
-import java.security.cert.CertStore;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,11 +46,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -122,32 +127,29 @@ public class TSATest {
 				httpEntity.getContent());
 		postMethod.releaseConnection();
 
-		CertStore certStore = tspResponse.getTimeStampToken()
-				.getCertificatesAndCRLs("Collection", "BC");
+		TimeStampToken timeStampToken = tspResponse.getTimeStampToken();
+		SignerId signerId = timeStampToken.getSID();
+		Store certificatesStore = timeStampToken.getCertificates();
+		Collection<X509CertificateHolder> signerCollection = certificatesStore
+				.getMatches(signerId);
 
-		Collection<? extends Certificate> certificates = certStore
-				.getCertificates(null);
-		for (Certificate certificate : certificates) {
-			LOG.debug("certificate: " + certificate.toString());
-		}
+		Iterator<X509CertificateHolder> signerCollectionIterator = signerCollection
+				.iterator();
+		X509CertificateHolder signerCertificateHolder = signerCollectionIterator
+				.next();
 
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
-		for (Certificate certificate : certificates) {
-			certificateChain.add(0, (X509Certificate) certificate);
-		}
+		// TODO: check time-stamp token signature
+
+		List<X509Certificate> certificateChain = getCertificateChain(
+				signerCertificateHolder, certificatesStore);
 
 		for (X509Certificate cert : certificateChain) {
 			LOG.debug("certificate subject: " + cert.getSubjectX500Principal());
 			LOG.debug("certificate issuer: " + cert.getIssuerX500Principal());
 		}
 
-		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
-		X509Certificate gsCert = (X509Certificate) certificateFactory
-				.generateCertificate(TSATest.class
-						.getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
-		certificateRepository.addTrustPoint(gsCert);
+		CertificateRepository certificateRepository = BelgianTrustValidatorFactory
+				.createTSACertificateRepository();
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
 		// NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
@@ -258,5 +260,59 @@ public class TSATest {
 				.createTSATrustValidator(null);
 
 		trustValidator.isTrusted(certificateChain);
+	}
+
+	private static List<X509Certificate> getCertificateChain(
+			X509CertificateHolder certificateHolder, Store certificatesStore)
+			throws CertificateException, IOException {
+		CertificateFactory certificateFactory = CertificateFactory
+				.getInstance("X.509");
+		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		while (true) {
+			X509Certificate certificate = (X509Certificate) certificateFactory
+					.generateCertificate(new ByteArrayInputStream(
+							certificateHolder.getEncoded()));
+			certificateChain.add(certificate);
+			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
+			IssuerSelector issuerSelector = new IssuerSelector(
+					certificateHolder);
+			Collection<X509CertificateHolder> issuerCollection = certificatesStore
+					.getMatches(issuerSelector);
+			if (issuerCollection.isEmpty()) {
+				break;
+			}
+			certificateHolder = issuerCollection.iterator().next();
+		}
+		return certificateChain;
+	}
+
+	private static class IssuerSelector implements Selector {
+
+		private X500Name subject;
+
+		private boolean isSelfSigned;
+
+		public IssuerSelector(X509CertificateHolder certificateHolder) {
+			this.subject = certificateHolder.getIssuer();
+			this.isSelfSigned = certificateHolder.getSubject().equals(
+					certificateHolder.getIssuer());
+		}
+
+		@Override
+		public boolean match(Object object) {
+			if (false == object instanceof X509CertificateHolder) {
+				return false;
+			}
+			X509CertificateHolder certificateHolder = (X509CertificateHolder) object;
+			if (this.isSelfSigned) {
+				return false;
+			}
+			return certificateHolder.getSubject().equals(this.subject);
+		}
+
+		@Override
+		public Object clone() {
+			return this;
+		}
 	}
 }
