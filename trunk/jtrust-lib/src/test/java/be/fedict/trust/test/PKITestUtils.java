@@ -31,10 +31,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
-import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAKeyGenParameterSpec;
@@ -48,6 +46,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
@@ -71,6 +70,7 @@ import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
@@ -84,6 +84,7 @@ import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.Req;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.jcajce.JcaBasicOCSPRespBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -100,6 +101,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
+import org.bouncycastle.util.Store;
 import org.joda.time.DateTime;
 
 public class PKITestUtils {
@@ -805,20 +807,22 @@ public class PKITestUtils {
 	public static TimeStampToken createTimeStampToken(PrivateKey privateKey,
 			List<X509Certificate> certificateChain) throws Exception {
 
-		CollectionCertStoreParameters collectionCertStoreParameters = new CollectionCertStoreParameters(
-				certificateChain);
-		CertStore certStore = CertStore.getInstance("Collection",
-				collectionCertStoreParameters);
+		Store certs = new JcaCertStore(certificateChain);
 
 		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
 		requestGen.setCertReq(true);
 		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1,
 				new byte[20], BigInteger.valueOf(100));
 
-		TimeStampTokenGenerator tstGen = new TimeStampTokenGenerator(
-				privateKey, certificateChain.get(0), TSPAlgorithms.SHA1, "1.2");
-		tstGen.setCertificatesAndCRLs(certStore);
-		return tstGen.generate(request, BigInteger.ONE, new Date(), "BC");
+		TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+				new JcaSimpleSignerInfoGeneratorBuilder().build("SHA1withRSA",
+						privateKey, certificateChain.get(0)),
+				new JcaDigestCalculatorProviderBuilder().build().get(
+						new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)),
+				new ASN1ObjectIdentifier("1.2"));
+
+		tsTokenGen.addCertificates(certs);
+		return tsTokenGen.generate(request, BigInteger.ONE, new Date());
 	}
 
 	public static X509Certificate loadCertificate(String resourceName)
