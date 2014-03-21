@@ -344,10 +344,18 @@ public class BelgianTrustValidatorFactory {
 					.addCertificatePolicy("2.16.56.12.1.1.7.1");
 			break;
 		case NATIONAL_REGISTRY:
+			// Root CA
 			certificatePoliciesCertificateConstraint
 					.addCertificatePolicy("2.16.56.1.1.1.4");
+			// Root CA 2
 			certificatePoliciesCertificateConstraint
 					.addCertificatePolicy("2.16.56.9.1.1.4");
+			// Root CA 3
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.10.1.1.4");
+			// Root CA 4
+			certificatePoliciesCertificateConstraint
+					.addCertificatePolicy("2.16.56.12.1.1.4");
 			break;
 		}
 		trustValidator
