@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -45,7 +46,7 @@ public class FallbackTrustLinker implements TrustLinker {
 	 * Default constructor.
 	 */
 	public FallbackTrustLinker() {
-		this.trustLinkers = new LinkedList<TrustLinker>();
+		this.trustLinkers = new LinkedList<>();
 	}
 
 	/**
@@ -59,6 +60,7 @@ public class FallbackTrustLinker implements TrustLinker {
 		this.trustLinkers.add(trustLinker);
 	}
 
+	@Override
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)

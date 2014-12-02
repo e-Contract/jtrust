@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -47,7 +48,7 @@ public class EndEntityCertificateConstraint implements CertificateConstraint {
 	 * Main constructor.
 	 */
 	public EndEntityCertificateConstraint() {
-		this.endEntities = new HashMap<String, Set<BigInteger>>();
+		this.endEntities = new HashMap<>();
 	}
 
 	/**
@@ -74,12 +75,13 @@ public class EndEntityCertificateConstraint implements CertificateConstraint {
 	public void addEndEntity(String issuerName, BigInteger serialNumber) {
 		Set<BigInteger> issuerSerials = this.endEntities.get(issuerName);
 		if (null == issuerSerials) {
-			issuerSerials = new HashSet<BigInteger>();
+			issuerSerials = new HashSet<>();
 			this.endEntities.put(issuerName, issuerSerials);
 		}
 		issuerSerials.add(serialNumber);
 	}
 
+	@Override
 	public void check(X509Certificate certificate)
 			throws TrustLinkerResultException {
 		String issuerName = certificate.getIssuerX500Principal().getName();

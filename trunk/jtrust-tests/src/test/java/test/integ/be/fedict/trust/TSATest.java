@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2013 e-Contract.be BVBA.
+ * Copyright (C) 2013-2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -172,7 +172,7 @@ public class TSATest {
 				.getInstance("X.509");
 		Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory
 				.generateCertificates(new ByteArrayInputStream(derData));
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 		for (X509Certificate certificate : certificates) {
 			certificateChain.add(0, certificate);
 		}
@@ -212,7 +212,7 @@ public class TSATest {
 	@Test
 	public void testTSA2014() throws Exception {
 		LOG.debug("test TSA 2014");
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 
 		certificateChain
 				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
@@ -246,7 +246,7 @@ public class TSATest {
 	@Test
 	public void testTSA2014_2() throws Exception {
 		LOG.debug("test TSA 2014");
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 
 		certificateChain
 				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
@@ -267,7 +267,7 @@ public class TSATest {
 			throws CertificateException, IOException {
 		CertificateFactory certificateFactory = CertificateFactory
 				.getInstance("X.509");
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 		while (true) {
 			X509Certificate certificate = (X509Certificate) certificateFactory
 					.generateCertificate(new ByteArrayInputStream(
@@ -288,9 +288,9 @@ public class TSATest {
 
 	private static class IssuerSelector implements Selector {
 
-		private X500Name subject;
+		private final X500Name subject;
 
-		private boolean isSelfSigned;
+		private final boolean isSelfSigned;
 
 		public IssuerSelector(X509CertificateHolder certificateHolder) {
 			this.subject = certificateHolder.getIssuer();

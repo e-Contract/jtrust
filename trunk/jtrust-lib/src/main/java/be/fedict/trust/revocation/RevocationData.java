@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2012 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -37,8 +38,8 @@ public class RevocationData {
 	 */
 	public RevocationData() {
 
-		this.ocspRevocationData = new LinkedList<OCSPRevocationData>();
-		this.crlRevocationData = new LinkedList<CRLRevocationData>();
+		this.ocspRevocationData = new LinkedList<>();
+		this.crlRevocationData = new LinkedList<>();
 	}
 
 	/**

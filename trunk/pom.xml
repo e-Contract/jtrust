@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.fedict</groupId>
 	<artifactId>jtrust</artifactId>
@@ -48,26 +49,26 @@
 				<plugin>
 					<groupId>org.jvnet.jaxb2.maven2</groupId>
 					<artifactId>maven-jaxb2-plugin</artifactId>
-					<version>0.8.3</version>
+					<version>0.11.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.1</version>
+					<version>3.2</version>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+						<source>1.7</source>
+						<target>1.7</target>
 					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.16</version>
+					<version>2.18</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.4.2</version>
+					<version>2.5.1</version>
 					<configuration>
 						<tagBase>https://jtrust.googlecode.com/svn/tags/</tagBase>
 						<preparationGoals>clean install</preparationGoals>
@@ -77,13 +78,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.4</version>
 					<configuration>
 						<reportPlugins>
 							<plugin>
 								<groupId>org.apache.maven.plugins</groupId>
 								<artifactId>maven-javadoc-plugin</artifactId>
-								<version>2.9.1</version>
+								<version>2.10.1</version>
 								<configuration>
 									<links>
 										<link>http://docs.oracle.com/javase/6/docs/api/</link>
@@ -101,7 +102,7 @@
 							<plugin>
 								<groupId>org.apache.maven.plugins</groupId>
 								<artifactId>maven-surefire-report-plugin</artifactId>
-								<version>2.16</version>
+								<version>2.18</version>
 							</plugin>
 							<plugin>
 								<groupId>org.codehaus.mojo</groupId>
@@ -124,7 +125,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.4</version>
+					<version>2.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -236,12 +237,12 @@
 		<downloadUrl>http://code.google.com/p/jtrust/downloads/list</downloadUrl>
 		<repository>
 			<id>e-contract-deploy</id>
-			<url>scp://e-contract.be/maven2</url>
+			<url>sftp://e-contract.be/maven2</url>
 			<uniqueVersion>false</uniqueVersion>
 		</repository>
 		<site>
 			<id>e-contract-jtrust-site</id>
-			<url>scp://e-contract.be/sites/jtrust/</url>
+			<url>sftp://e-contract.be/sites/jtrust/</url>
 		</site>
 	</distributionManagement>
 	<issueManagement>

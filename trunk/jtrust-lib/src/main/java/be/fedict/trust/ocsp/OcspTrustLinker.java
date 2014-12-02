@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -39,9 +40,9 @@ import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
@@ -108,6 +109,7 @@ public class OcspTrustLinker implements TrustLinker {
 		this.freshnessInterval = freshnessInterval;
 	}
 
+	@Override
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
@@ -328,7 +330,7 @@ public class OcspTrustLinker implements TrustLinker {
 			DERObjectIdentifier accessMethod) throws IOException,
 			URISyntaxException {
 		byte[] authInfoAccessExtensionValue = certificate
-				.getExtensionValue(X509Extension.authorityInfoAccess.getId());
+				.getExtensionValue(Extension.authorityInfoAccess.getId());
 		if (null == authInfoAccessExtensionValue) {
 			return null;
 		}

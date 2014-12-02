@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -49,6 +50,7 @@ public class TSACertificateConstraint implements CertificateConstraint {
 	public TSACertificateConstraint() {
 	}
 
+	@Override
 	public void check(X509Certificate certificate)
 			throws TrustLinkerResultException {
 

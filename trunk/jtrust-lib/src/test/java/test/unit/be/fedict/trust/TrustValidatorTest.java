@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -90,7 +91,7 @@ public class TrustValidatorTest {
 		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
 				.andReturn(false);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		try {
@@ -120,7 +121,7 @@ public class TrustValidatorTest {
 		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
 				.andReturn(true);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -148,7 +149,7 @@ public class TrustValidatorTest {
 		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
 				.andReturn(true);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -176,7 +177,7 @@ public class TrustValidatorTest {
 		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
 				.andStubReturn(true);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -210,7 +211,7 @@ public class TrustValidatorTest {
 		EasyMock.expect(mockCertificateRepository.isTrustPoint(certificate))
 				.andStubReturn(true);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -239,7 +240,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -274,7 +275,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 
 		EasyMock.replay(mockCertificateRepository);
@@ -310,7 +311,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -349,7 +350,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -396,7 +397,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -446,7 +447,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -498,7 +499,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -550,7 +551,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -618,7 +619,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(interCertificate);
 		certificatePath.add(rootCertificate);
@@ -672,7 +673,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -722,7 +723,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -777,7 +778,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 
@@ -828,7 +829,7 @@ public class TrustValidatorTest {
 		TrustValidator trustValidator = new TrustValidator(
 				mockCertificateRepository);
 
-		List<X509Certificate> certificatePath = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificatePath = new LinkedList<>();
 		certificatePath.add(certificate);
 		certificatePath.add(rootCertificate);
 

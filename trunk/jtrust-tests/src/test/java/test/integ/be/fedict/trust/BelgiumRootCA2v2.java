@@ -37,7 +37,7 @@ import be.fedict.trust.test.PKITestUtils;
 public class BelgiumRootCA2v2 {
 
 	private static final Log LOG = LogFactory.getLog(BelgiumRootCA2v2.class);
-	
+
 	@Before
 	public void setUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
@@ -50,7 +50,7 @@ public class BelgiumRootCA2v2 {
 		X509Certificate rootCaCert = PKITestUtils
 				.loadCertificate("/brca2-2/CertificateBelgiumRoot.crt");
 		LOG.debug(rootCaCert);
-		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certChain = new LinkedList<>();
 		certChain.add(rrnCert);
 		certChain.add(rootCaCert);
 

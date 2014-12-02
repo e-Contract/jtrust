@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -45,6 +46,8 @@ public class NetworkConfig {
 
 	/**
 	 * Gives back the HTTP proxy host.
+	 * 
+	 * @return the HTTP proxy host.
 	 */
 	public String getProxyHost() {
 		return this.proxyHost;
@@ -52,6 +55,8 @@ public class NetworkConfig {
 
 	/**
 	 * Gives back the HTTP proxy port.
+	 * 
+	 * @return the HTTP proxy port.
 	 */
 	public int getProxyPort() {
 		return this.proxyPort;

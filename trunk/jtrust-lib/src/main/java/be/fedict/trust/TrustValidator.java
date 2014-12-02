@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +19,6 @@
 
 package be.fedict.trust;
 
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -81,8 +81,8 @@ public class TrustValidator {
 	public TrustValidator(CertificateRepository certificateRepository,
 			RevocationData revocationData) {
 		this.certificateRepository = certificateRepository;
-		this.trustLinkers = new LinkedList<TrustLinker>();
-		this.certificateConstraints = new LinkedList<CertificateConstraint>();
+		this.trustLinkers = new LinkedList<>();
+		this.certificateConstraints = new LinkedList<>();
 		this.revocationData = revocationData;
 		this.algorithmPolicy = new DefaultAlgorithmPolicy();
 	}
@@ -126,7 +126,7 @@ public class TrustValidator {
 	 * 
 	 * @param certificatePath
 	 *            the X509 certificate path to validate.
-	 * @throws CertPathValidatorException
+	 * @throws TrustLinkerResultException
 	 *             in case the certificate path is invalid.
 	 * @see #isTrusted(List, Date)
 	 */
@@ -141,10 +141,11 @@ public class TrustValidator {
 	 * chain directly from a JCA key store implementation.
 	 * 
 	 * @param certificates
+	 * @throws be.fedict.trust.linker.TrustLinkerResultException
 	 */
 	public void isTrusted(Certificate[] certificates)
 			throws TrustLinkerResultException {
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 		for (Certificate certificate : certificates) {
 			X509Certificate x509Certificate = (X509Certificate) certificate;
 			certificateChain.add(x509Certificate);

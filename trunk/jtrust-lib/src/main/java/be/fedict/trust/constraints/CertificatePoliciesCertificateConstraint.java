@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -30,8 +31,8 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.X509Extension;
 
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
@@ -48,13 +49,13 @@ public class CertificatePoliciesCertificateConstraint implements
 	private static final Log LOG = LogFactory
 			.getLog(CertificatePoliciesCertificateConstraint.class);
 
-	private Set<String> certificatePolicies;
+	private final Set<String> certificatePolicies;
 
 	/**
 	 * Default constructor.
 	 */
 	public CertificatePoliciesCertificateConstraint() {
-		this.certificatePolicies = new HashSet<String>();
+		this.certificatePolicies = new HashSet<>();
 	}
 
 	/**
@@ -66,10 +67,11 @@ public class CertificatePoliciesCertificateConstraint implements
 		this.certificatePolicies.add(certificatePolicy);
 	}
 
+	@Override
 	public void check(X509Certificate certificate)
 			throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
-				.getExtensionValue(X509Extension.certificatePolicies.getId());
+				.getExtensionValue(Extension.certificatePolicies.getId());
 		if (null == extensionValue) {
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.CONSTRAINT_VIOLATION,

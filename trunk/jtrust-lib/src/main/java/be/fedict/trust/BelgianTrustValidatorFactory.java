@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013 e-Contract.be BVBA.
+ * Copyright (C) 2013-2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -37,6 +37,7 @@ import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.constraints.TSACertificateConstraint;
+import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.repository.CertificateRepository;
 import be.fedict.trust.repository.MemoryCertificateRepository;
@@ -99,7 +100,8 @@ public class BelgianTrustValidatorFactory {
 	public static TrustValidator createTrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.AUTHN, networkConfig, externalTrustLinker, null);
+				CertificateType.AUTHN, networkConfig, externalTrustLinker,
+				null, null);
 
 		return trustValidator;
 	}
@@ -117,7 +119,8 @@ public class BelgianTrustValidatorFactory {
 	public static TrustValidator createNonRepudiationTrustValidator(
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, externalTrustLinker, null);
+				CertificateType.SIGN, networkConfig, externalTrustLinker, null,
+				null);
 
 		return trustValidator;
 	}
@@ -133,7 +136,7 @@ public class BelgianTrustValidatorFactory {
 	public static TrustValidator createNonRepudiationTrustValidator(
 			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, null, null);
+				CertificateType.SIGN, networkConfig, null, null, null);
 
 		return trustValidator;
 	}
@@ -149,7 +152,8 @@ public class BelgianTrustValidatorFactory {
 	public static TrustValidator createNationalRegistryTrustValidator(
 			NetworkConfig networkConfig) {
 		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null);
+				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null,
+				null);
 
 		return trustValidator;
 	}
@@ -160,8 +164,6 @@ public class BelgianTrustValidatorFactory {
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
-	 * @param externalTrustLinker
-	 *            the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTSATrustValidator(
@@ -220,7 +222,7 @@ public class BelgianTrustValidatorFactory {
 			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
 			CertificateRepository certificateRepository) {
 		return createTrustValidator(CertificateType.AUTHN, networkConfig,
-				externalTrustLinker, certificateRepository);
+				externalTrustLinker, certificateRepository, null);
 	}
 
 	public static CertificateRepository createCertificateRepository() {
@@ -256,7 +258,8 @@ public class BelgianTrustValidatorFactory {
 	private static TrustValidator createTrustValidator(
 			CertificateType certificateType, NetworkConfig networkConfig,
 			TrustLinker externalTrustLinker,
-			CertificateRepository certificateRepository) {
+			CertificateRepository certificateRepository,
+			CrlRepository crlRepository) {
 
 		TrustValidator trustValidator;
 		if (null == certificateRepository) {
@@ -270,7 +273,7 @@ public class BelgianTrustValidatorFactory {
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
 				networkConfig);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
-				externalTrustLinker);
+				externalTrustLinker, false, crlRepository);
 
 		KeyUsageCertificateConstraint keyUsageCertificateConstraint = new KeyUsageCertificateConstraint();
 		switch (certificateType) {

@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -62,17 +63,18 @@ public class OfflineCrlRepository implements CrlRepository {
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance(
 				"X.509", "BC");
-		this.crls = new LinkedList<X509CRL>();
+		this.crls = new LinkedList<>();
 		for (byte[] encodedCrl : encodedCrls) {
 			ByteArrayInputStream bais = new ByteArrayInputStream(encodedCrl);
 			this.crls.add((X509CRL) certificateFactory.generateCRL(bais));
 		}
 	}
 
+	@Override
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
 
-		List<X509CRL> matchingCrls = new LinkedList<X509CRL>();
+		List<X509CRL> matchingCrls = new LinkedList<>();
 		for (X509CRL crl : this.crls) {
 			if (crl.getIssuerX500Principal().equals(
 					issuerCertificate.getSubjectX500Principal())) {
