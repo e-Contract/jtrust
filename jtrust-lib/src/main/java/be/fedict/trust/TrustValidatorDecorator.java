@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,6 +20,7 @@
 package be.fedict.trust;
 
 import be.fedict.trust.crl.CachedCrlRepository;
+import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.linker.FallbackTrustLinker;
@@ -80,15 +82,35 @@ public class TrustValidatorDecorator {
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
 			TrustLinker externalTrustLinker, boolean noOcsp) {
+		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker,
+				noOcsp, null);
+	}
+
+	/**
+	 * Adds a default trust linker configuration to a given trust validator.
+	 * 
+	 * @param trustValidator
+	 *            the trust validator to be configured.
+	 * @param externalTrustLinker
+	 *            optional additional trust linker.
+	 * @param noOcsp
+	 *            set to <code>true</code> to avoid OCSP validation.
+	 * @param crlRepository
+	 *            the optional CRL repository to use.
+	 */
+	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
+			TrustLinker externalTrustLinker, boolean noOcsp,
+			CrlRepository crlRepository) {
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
 
 		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
 				this.networkConfig);
 
-		OnlineCrlRepository crlRepository = new OnlineCrlRepository(
-				this.networkConfig);
-		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(
-				crlRepository);
+		if (null == crlRepository) {
+			OnlineCrlRepository onlineCrlRepository = new OnlineCrlRepository(
+					this.networkConfig);
+			crlRepository = new CachedCrlRepository(onlineCrlRepository);
+		}
 
 		FallbackTrustLinker fallbackTrustLinker = new FallbackTrustLinker();
 		if (null != externalTrustLinker) {
@@ -98,8 +120,7 @@ public class TrustValidatorDecorator {
 			fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(
 					ocspRepository));
 		}
-		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(
-				cachedCrlRepository));
+		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(crlRepository));
 
 		trustValidator.addTrustLinker(fallbackTrustLinker);
 	}

@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -57,13 +58,13 @@ import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.cert.X509CRLHolder;
@@ -299,7 +300,7 @@ public class PKITestUtils {
 		if (includeSKID) {
 			x509v3CertificateBuilder
 					.addExtension(
-							X509Extension.subjectKeyIdentifier,
+							Extension.subjectKeyIdentifier,
 							false,
 							extensionUtils
 									.createSubjectKeyIdentifier(subjectPublicKey));
@@ -316,19 +317,19 @@ public class PKITestUtils {
 				authorityPublicKey = subjectPublicKey;
 			}
 			x509v3CertificateBuilder.addExtension(
-					X509Extension.authorityKeyIdentifier, false, extensionUtils
+					Extension.authorityKeyIdentifier, false, extensionUtils
 							.createAuthorityKeyIdentifier(authorityPublicKey));
 		}
 
 		if (caFlag) {
 			if (-1 == pathLength) {
 				x509v3CertificateBuilder.addExtension(
-						X509Extension.basicConstraints, true,
-						new BasicConstraints(2147483647));
+						Extension.basicConstraints, true, new BasicConstraints(
+								2147483647));
 			} else {
 				x509v3CertificateBuilder.addExtension(
-						X509Extension.basicConstraints, true,
-						new BasicConstraints(pathLength));
+						Extension.basicConstraints, true, new BasicConstraints(
+								pathLength));
 			}
 		}
 
@@ -344,7 +345,7 @@ public class PKITestUtils {
 			DistributionPoint[] crlDistPoints = new DistributionPoint[] { distPoint };
 			CRLDistPoint crlDistPoint = new CRLDistPoint(crlDistPoints);
 			x509v3CertificateBuilder.addExtension(
-					X509Extension.cRLDistributionPoints, false, crlDistPoint);
+					Extension.cRLDistributionPoints, false, crlDistPoint);
 		}
 
 		if (null != ocspUri) {
@@ -353,12 +354,12 @@ public class PKITestUtils {
 			AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess(
 					X509ObjectIdentifiers.ocspAccessMethod, ocspName);
 			x509v3CertificateBuilder.addExtension(
-					X509Extension.authorityInfoAccess, false,
+					Extension.authorityInfoAccess, false,
 					authorityInformationAccess);
 		}
 
 		if (null != keyUsage) {
-			x509v3CertificateBuilder.addExtension(X509Extension.keyUsage, true,
+			x509v3CertificateBuilder.addExtension(Extension.keyUsage, true,
 					keyUsage);
 		}
 
@@ -368,7 +369,7 @@ public class PKITestUtils {
 			PolicyInformation policyInformation = new PolicyInformation(
 					policyObjectIdentifier);
 			x509v3CertificateBuilder.addExtension(
-					X509Extension.certificatePolicies, false, new DERSequence(
+					Extension.certificatePolicies, false, new DERSequence(
 							policyInformation));
 		}
 
@@ -379,15 +380,16 @@ public class PKITestUtils {
 			} else {
 				vec.add(new QCStatement(QCStatement.id_etsi_qcs_RetentionPeriod));
 			}
-			x509v3CertificateBuilder.addExtension(X509Extension.qCStatements,
-					true, new DERSequence(vec));
+			x509v3CertificateBuilder.addExtension(Extension.qCStatements, true,
+					new DERSequence(vec));
 
 		}
 
 		if (tsa) {
-			x509v3CertificateBuilder.addExtension(
-					X509Extension.extendedKeyUsage, true, new ExtendedKeyUsage(
-							KeyPurposeId.id_kp_timeStamping));
+			x509v3CertificateBuilder
+					.addExtension(Extension.extendedKeyUsage, true,
+							new ExtendedKeyUsage(
+									KeyPurposeId.id_kp_timeStamping));
 		}
 
 		if (ocspResponder) {
@@ -395,9 +397,8 @@ public class PKITestUtils {
 					OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false,
 					DERNull.INSTANCE);
 
-			x509v3CertificateBuilder.addExtension(
-					X509Extension.extendedKeyUsage, true, new ExtendedKeyUsage(
-							KeyPurposeId.id_kp_OCSPSigning));
+			x509v3CertificateBuilder.addExtension(Extension.extendedKeyUsage,
+					true, new ExtendedKeyUsage(KeyPurposeId.id_kp_OCSPSigning));
 		}
 
 		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
@@ -539,7 +540,7 @@ public class PKITestUtils {
 			NoSuchAlgorithmException, SignatureException, CertificateException,
 			OperatorCreationException, IOException {
 
-		List<RevokedCertificate> revokedCertificates = new LinkedList<RevokedCertificate>();
+		List<RevokedCertificate> revokedCertificates = new LinkedList<>();
 		for (BigInteger revokedCertificateSerialNumber : revokedCertificateSerialNumbers) {
 			revokedCertificates.add(new RevokedCertificate(
 					revokedCertificateSerialNumber, thisUpdate));
@@ -630,10 +631,9 @@ public class PKITestUtils {
 		}
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
-		x509v2crlBuilder.addExtension(X509Extension.authorityKeyIdentifier,
-				false,
+		x509v2crlBuilder.addExtension(Extension.authorityKeyIdentifier, false,
 				extensionUtils.createAuthorityKeyIdentifier(issuerCertificate));
-		x509v2crlBuilder.addExtension(X509Extension.cRLNumber, false,
+		x509v2crlBuilder.addExtension(Extension.cRLNumber, false,
 				new CRLNumber(BigInteger.ONE));
 
 		if (null != deltaCrlUris && !deltaCrlUris.isEmpty()) {
@@ -644,13 +644,13 @@ public class PKITestUtils {
 			}
 			CRLDistPoint crlDistPoint = new CRLDistPoint(
 					(DistributionPoint[]) deltaCrlDps);
-			x509v2crlBuilder.addExtension(X509Extension.freshestCRL, false,
+			x509v2crlBuilder.addExtension(Extension.freshestCRL, false,
 					crlDistPoint);
 		}
 
 		if (deltaCrl) {
-			x509v2crlBuilder.addExtension(X509Extension.deltaCRLIndicator,
-					true, new CRLNumber(BigInteger.ONE));
+			x509v2crlBuilder.addExtension(Extension.deltaCRLIndicator, true,
+					new CRLNumber(BigInteger.ONE));
 		}
 
 		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()

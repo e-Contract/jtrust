@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -39,7 +40,7 @@ public class Credentials {
 	 * Default constructor.
 	 */
 	public Credentials() {
-		this.credentials = new LinkedList<Credential>();
+		this.credentials = new LinkedList<>();
 	}
 
 	/**

@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -92,6 +93,7 @@ public class KeyUsageCertificateConstraint implements CertificateConstraint {
 		this.mask[DECIPHER_ONLY_IDX] = flag;
 	}
 
+	@Override
 	public void check(X509Certificate certificate)
 			throws TrustLinkerResultException {
 		boolean[] keyUsage = certificate.getKeyUsage();

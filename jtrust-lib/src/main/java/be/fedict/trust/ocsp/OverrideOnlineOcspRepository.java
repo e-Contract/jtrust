@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -46,12 +47,12 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 
 	public OverrideOnlineOcspRepository() {
 		super();
-		this.overrideURIs = new HashMap<URI, URI>();
+		this.overrideURIs = new HashMap<>();
 	}
 
 	public OverrideOnlineOcspRepository(NetworkConfig networkConfig) {
 		super(networkConfig);
-		this.overrideURIs = new HashMap<URI, URI>();
+		this.overrideURIs = new HashMap<>();
 	}
 
 	public void overrideOCSP(URI originalOcspUri, URI newOcspUri) {

@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -29,8 +30,8 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
@@ -48,6 +49,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 	private static final Log LOG = LogFactory
 			.getLog(PublicKeyTrustLinker.class);
 
+	@Override
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
@@ -134,9 +136,9 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		boolean isChildCa = isCa(childCertificate);
 
 		byte[] subjectKeyIdentifierData = certificate
-				.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
+				.getExtensionValue(Extension.subjectKeyIdentifier.getId());
 		byte[] authorityKeyIdentifierData = childCertificate
-				.getExtensionValue(X509Extension.authorityKeyIdentifier.getId());
+				.getExtensionValue(Extension.authorityKeyIdentifier.getId());
 
 		if (isCa && null == subjectKeyIdentifierData) {
 			LOG.debug("certificate is CA and MUST contain a Subject Key Identifier");
@@ -181,9 +183,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 	}
 
 	private boolean isCa(X509Certificate certificate) {
-
 		byte[] basicConstraintsValue = certificate
-				.getExtensionValue(X509Extension.basicConstraints.getId());
+				.getExtensionValue(Extension.basicConstraints.getId());
 		if (null == basicConstraintsValue) {
 			return false;
 		}

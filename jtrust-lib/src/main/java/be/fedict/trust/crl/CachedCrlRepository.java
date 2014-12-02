@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -62,6 +63,7 @@ public class CachedCrlRepository implements CrlRepository {
 		this.cacheAgingHours = DEFAULT_CACHE_AGING_HOURS;
 	}
 
+	@Override
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
 
@@ -102,7 +104,7 @@ public class CachedCrlRepository implements CrlRepository {
 			Date validationDate) {
 		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate,
 				validationDate);
-		this.crlCache.put(crlUri, new SoftReference<X509CRL>(crl));
+		this.crlCache.put(crlUri, new SoftReference<>(crl));
 		return crl;
 	}
 

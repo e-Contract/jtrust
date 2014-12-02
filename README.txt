@@ -11,9 +11,8 @@ The source code is hosted at: http://code.google.com/p/jtrust/
 === 2. Requirements
 
 The following is required for compiling the jTrust software:
-* Oracle Java 1.6.0_45+
-* Apache Maven 3.1.1. Releasing via Maven 3.2.1 fails (ssh-wagon hangs).
-	See also: http://jira.codehaus.org/browse/MNG-5605
+* Oracle Java JDK 1.7.0_71+
+* Apache Maven 3.2.3+
 
 
 === 3. Build
@@ -25,4 +24,3 @@ The project can be build via:
 === 4. License
 
 The license conditions can be found in the file: LICENSE.txt
-

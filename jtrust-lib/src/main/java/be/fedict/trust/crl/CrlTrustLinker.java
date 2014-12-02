@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -42,10 +43,10 @@ import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle.asn1.x509.X509Extension;
 
 import be.fedict.trust.linker.TrustLinker;
 import be.fedict.trust.linker.TrustLinkerResult;
@@ -77,6 +78,7 @@ public class CrlTrustLinker implements TrustLinker {
 		this.crlRepository = crlRepository;
 	}
 
+	@Override
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
@@ -150,7 +152,7 @@ public class CrlTrustLinker implements TrustLinker {
 			LOG.debug("non-critical extensions: "
 					+ crlEntry.getNonCriticalExtensionOIDs());
 			byte[] reasonCodeExtension = crlEntry
-					.getExtensionValue(X509Extension.reasonCode.getId());
+					.getExtensionValue(Extension.reasonCode.getId());
 			if (null != reasonCodeExtension) {
 				try {
 					DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
@@ -250,7 +252,7 @@ public class CrlTrustLinker implements TrustLinker {
 	 */
 	public static URI getCrlUri(X509Certificate certificate) {
 		byte[] crlDistributionPointsValue = certificate
-				.getExtensionValue(X509Extension.cRLDistributionPoints.getId());
+				.getExtensionValue(Extension.cRLDistributionPoints.getId());
 		if (null == crlDistributionPointsValue) {
 			return null;
 		}
@@ -301,7 +303,7 @@ public class CrlTrustLinker implements TrustLinker {
 
 	private BigInteger getCrlNumber(X509CRL crl) {
 		byte[] crlNumberExtensionValue = crl
-				.getExtensionValue(X509Extension.cRLNumber.getId());
+				.getExtensionValue(Extension.cRLNumber.getId());
 		if (null == crlNumberExtensionValue) {
 			return null;
 		}
@@ -320,9 +322,8 @@ public class CrlTrustLinker implements TrustLinker {
 	}
 
 	private boolean isIndirectCRL(X509CRL crl) {
-		byte[] idp = crl
-				.getExtensionValue(X509Extension.issuingDistributionPoint
-						.getId());
+		byte[] idp = crl.getExtensionValue(Extension.issuingDistributionPoint
+				.getId());
 		boolean isIndirect = false;
 		if (idp != null) {
 			isIndirect = IssuingDistributionPoint.getInstance(idp)

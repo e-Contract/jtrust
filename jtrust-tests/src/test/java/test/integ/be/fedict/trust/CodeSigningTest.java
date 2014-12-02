@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -75,7 +76,7 @@ public class CodeSigningTest {
 		X509Certificate gsCert = (X509Certificate) certificateFactory
 				.generateCertificate(gsCertInputStream);
 
-		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certChain = new LinkedList<>();
 		certChain.add(fedictCert);
 		certChain.add(govCert);
 		certChain.add(rootCert);
@@ -121,7 +122,7 @@ public class CodeSigningTest {
 		X509Certificate gsCert = (X509Certificate) certificateFactory
 				.generateCertificate(gsCertInputStream);
 
-		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certChain = new LinkedList<>();
 		certChain.add(fedictCert);
 		certChain.add(govCert);
 		certChain.add(rootCert);
@@ -172,7 +173,7 @@ public class CodeSigningTest {
 		X509Certificate gsCert = (X509Certificate) certificateFactory
 				.generateCertificate(gsCertInputStream);
 
-		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certChain = new LinkedList<>();
 		certChain.add(fedictCert);
 		certChain.add(govCert);
 		certChain.add(rootCert);
@@ -218,7 +219,7 @@ public class CodeSigningTest {
 		X509Certificate gsCert = (X509Certificate) certificateFactory
 				.generateCertificate(gsCertInputStream);
 
-		List<X509Certificate> certChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certChain = new LinkedList<>();
 		certChain.add(fedictCert);
 		certChain.add(ca2Cert);
 		certChain.add(rootCert);

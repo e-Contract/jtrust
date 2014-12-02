@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -64,13 +65,14 @@ public class OfflineOcspRepository implements OcspRepository {
 	public OfflineOcspRepository(List<byte[]> encodedOcspResponses)
 			throws IOException {
 
-		this.ocspResponses = new LinkedList<OCSPResp>();
+		this.ocspResponses = new LinkedList<>();
 		for (byte[] encodedOcspResponse : encodedOcspResponses) {
 			OCSPResp ocspResponse = new OCSPResp(encodedOcspResponse);
 			ocspResponses.add(ocspResponse);
 		}
 	}
 
+	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate, Date validationDate) {
 

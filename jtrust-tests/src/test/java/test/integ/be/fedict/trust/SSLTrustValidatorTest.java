@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -146,7 +147,7 @@ public class SSLTrustValidatorTest {
 				.openConnection(proxy);
 		connection.connect();
 		Certificate[] serverCertificates = connection.getServerCertificates();
-		List<X509Certificate> certificateChain = new LinkedList<X509Certificate>();
+		List<X509Certificate> certificateChain = new LinkedList<>();
 		for (Certificate certificate : serverCertificates) {
 			X509Certificate x509Cert = (X509Certificate) certificate;
 			certificateChain.add(x509Cert);

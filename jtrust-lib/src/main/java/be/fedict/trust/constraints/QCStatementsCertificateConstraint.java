@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -28,7 +29,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 
 import be.fedict.trust.linker.TrustLinkerResultException;
@@ -52,10 +53,11 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		this.qcComplianceFilter = qcComplianceFilter;
 	}
 
+	@Override
 	public void check(X509Certificate certificate)
 			throws TrustLinkerResultException, Exception {
 		byte[] extensionValue = certificate
-				.getExtensionValue(X509Extension.qCStatements.getId());
+				.getExtensionValue(Extension.qCStatements.getId());
 		if (null == extensionValue) {
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.CONSTRAINT_VIOLATION,

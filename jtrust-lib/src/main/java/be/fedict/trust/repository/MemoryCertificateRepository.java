@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -40,7 +41,7 @@ public class MemoryCertificateRepository implements CertificateRepository {
 	 * Default constructor.
 	 */
 	public MemoryCertificateRepository() {
-		this.trustPoints = new HashMap<String, X509Certificate>();
+		this.trustPoints = new HashMap<>();
 	}
 
 	/**
@@ -54,6 +55,7 @@ public class MemoryCertificateRepository implements CertificateRepository {
 		this.trustPoints.put(fingerprint, certificate);
 	}
 
+	@Override
 	public boolean isTrustPoint(X509Certificate certificate) {
 		String fingerprint = getFingerprint(certificate);
 		X509Certificate trustPoint = this.trustPoints.get(fingerprint);

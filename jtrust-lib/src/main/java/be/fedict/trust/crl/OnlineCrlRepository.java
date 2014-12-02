@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -84,6 +85,7 @@ public class OnlineCrlRepository implements CrlRepository {
 		this.credentials = credentials;
 	}
 
+	@Override
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
 		try {
