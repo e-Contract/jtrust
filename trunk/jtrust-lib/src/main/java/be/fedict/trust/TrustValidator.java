@@ -170,7 +170,6 @@ public class TrustValidator {
 	 * 
 	 * @param certificate
 	 *            the X509 certificate.
-	 * @return <code>true</code> if self-signed, <code>false</code> otherwise.
 	 */
 	public static void isSelfSigned(X509Certificate certificate)
 			throws TrustLinkerResultException {

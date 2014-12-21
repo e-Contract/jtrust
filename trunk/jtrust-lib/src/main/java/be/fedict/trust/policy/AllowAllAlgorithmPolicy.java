@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
+ * Copyright (C) 2014 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,8 +26,9 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * An algorithm policy implementation that allows everything.
- * <p/>
+ * <p>
  * Gives a log warning on MD5.
+ * </p>
  * 
  * @author Frank Cornelis
  * 
