@@ -399,13 +399,16 @@ public class BelgianTrustValidatorFactory {
 		PemReader pemReader = new PemReader(new InputStreamReader(
 				certificateInputStream));
 		try {
-			PemObject pemObject;
-			pemObject = pemReader.readPemObject();
-			X509Certificate certificate = (X509Certificate) certificateFactory
-					.generateCertificate(new ByteArrayInputStream(pemObject
-							.getContent()));
-			pemReader.close();
-			return certificate;
+			try {
+				PemObject pemObject;
+				pemObject = pemReader.readPemObject();
+				X509Certificate certificate = (X509Certificate) certificateFactory
+						.generateCertificate(new ByteArrayInputStream(pemObject
+								.getContent()));
+				return certificate;
+			} finally {
+				pemReader.close();
+			}
 		} catch (IOException e) {
 			throw new RuntimeException("IO error: " + e.getMessage(), e);
 		} catch (CertificateException e) {

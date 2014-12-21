@@ -24,11 +24,13 @@ import static org.junit.Assert.assertNull;
 
 import java.net.URI;
 import java.security.KeyPair;
+import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +45,7 @@ public class OfflineCrlRepositoryTest {
 
 	@Before
 	public void setUp() throws Exception {
+		Security.addProvider(new BouncyCastleProvider());
 		this.validationDate = new Date();
 	}
 

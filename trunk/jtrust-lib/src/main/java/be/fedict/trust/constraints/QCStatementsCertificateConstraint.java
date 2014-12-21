@@ -26,8 +26,8 @@ import java.util.Enumeration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -72,7 +72,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		while (qcStatementEnum.hasMoreElements()) {
 			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum
 					.nextElement());
-			DERObjectIdentifier statementId = qcStatement.getStatementId();
+			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
 			LOG.debug("statement Id: " + statementId.getId());
 			if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
 				qcCompliance = true;

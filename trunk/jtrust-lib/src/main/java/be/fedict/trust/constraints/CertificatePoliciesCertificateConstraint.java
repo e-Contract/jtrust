@@ -28,8 +28,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.PolicyInformation;
@@ -85,7 +85,7 @@ public class CertificatePoliciesCertificateConstraint implements
 		while (certPoliciesEnum.hasMoreElements()) {
 			PolicyInformation policyInfo = PolicyInformation
 					.getInstance(certPoliciesEnum.nextElement());
-			DERObjectIdentifier policyOid = policyInfo.getPolicyIdentifier();
+			ASN1ObjectIdentifier policyOid = policyInfo.getPolicyIdentifier();
 			String policyId = policyOid.getId();
 			LOG.debug("present policy OID: " + policyId);
 			if (this.certificatePolicies.contains(policyId)) {
