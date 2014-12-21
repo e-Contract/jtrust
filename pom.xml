@@ -255,6 +255,7 @@
 	</mailingLists>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- also test 1.51 before releasing -->
 		<bouncycastle.version>1.50</bouncycastle.version>
 	</properties>
 </project>

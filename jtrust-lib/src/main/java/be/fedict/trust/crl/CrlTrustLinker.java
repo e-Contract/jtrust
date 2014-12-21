@@ -33,11 +33,12 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -159,7 +160,7 @@ public class CrlTrustLinker implements TrustLinker {
 							new ByteArrayInputStream(reasonCodeExtension))
 							.readObject());
 					byte[] octets = octetString.getOctets();
-					CRLReason crlReason = CRLReason.getInstance(DEREnumerated
+					CRLReason crlReason = CRLReason.getInstance(ASN1Enumerated
 							.getInstance(new ASN1InputStream(octets)
 									.readObject()));
 					BigInteger crlReasonValue = crlReason.getValue();
@@ -308,11 +309,11 @@ public class CrlTrustLinker implements TrustLinker {
 			return null;
 		}
 		try {
-			DEROctetString octetString = (DEROctetString) (new ASN1InputStream(
+			ASN1OctetString octetString = (ASN1OctetString) (new ASN1InputStream(
 					new ByteArrayInputStream(crlNumberExtensionValue))
 					.readObject());
 			byte[] octets = octetString.getOctets();
-			DERInteger integer = (DERInteger) new ASN1InputStream(octets)
+			ASN1Integer integer = (ASN1Integer) new ASN1InputStream(octets)
 					.readObject();
 			BigInteger crlNumber = integer.getPositiveValue();
 			return crlNumber;

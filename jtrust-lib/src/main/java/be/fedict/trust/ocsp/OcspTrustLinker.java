@@ -33,8 +33,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
@@ -327,7 +327,7 @@ public class OcspTrustLinker implements TrustLinker {
 	}
 
 	private URI getAccessLocation(X509Certificate certificate,
-			DERObjectIdentifier accessMethod) throws IOException,
+			ASN1ObjectIdentifier accessMethod) throws IOException,
 			URISyntaxException {
 		byte[] authInfoAccessExtensionValue = certificate
 				.getExtensionValue(Extension.authorityInfoAccess.getId());
