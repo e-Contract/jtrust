@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.fedict</groupId>
 	<artifactId>jtrust</artifactId>
-	<version>2.0.5</version>
+	<version>2.0.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Java Trust Library Project</name>
 	<description>Pragmatic PKI validation library Project</description>
@@ -27,7 +27,7 @@
 		</developer>
 	</developers>
 	<scm>
-		<developerConnection>scm:svn:https://jtrust.googlecode.com/svn/tags/jtrust-2.0.5
+		<developerConnection>scm:svn:https://jtrust.googlecode.com/svn/trunk
         </developerConnection>
 	</scm>
 	<modules>
