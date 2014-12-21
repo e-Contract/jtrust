@@ -75,6 +75,24 @@ public class TrustValidatorTest {
 	}
 
 	@Test
+	public void emptyNullCertFails() throws Exception {
+		// setup
+		List<X509Certificate> certificateChain = new LinkedList<>();
+		certificateChain.add(null);
+
+		TrustValidator trustValidator = new TrustValidator(null);
+
+		// operate & verify
+		try {
+			trustValidator.isTrusted(certificateChain);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+			assertEquals(TrustLinkerResultReason.UNSPECIFIED, e.getReason());
+		}
+	}
+
+	@Test
 	public void doNotTrustUnknownCertificate() throws Exception {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
