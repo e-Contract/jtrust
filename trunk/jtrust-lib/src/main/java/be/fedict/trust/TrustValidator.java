@@ -234,6 +234,13 @@ public class TrustValidator {
 					TrustLinkerResultReason.UNSPECIFIED,
 					"certificate path is empty");
 		}
+		for (X509Certificate certificate : certificatePath) {
+			if (null == certificate) {
+				throw new TrustLinkerResultException(
+						TrustLinkerResultReason.UNSPECIFIED,
+						"certificate path contains null certificate");
+			}
+		}
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
