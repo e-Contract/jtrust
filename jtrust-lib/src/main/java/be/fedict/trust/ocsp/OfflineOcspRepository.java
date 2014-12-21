@@ -42,9 +42,10 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 /**
  * Off line OCSP repository. This implementation receives a list of
  * {@link OCSPResp} objects.
- * <p/>
+ * <p>
  * TODO: when multiple OCSPs match, we should return the one closest to the
  * validation date.
+ * </p>
  * 
  * @author Frank Cornelis
  */
