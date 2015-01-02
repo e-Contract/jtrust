@@ -200,6 +200,16 @@ public class CrlTrustLinker implements TrustLinker {
 	 */
 	public static boolean checkCrlIntegrity(X509CRL x509crl,
 			X509Certificate issuerCertificate, Date validationDate) {
+		if (null == x509crl) {
+			throw new IllegalArgumentException("CRL is null");
+		}
+		if (null == issuerCertificate) {
+			throw new IllegalArgumentException("issuer certificate is null");
+		}
+		if (null == validationDate) {
+			throw new IllegalArgumentException("validation date is null");
+		}
+
 		if (false == x509crl.getIssuerX500Principal().equals(
 				issuerCertificate.getSubjectX500Principal())) {
 			return false;
