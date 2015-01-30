@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -34,7 +34,8 @@ import org.joda.time.DateTime;
 
 /**
  * A cached CRL repository implementation. This CRL repository will cache CRLs
- * in memory.
+ * in memory. This implementation is thread-safe, as far as the passed
+ * {@link CrlRepository} is also thread-safe of course.
  * 
  * @author Frank Cornelis
  */
@@ -44,11 +45,30 @@ public class CachedCrlRepository implements CrlRepository {
 
 	public static final int DEFAULT_CACHE_AGING_HOURS = 3;
 
-	private final Map<URI, SoftReference<X509CRL>> crlCache;
+	private final Map<URI, SoftReference<CacheEntry>> crlCache;
 
 	private final CrlRepository crlRepository;
 
 	private int cacheAgingHours;
+
+	private static class CacheEntry {
+
+		private final DateTime timestamp;
+		private final X509CRL crl;
+
+		public CacheEntry(X509CRL crl) {
+			this.timestamp = new DateTime();
+			this.crl = crl;
+		}
+
+		public DateTime getTimestamp() {
+			return this.timestamp;
+		}
+
+		public X509CRL getCRL() {
+			return this.crl;
+		}
+	}
 
 	/**
 	 * Main constructor.
@@ -59,24 +79,24 @@ public class CachedCrlRepository implements CrlRepository {
 	public CachedCrlRepository(CrlRepository crlRepository) {
 		this.crlRepository = crlRepository;
 		this.crlCache = Collections
-				.synchronizedMap(new HashMap<URI, SoftReference<X509CRL>>());
+				.synchronizedMap(new HashMap<URI, SoftReference<CacheEntry>>());
 		this.cacheAgingHours = DEFAULT_CACHE_AGING_HOURS;
 	}
 
 	@Override
 	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
 			Date validationDate) {
-
-		SoftReference<X509CRL> crlRef = this.crlCache.get(crlUri);
-		if (null == crlRef) {
-			LOG.debug("no CRL entry found: " + crlUri);
+		SoftReference<CacheEntry> cacheEntryRef = this.crlCache.get(crlUri);
+		if (null == cacheEntryRef) {
+			LOG.debug("no cache entry ref found: " + crlUri);
 			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
-		X509CRL crl = crlRef.get();
-		if (null == crl) {
-			LOG.debug("CRL garbage collected: " + crlUri);
+		CacheEntry cacheEntry = cacheEntryRef.get();
+		if (null == cacheEntry) {
+			LOG.debug("cache entry garbage collected: " + crlUri);
 			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
+		X509CRL crl = cacheEntry.getCRL();
 		if (validationDate.after(crl.getNextUpdate())) {
 			LOG.debug("CRL no longer valid: " + crlUri);
 			LOG.debug("validation date: " + validationDate);
@@ -89,9 +109,8 @@ public class CachedCrlRepository implements CrlRepository {
 		 * only base the CRL cache refresh strategy on the nextUpdate field as
 		 * indicated by the CRL.
 		 */
-		Date thisUpdate = crl.getThisUpdate();
-		DateTime cacheMaturityDateTime = new DateTime(thisUpdate)
-				.plusHours(this.cacheAgingHours);
+		DateTime cacheMaturityDateTime = cacheEntry.getTimestamp().plusHours(
+				this.cacheAgingHours);
 		if (validationDate.after(cacheMaturityDateTime.toDate())) {
 			LOG.debug("refreshing the CRL cache: " + crlUri);
 			return refreshCrl(crlUri, issuerCertificate, validationDate);
@@ -104,7 +123,7 @@ public class CachedCrlRepository implements CrlRepository {
 			Date validationDate) {
 		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate,
 				validationDate);
-		this.crlCache.put(crlUri, new SoftReference<>(crl));
+		this.crlCache.put(crlUri, new SoftReference<>(new CacheEntry(crl)));
 		return crl;
 	}
 
