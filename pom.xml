@@ -18,7 +18,7 @@
 		<name>FedICT</name>
 		<url>http://www.fedict.belgium.be/</url>
 	</organization>
-	<url>http://code.google.com/p/jtrust/</url>
+	<url>https://github.com/e-Contract/jtrust</url>
 	<developers>
 		<developer>
 			<id>fcorneli</id>
@@ -27,8 +27,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<developerConnection>scm:svn:https://jtrust.googlecode.com/svn/trunk
-        </developerConnection>
+		<connection>scm:git:https://github.com/e-Contract/jtrust.git</connection>
+		<tag>HEAD</tag>
 	</scm>
 	<modules>
 		<module>jtrust-lib</module>
@@ -69,7 +69,6 @@
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.5.1</version>
 					<configuration>
-						<tagBase>https://jtrust.googlecode.com/svn/tags/</tagBase>
 						<preparationGoals>clean install</preparationGoals>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 					</configuration>
@@ -236,19 +235,19 @@
 		</repository>
 	</repositories>
 	<distributionManagement>
-		<downloadUrl>http://code.google.com/p/jtrust/downloads/list</downloadUrl>
+		<downloadUrl>https://github.com/e-Contract/jtrust/releases</downloadUrl>
 		<repository>
 			<id>e-contract-deploy</id>
-			<url>sftp://e-contract.be/maven2</url>
+			<url>sftp://192.168.100.1/maven2</url>
 			<uniqueVersion>false</uniqueVersion>
 		</repository>
 		<site>
 			<id>e-contract-jtrust-site</id>
-			<url>sftp://e-contract.be/sites/jtrust/</url>
+			<url>sftp://192.168.100.1/sites/jtrust/</url>
 		</site>
 	</distributionManagement>
 	<issueManagement>
-		<url>http://code.google.com/p/jtrust/issues/list</url>
+		<url>https://github.com/e-Contract/jtrust/issues</url>
 	</issueManagement>
 	<mailingLists>
 		<mailingList>

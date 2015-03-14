@@ -5,7 +5,7 @@ README for jTrust Project
 === 1. Introduction
 
 This project contains the source code tree of the jTrust library.
-The source code is hosted at: http://code.google.com/p/jtrust/
+The source code is hosted at: https://github.com/e-Contract/jtrust
 
 
 === 2. Requirements
