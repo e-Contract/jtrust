@@ -123,6 +123,11 @@ public class CachedCrlRepository implements CrlRepository {
 			Date validationDate) {
 		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate,
 				validationDate);
+		if (null == crl) {
+			// we don't want to cache CRL retrieval errors
+			this.crlCache.remove(crlUri);
+			return null;
+		}
 		this.crlCache.put(crlUri, new SoftReference<>(new CacheEntry(crl)));
 		return crl;
 	}
