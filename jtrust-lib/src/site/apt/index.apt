@@ -1,6 +1,6 @@
 Java X509 Certificate Trust Library
 
- This Java library allows for PKI validation of X509 certificates.
+ This Java library provides an implementation of a PKI validation algorithm for X509 certificates.
  
  The jTrust library features OCSP and CRL revocation checking, automatic CRL fallback when OCSP fails, CRL caching, and a clean architecture that is ready for a scalable trust service implementation.
  
