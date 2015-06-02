@@ -27,7 +27,7 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:https://github.com/e-Contract/jtrust.git</connection>
+		<connection>scm:git:git@github.com:e-Contract/jtrust.git</connection>
 		<tag>HEAD</tag>
 	</scm>
 	<modules>
