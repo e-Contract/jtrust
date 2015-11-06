@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2015 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -96,6 +96,7 @@ public class CrlTrustLinker implements TrustLinker {
 		X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
 				validationDate);
 		if (null == x509crl) {
+			LOG.debug("CRL not found");
 			return TrustLinkerResult.UNDECIDED;
 		}
 
@@ -103,6 +104,7 @@ public class CrlTrustLinker implements TrustLinker {
 		boolean crlIntegrityResult = checkCrlIntegrity(x509crl, certificate,
 				validationDate);
 		if (false == crlIntegrityResult) {
+			LOG.debug("CRL integrity check failed");
 			return TrustLinkerResult.UNDECIDED;
 		}
 
@@ -210,13 +212,19 @@ public class CrlTrustLinker implements TrustLinker {
 			throw new IllegalArgumentException("validation date is null");
 		}
 
+		LOG.debug("CRL number: " + getCrlNumber(x509crl));
+		LOG.debug("CRL issuer: " + x509crl.getIssuerX500Principal());
+		LOG.debug("issuer certificate: " + issuerCertificate.getSubjectX500Principal());
 		if (false == x509crl.getIssuerX500Principal().equals(
 				issuerCertificate.getSubjectX500Principal())) {
+			LOG.warn("CRL issuer mismatch with certificate issuer");
 			return false;
 		}
 		try {
 			x509crl.verify(issuerCertificate.getPublicKey());
 		} catch (Exception e) {
+			LOG.warn("CRL signature verification failed");
+			LOG.warn("exception: " + e.getMessage());
 			return false;
 		}
 		Date thisUpdate = x509crl.getThisUpdate();
@@ -312,7 +320,7 @@ public class CrlTrustLinker implements TrustLinker {
 		return null;
 	}
 
-	private BigInteger getCrlNumber(X509CRL crl) {
+	private static BigInteger getCrlNumber(X509CRL crl) {
 		byte[] crlNumberExtensionValue = crl
 				.getExtensionValue(Extension.cRLNumber.getId());
 		if (null == crlNumberExtensionValue) {
