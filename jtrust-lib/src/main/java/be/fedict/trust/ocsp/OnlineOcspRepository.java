@@ -48,6 +48,7 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder
@@ -156,12 +157,16 @@ public class OnlineOcspRepository implements OcspRepository {
 		Header responseContentTypeHeader = httpResponse
 				.getFirstHeader("Content-Type");
 		if (null == responseContentTypeHeader) {
-			LOG.debug("no Content-Type response header");
+			LOG.error("no Content-Type response header");
 			return null;
 		}
 		String resultContentType = responseContentTypeHeader.getValue();
 		if (!"application/ocsp-response".equals(resultContentType)) {
-			LOG.debug("result content type not application/ocsp-response");
+			LOG.error("result content type not application/ocsp-response");
+                        LOG.error("actual content-type: " + resultContentType);
+                        if ("text/html".equals(resultContentType)) {
+                            LOG.error("content: " + EntityUtils.toString(httpResponse.getEntity()));
+                        }
 			return null;
 		}
 
