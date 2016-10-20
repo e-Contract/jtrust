@@ -114,11 +114,23 @@ public class TrustValidator {
 
 	/**
 	 * Adds a certificate constraint to this trust validator.
+	 * Keep this typo-version of addCertificateContrainT for downwards compatibility.
 	 * 
 	 * @param certificateConstraint
 	 *            the certificate constraint component.
 	 */
 	public void addCertificateConstrain(
+			CertificateConstraint certificateConstraint) {
+		this.certificateConstraints.add(certificateConstraint);
+	}
+
+	/**
+	 * Adds a certificate constraint to this trust validator.
+	 *
+	 * @param certificateConstraint
+	 *            the certificate constraint component.
+	 */
+	public void addCertificateConstraint(
 			CertificateConstraint certificateConstraint) {
 		this.certificateConstraints.add(certificateConstraint);
 	}

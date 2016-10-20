@@ -41,11 +41,13 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
  * @author Frank Cornelis
  * 
  * @see <a href="http://www.ietf.org/rfc/rfc3039.txt">RFC 3039</a>
+ * @see <a href=
+ *      "http://www.etsi.org/deliver/etsi_en/319400_319499/31941205/02.01.01_60/en_31941205v020101p.pdf">
+ *      ETSI EN 319 412-5 V2.1.1</a>
  */
 public class QCStatementsCertificateConstraint implements CertificateConstraint {
 
-	private static final Log LOG = LogFactory
-			.getLog(QCStatementsCertificateConstraint.class);
+	private static final Log LOG = LogFactory.getLog(QCStatementsCertificateConstraint.class);
 
 	private final Boolean qcComplianceFilter;
 
@@ -54,24 +56,19 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 	}
 
 	@Override
-	public void check(X509Certificate certificate)
-			throws TrustLinkerResultException, Exception {
-		byte[] extensionValue = certificate
-				.getExtensionValue(Extension.qCStatements.getId());
+	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
+		byte[] extensionValue = certificate.getExtensionValue(Extension.qCStatements.getId());
 		if (null == extensionValue) {
-			throw new TrustLinkerResultException(
-					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 					"missing QCStatements extension");
 		}
-		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
-				new ByteArrayInputStream(extensionValue)).readObject());
-		ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(
-				oct.getOctets()).readObject();
+		DEROctetString oct = (DEROctetString) (new ASN1InputStream(new ByteArrayInputStream(extensionValue))
+				.readObject());
+		ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets()).readObject();
 		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
 		boolean qcCompliance = false;
 		while (qcStatementEnum.hasMoreElements()) {
-			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum
-					.nextElement());
+			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
 			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
 			LOG.debug("statement Id: " + statementId.getId());
 			if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
@@ -80,8 +77,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		}
 		if (null != this.qcComplianceFilter) {
 			if (qcCompliance != this.qcComplianceFilter) {
-				throw new TrustLinkerResultException(
-						TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QCStatements not matching");
 			}
 		}
