@@ -26,6 +26,7 @@ import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedList;
@@ -137,7 +138,8 @@ public class SSLTrustValidatorTest {
 		// URL url = new URL("https://www.e-contract.be/"); // OK
 		// URL url = new URL("https://idp.services.belgium.be"); // OK
 		// URL url = new URL("https://idp.int.belgium.be"); // OK
-		URL url = new URL("https://test.eid.belgium.be/");
+		//URL url = new URL("https://test.eid.belgium.be/");
+		URL url = new URL("https://www.cloudflare.com/");
 
 		// URL url = new URL("https://www.facebook.com");
 		// URL url = new URL("https://www.twitter.com");
@@ -156,10 +158,16 @@ public class SSLTrustValidatorTest {
 			LOG.debug("certificate issuer: "
 					+ x509Cert.getIssuerX500Principal());
 		}
+		
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate rootCertificate = (X509Certificate) certificateFactory.generateCertificate(SSLTrustValidatorTest.class.getResourceAsStream("/ecc/AddTrustExternalCARoot.crt"));
+		certificateChain.add(rootCertificate);
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		certificateRepository.addTrustPoint(certificateChain
 				.get(certificateChain.size() - 1));
+		
+		//certificateRepository.addTrustPoint(rootCertificate);
 		TrustValidator trustValidator = new TrustValidator(
 				certificateRepository);
 		trustValidator.setAlgorithmPolicy(new AlgorithmPolicy() {
@@ -167,6 +175,7 @@ public class SSLTrustValidatorTest {
 			@Override
 			public void checkSignatureAlgorithm(String signatureAlgorithm,
 					Date validationDate) throws SignatureException {
+				LOG.debug("signature algo: " + signatureAlgorithm);
 				// allow all
 			}
 		});
