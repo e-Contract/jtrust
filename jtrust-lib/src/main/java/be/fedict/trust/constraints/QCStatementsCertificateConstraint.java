@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -51,8 +51,15 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 	private final Boolean qcComplianceFilter;
 
+	private final Boolean qcSSCDFilter;
+
 	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter) {
+		this(qcComplianceFilter, null);
+	}
+
+	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter, Boolean qcSSCDFilter) {
 		this.qcComplianceFilter = qcComplianceFilter;
+		this.qcSSCDFilter = qcSSCDFilter;
 	}
 
 	@Override
@@ -67,6 +74,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets()).readObject();
 		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
 		boolean qcCompliance = false;
+		boolean qcSSCD = false;
 		while (qcStatementEnum.hasMoreElements()) {
 			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
 			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
@@ -74,9 +82,22 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 			if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
 				qcCompliance = true;
 			}
+			if (QCStatement.id_etsi_qcs_QcSSCD.equals(statementId)) {
+				qcSSCD = true;
+			}
 		}
+
 		if (null != this.qcComplianceFilter) {
 			if (qcCompliance != this.qcComplianceFilter) {
+				LOG.error("qcCompliance QCStatements error");
+				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+						"QCStatements not matching");
+			}
+		}
+
+		if (null != this.qcSSCDFilter) {
+			if (qcSSCD != this.qcSSCDFilter) {
+				LOG.error("qcSSCD QCStatements error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QCStatements not matching");
 			}

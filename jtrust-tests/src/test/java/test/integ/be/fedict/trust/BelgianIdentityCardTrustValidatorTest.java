@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2017 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -97,7 +97,7 @@ public class BelgianIdentityCardTrustValidatorTest {
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-		trustValidator.addCertificateConstrain(new QCStatementsCertificateConstraint(true));
+		trustValidator.addCertificateConstrain(new QCStatementsCertificateConstraint(true, true));
 
 		trustValidator.isTrusted(certificateChain);
 	}
