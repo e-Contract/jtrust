@@ -19,10 +19,12 @@
 
 package test.integ.be.fedict.trust;
 
+import java.io.File;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -102,4 +104,15 @@ public class BelgianIdentityCardTrustValidatorTest {
 		trustValidator.isTrusted(certificateChain);
 	}
 
+	@Test
+	public void testWriteSignatureCertificateToFile() throws Exception {
+		Security.addProvider(new BeIDProvider());
+		KeyStore keyStore = KeyStore.getInstance("BeID");
+		keyStore.load(null);
+		Certificate[] certificateChain = keyStore.getCertificateChain("Signature");
+
+		File tmpFile = File.createTempFile("sign-cert-", ".der");
+		FileUtils.writeByteArrayToFile(tmpFile, certificateChain[0].getEncoded());
+		LOG.debug("sign cert file: " + tmpFile.getAbsolutePath());
+	}
 }

@@ -1,0 +1,95 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 16 (0x10)
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=BE, CN=e-Contract.be BVBA Test CA/serialNumber=201601
+        Validity
+            Not Before: Jan 23 13:54:15 2017 GMT
+            Not After : Jan 23 13:54:15 2020 GMT
+        Subject: C=BE, CN=Test Signing Key/serialNumber=12345
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (2048 bit)
+                Modulus (2048 bit):
+                    00:cc:c9:da:a0:b0:b6:8f:fd:11:c4:33:60:2e:e7:
+                    83:b3:18:0a:0c:76:f4:9a:e5:44:67:58:2a:50:dd:
+                    29:28:69:22:52:e8:42:f2:fd:b0:f0:43:c2:d7:80:
+                    ca:b5:62:db:e6:86:e9:06:0a:29:5d:31:bf:05:9f:
+                    6d:04:2b:67:0e:b1:24:1b:35:8e:7f:95:f2:35:74:
+                    6d:7d:11:5d:90:00:f5:bb:a4:50:19:69:8b:19:10:
+                    25:ab:55:6e:6b:b4:8a:16:23:d6:dc:b6:34:a1:81:
+                    d9:be:39:9a:f4:39:25:39:d4:02:de:0c:44:9c:cd:
+                    7e:87:78:79:db:5c:3e:62:2f:70:94:cb:c3:ca:a3:
+                    2e:a5:40:e7:b5:97:2d:de:8d:78:4b:8a:de:6d:bd:
+                    a9:55:34:f2:eb:da:97:c3:54:8e:13:5a:f1:c9:95:
+                    09:13:34:54:9c:ec:1c:4c:e2:60:94:89:64:a6:90:
+                    3f:50:72:17:04:ea:8c:b8:63:36:00:92:bd:d8:36:
+                    0a:30:1d:60:8e:f2:9e:3e:2c:20:58:f3:3a:5d:1a:
+                    66:77:a9:87:9e:15:79:91:5b:c1:25:f3:d5:34:77:
+                    8a:a6:2d:9c:59:4f:60:db:1e:15:d6:93:a7:db:6c:
+                    03:e3:4a:74:46:80:8f:f5:41:6a:32:fc:ce:1a:52:
+                    30:f1
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Key Usage: critical
+                Non Repudiation
+            X509v3 Subject Key Identifier: 
+                5D:16:26:AF:67:FB:3E:90:E6:06:25:BA:06:BF:9B:4B:FC:C0:97:24
+            X509v3 Authority Key Identifier: 
+                keyid:C1:25:C4:D0:45:4A:16:3F:AA:98:20:D8:0E:A5:8E:1F:97:B0:F5:09
+
+            X509v3 Certificate Policies: 
+                Policy: 1.2.3.4.5.6
+                  CPS: http://www.e-contract.be/test-ca/
+                  User Notice:
+                    Explicit Text: For testing purposes only.
+
+            X509v3 CRL Distribution Points: 
+                URI:http://www.e-contract.be/test-ca/ca-201601.crl
+
+            qcStatements: 
+                0.0......F..0......F..
+            X509v3 Extended Key Usage: 
+                1.3.6.1.4.1.311.10.3.12
+    Signature Algorithm: sha256WithRSAEncryption
+        02:df:16:01:6f:57:c3:5d:eb:e2:9d:27:4b:62:2b:43:b6:68:
+        a4:2f:d8:bd:30:69:7b:35:7e:4b:a0:a3:7c:b6:f4:79:28:41:
+        9c:27:8e:52:c8:de:f4:ab:30:ce:e0:74:6c:ae:6e:7d:3a:8a:
+        0e:59:b2:a7:dd:33:3e:2d:4f:d5:1f:d9:ef:61:84:ef:d4:a0:
+        cc:16:a1:6b:bb:ed:32:53:fb:83:21:5b:ce:34:45:90:87:a4:
+        a3:6b:b2:60:f9:50:fe:f3:e2:5a:8d:4e:82:fe:a6:99:0f:25:
+        44:6b:f1:11:91:ca:ed:d6:a6:40:92:e4:82:51:aa:f5:97:58:
+        de:b8:91:81:60:d9:f1:df:99:cf:28:5b:15:49:ae:94:4b:80:
+        b2:5a:16:7a:ea:b2:5d:bd:33:ec:61:ad:39:b7:6f:18:eb:26:
+        a2:3d:bc:d4:62:59:f4:49:fd:43:1b:78:b4:1e:b3:71:a6:eb:
+        e4:49:a8:4a:93:0d:77:d6:15:26:36:61:9b:7b:9e:73:55:6f:
+        2c:e5:ce:04:69:7d:48:bb:18:4b:bb:2d:f3:d9:68:31:1e:11:
+        07:91:57:37:98:da:e6:d4:65:1c:03:78:67:34:80:b2:dd:ec:
+        99:9d:4d:e4:f0:c1:43:95:ec:3e:f2:54:15:89:59:83:af:28:
+        ae:be:19:06
+-----BEGIN CERTIFICATE-----
+MIIENzCCAx+gAwIBAgIBEDANBgkqhkiG9w0BAQsFADBDMQswCQYDVQQGEwJCRTEj
+MCEGA1UEAxMaZS1Db250cmFjdC5iZSBCVkJBIFRlc3QgQ0ExDzANBgNVBAUTBjIw
+MTYwMTAeFw0xNzAxMjMxMzU0MTVaFw0yMDAxMjMxMzU0MTVaMDgxCzAJBgNVBAYT
+AkJFMRkwFwYDVQQDDBBUZXN0IFNpZ25pbmcgS2V5MQ4wDAYDVQQFEwUxMjM0NTCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMzJ2qCwto/9EcQzYC7ng7MY
+Cgx29JrlRGdYKlDdKShpIlLoQvL9sPBDwteAyrVi2+aG6QYKKV0xvwWfbQQrZw6x
+JBs1jn+V8jV0bX0RXZAA9bukUBlpixkQJatVbmu0ihYj1ty2NKGB2b45mvQ5JTnU
+At4MRJzNfod4edtcPmIvcJTLw8qjLqVA57WXLd6NeEuK3m29qVU08uval8NUjhNa
+8cmVCRM0VJzsHEziYJSJZKaQP1ByFwTqjLhjNgCSvdg2CjAdYI7ynj4sIFjzOl0a
+Zneph54VeZFbwSXz1TR3iqYtnFlPYNseFdaTp9tsA+NKdEaAj/VBajL8zhpSMPEC
+AwEAAaOCAT8wggE7MA4GA1UdDwEB/wQEAwIGQDAdBgNVHQ4EFgQUXRYmr2f7PpDm
+BiW6Br+bS/zAlyQwHwYDVR0jBBgwFoAUwSXE0EVKFj+qmCDYDqWOH5ew9QkwbQYD
+VR0gBGYwZDBiBgUqAwQFBjBZMC0GCCsGAQUFBwIBFiFodHRwOi8vd3d3LmUtY29u
+dHJhY3QuYmUvdGVzdC1jYS8wKAYIKwYBBQUHAgIwHBoaRm9yIHRlc3RpbmcgcHVy
+cG9zZXMgb25seS4wPwYDVR0fBDgwNjA0oDKgMIYuaHR0cDovL3d3dy5lLWNvbnRy
+YWN0LmJlL3Rlc3QtY2EvY2EtMjAxNjAxLmNybDAiBggrBgEFBQcBAwQWMBQwCAYG
+BACORgEBMAgGBgQAjkYBBDAVBgNVHSUEDjAMBgorBgEEAYI3CgMMMA0GCSqGSIb3
+DQEBCwUAA4IBAQAC3xYBb1fDXevinSdLYitDtmikL9i9MGl7NX5LoKN8tvR5KEGc
+J45SyN70qzDO4HRsrm59OooOWbKn3TM+LU/VH9nvYYTv1KDMFqFru+0yU/uDIVvO
+NEWQh6Sja7Jg+VD+8+JajU6C/qaZDyVEa/ERkcrt1qZAkuSCUar1l1jeuJGBYNnx
+35nPKFsVSa6US4CyWhZ66rJdvTPsYa05t28Y6yaiPbzUYln0Sf1DG3i0HrNxpuvk
+SahKkw131hUmNmGbe55zVW8s5c4EaX1IuxhLuy3z2WgxHhEHkVc3mNrm1GUcA3hn
+NICy3eyZnU3k8MFDlew+8lQViVmDryiuvhkG
+-----END CERTIFICATE-----
