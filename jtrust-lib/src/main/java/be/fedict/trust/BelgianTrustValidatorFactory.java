@@ -2,6 +2,7 @@
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
  * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -46,7 +47,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
  * Trust Validator Factory for Belgian (eID) PKI.
  * 
  * @author Frank Cornelis
- * 
+ * @author Dennis Wagelaar
  */
 public class BelgianTrustValidatorFactory {
 
@@ -239,6 +240,9 @@ public class BelgianTrustValidatorFactory {
 
 		X509Certificate rootCa4Certificate = loadCertificate("be/fedict/trust/belgiumrca4.crt");
 		memoryCertificateRepository.addTrustPoint(rootCa4Certificate);
+
+		X509Certificate rootCa4_2Certificate = loadCertificate("be/fedict/trust/belgiumrca4-2.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa4_2Certificate);
 
 		return memoryCertificateRepository;
 	}
