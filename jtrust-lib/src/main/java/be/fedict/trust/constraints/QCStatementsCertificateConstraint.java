@@ -53,37 +53,42 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 	private final Boolean qcSSCDFilter;
 
-	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter) {
+	public QCStatementsCertificateConstraint(final Boolean qcComplianceFilter) {
 		this(qcComplianceFilter, null);
 	}
 
-	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter, Boolean qcSSCDFilter) {
+	public QCStatementsCertificateConstraint(final Boolean qcComplianceFilter, final Boolean qcSSCDFilter) {
 		this.qcComplianceFilter = qcComplianceFilter;
 		this.qcSSCDFilter = qcSSCDFilter;
 	}
 
 	@Override
-	public void check(X509Certificate certificate) throws TrustLinkerResultException, Exception {
-		byte[] extensionValue = certificate.getExtensionValue(Extension.qCStatements.getId());
+	public void check(final X509Certificate certificate) throws TrustLinkerResultException, Exception {
+		final byte[] extensionValue = certificate.getExtensionValue(Extension.qCStatements.getId());
 		if (null == extensionValue) {
 			throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 					"missing QCStatements extension");
 		}
-		DEROctetString oct = (DEROctetString) (new ASN1InputStream(new ByteArrayInputStream(extensionValue))
-				.readObject());
-		ASN1Sequence qcStatements = (ASN1Sequence) new ASN1InputStream(oct.getOctets()).readObject();
-		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
+
 		boolean qcCompliance = false;
 		boolean qcSSCD = false;
-		while (qcStatementEnum.hasMoreElements()) {
-			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
-			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
-			LOG.debug("statement Id: " + statementId.getId());
-			if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
-				qcCompliance = true;
-			}
-			if (QCStatement.id_etsi_qcs_QcSSCD.equals(statementId)) {
-				qcSSCD = true;
+
+		try (final ASN1InputStream extensionStream = new ASN1InputStream(new ByteArrayInputStream(extensionValue))) {
+			final DEROctetString octetString = (DEROctetString) extensionStream.readObject();
+			try (final ASN1InputStream octetStream = new ASN1InputStream(octetString.getOctets())) {
+				final ASN1Sequence qcStatements = (ASN1Sequence) octetStream.readObject();
+				final Enumeration<?> qcStatementEnum = qcStatements.getObjects();
+				while (qcStatementEnum.hasMoreElements()) {
+					final QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
+					final ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
+					LOG.debug("statement Id: " + statementId.getId());
+					if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
+						qcCompliance = true;
+					}
+					if (QCStatement.id_etsi_qcs_QcSSCD.equals(statementId)) {
+						qcSSCD = true;
+					}
+				}
 			}
 		}
 
