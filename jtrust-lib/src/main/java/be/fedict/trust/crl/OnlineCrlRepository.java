@@ -20,6 +20,7 @@
 package be.fedict.trust.crl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchProviderException;
@@ -65,7 +66,7 @@ public class OnlineCrlRepository implements CrlRepository {
 	 * @param networkConfig
 	 *            the optional network configuration used for downloading CRLs.
 	 */
-	public OnlineCrlRepository(NetworkConfig networkConfig) {
+	public OnlineCrlRepository(final NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
 	}
 
@@ -81,30 +82,30 @@ public class OnlineCrlRepository implements CrlRepository {
 	 * 
 	 * @param credentials
 	 */
-	public void setCredentials(Credentials credentials) {
+	public void setCredentials(final Credentials credentials) {
 		this.credentials = credentials;
 	}
 
 	@Override
-	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-			Date validationDate) {
+	public X509CRL findCrl(final URI crlUri, final X509Certificate issuerCertificate,
+			final Date validationDate) {
 		try {
 			return getCrl(crlUri);
-		} catch (CRLException e) {
+		} catch (final CRLException e) {
 			LOG.debug("error parsing CRL: " + e.getMessage(), e);
 			return null;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("find CRL error: " + e.getMessage(), e);
 			return null;
 		}
 	}
 
-	private X509CRL getCrl(URI crlUri) throws IOException,
+	private X509CRL getCrl(final URI crlUri) throws IOException,
 			CertificateException, CRLException, NoSuchProviderException,
 			NoSuchParserException, StreamParsingException {
-		DefaultHttpClient httpClient = new DefaultHttpClient();
+		final DefaultHttpClient httpClient = new DefaultHttpClient();
 		if (null != this.networkConfig) {
-			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(),
+			final HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(),
 					this.networkConfig.getProxyPort());
 			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
 					proxy);
@@ -112,30 +113,36 @@ public class OnlineCrlRepository implements CrlRepository {
 		if (null != this.credentials) {
 			this.credentials.init(httpClient.getCredentialsProvider());
 		}
-		String downloadUrl = crlUri.toURL().toString();
+		final String downloadUrl = crlUri.toURL().toString();
 		LOG.debug("downloading CRL from: " + downloadUrl);
-		HttpGet httpGet = new HttpGet(downloadUrl);
+		final HttpGet httpGet = new HttpGet(downloadUrl);
 		httpGet.addHeader("User-Agent", "jTrust CRL Client");
-		HttpResponse httpResponse = httpClient.execute(httpGet);
-		StatusLine statusLine = httpResponse.getStatusLine();
-		int statusCode = statusLine.getStatusCode();
+		final HttpResponse httpResponse = httpClient.execute(httpGet);
+		final StatusLine statusLine = httpResponse.getStatusLine();
+		final int statusCode = statusLine.getStatusCode();
 		if (HttpURLConnection.HTTP_OK != statusCode) {
 			LOG.debug("HTTP status code: " + statusCode);
 			return null;
 		}
 
-		CertificateFactory certificateFactory = CertificateFactory.getInstance(
+		final CertificateFactory certificateFactory = CertificateFactory.getInstance(
 				"X.509", "BC");
 		LOG.debug("certificate factory provider: "
 				+ certificateFactory.getProvider().getName());
 		LOG.debug("certificate factory class: "
 				+ certificateFactory.getClass().getName());
-		HttpEntity httpEntity = httpResponse.getEntity();
-		X509CRL crl = (X509CRL) certificateFactory.generateCRL(httpEntity
-				.getContent());
-		httpGet.releaseConnection();
-		LOG.debug("X509CRL class: " + crl.getClass().getName());
-		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
-		return crl;
+		final HttpEntity httpEntity = httpResponse.getEntity();
+		try (final InputStream content = httpEntity.getContent()) {
+			final X509CRL crl = (X509CRL) certificateFactory.generateCRL(content);
+			if (crl != null) {
+				LOG.debug("X509CRL class: " + crl.getClass().getName());
+				LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
+			} else {
+				LOG.debug("X509CRL is null");
+			}
+			return crl;
+		} finally {
+			httpGet.releaseConnection();
+		}
 	}
 }
