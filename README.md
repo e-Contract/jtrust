@@ -1,6 +1,6 @@
 # jTrust
 
-[![Build Status](https://travis-ci.org/dwagelaar/jtrust.svg?branch=master)](https://travis-ci.org/dwagelaar/jtrust)
+[![Build Status](https://travis-ci.org/Corilus/jtrust.svg?branch=master)](https://travis-ci.org/Corilus/jtrust)
 
 ## Introduction
 
