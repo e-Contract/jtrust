@@ -22,6 +22,7 @@ import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.common.ServerNotAvailableException;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 
 /**
@@ -43,8 +44,10 @@ public interface OcspRepository {
 	 *            the X509 issuer certificate.
 	 * @param validationDate
 	 *            the validation date.
+	 * @throws ServerNotAvailableException
+	 * 			  {@link ServerNotAvailableException} if the OCSP server is not responding.
 	 * @return the OCSP response, or <code>null</code> if not found.
 	 */
 	OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate, Date validationDate);
+			X509Certificate issuerCertificate, Date validationDate) throws ServerNotAvailableException;
 }

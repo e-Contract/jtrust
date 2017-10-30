@@ -29,6 +29,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
+import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.common.ServerType;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
@@ -560,6 +562,38 @@ public class CrlTrustLinkerTest {
 		EasyMock.verify(mockCrlRepository);
 
 		assertEquals(TrustLinkerResult.UNDECIDED, result);
+	}
+
+	@Test(expected = TrustLinkerResultException.class)
+	public void testCrlServerNotAvailable() throws Exception {
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter, true, 0);
+
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
+
+		final Date validationDate = new Date();
+
+		final CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
+		EasyMock.expect(mockCrlRepository.findCrl(new URI("http://crl-uri"), rootCertificate, validationDate))
+				.andThrow(new ServerNotAvailableException("CRL server responded with status code 500", ServerType.CRL));
+
+		EasyMock.replay(mockCrlRepository);
+
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+
+		EasyMock.verify(mockCrlRepository);
 	}
 
 }

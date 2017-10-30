@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import be.fedict.trust.common.ServerNotAvailableException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,15 +91,22 @@ public class OnlineCrlRepositoryTest {
 	@Test
 	public void testCrlNotFound() throws Exception {
 		// setup
-		CrlRepositoryTestServlet
-				.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
+		CrlRepositoryTestServlet.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
 
 		// operate
-		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
-				this.validationDate);
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null, this.validationDate);
 
 		// verify
 		assertNull(crl);
+	}
+
+	@Test(expected = ServerNotAvailableException.class)
+	public void testCrlServerNotResponding() throws Exception {
+		// setup
+		CrlRepositoryTestServlet.setResponseStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+
+		// operate
+		this.testedInstance.findCrl(this.crlUri, null, this.validationDate);
 	}
 
 	@Test

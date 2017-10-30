@@ -19,12 +19,16 @@
 
 package be.fedict.trust.ocsp;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.common.ServerType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -38,12 +42,10 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.ocsp.CertificateID;
-import org.bouncycastle.cert.ocsp.OCSPReq;
-import org.bouncycastle.cert.ocsp.OCSPReqBuilder;
-import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import be.fedict.trust.Credentials;
@@ -95,18 +97,19 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate, Date validationDate) {
+			X509Certificate issuerCertificate, Date validationDate) throws ServerNotAvailableException {
 		OCSPResp ocspResp = null;
 		try {
 			ocspResp = getOcspResponse(ocspUri, certificate, issuerCertificate);
-		} catch (Exception e) {
+		} catch (OperatorCreationException | CertificateEncodingException | OCSPException | IOException e) {
 			throw new RuntimeException(e);
 		}
 		return ocspResp;
 	}
 
 	private OCSPResp getOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate) throws Exception {
+			X509Certificate issuerCertificate) throws OperatorCreationException,
+			CertificateEncodingException, OCSPException, IOException, ServerNotAvailableException {
 		LOG.debug("OCSP URI: " + ocspUri);
 		OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
 		DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder()
@@ -144,6 +147,11 @@ public class OnlineOcspRepository implements OcspRepository {
 			httpResponse = httpClient.execute(httpPost);
 			StatusLine statusLine = httpResponse.getStatusLine();
 			responseCode = statusLine.getStatusCode();
+
+			if (responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
+				LOG.error("OCSP server responded with status code: " + responseCode );
+				throw new ServerNotAvailableException("OCSP server responded with status code " + responseCode, ServerType.OCSP);
+			}
 		} catch (ConnectException e) {
 			LOG.debug("OCSP responder is down");
 			return null;

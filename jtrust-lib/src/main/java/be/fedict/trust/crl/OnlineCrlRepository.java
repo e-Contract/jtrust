@@ -31,12 +31,15 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.common.ServerType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -87,14 +90,13 @@ public class OnlineCrlRepository implements CrlRepository {
 	}
 
 	@Override
-	public X509CRL findCrl(final URI crlUri, final X509Certificate issuerCertificate,
-			final Date validationDate) {
+	public X509CRL findCrl(final URI crlUri, final X509Certificate issuerCertificate, final Date validationDate) throws ServerNotAvailableException {
 		try {
 			return getCrl(crlUri);
 		} catch (final CRLException e) {
 			LOG.debug("error parsing CRL: " + e.getMessage(), e);
 			return null;
-		} catch (final Exception e) {
+		} catch (final IOException | CertificateException | NoSuchProviderException | NoSuchParserException | StreamParsingException e) {
 			LOG.error("find CRL error: " + e.getMessage(), e);
 			return null;
 		}
@@ -102,35 +104,41 @@ public class OnlineCrlRepository implements CrlRepository {
 
 	private X509CRL getCrl(final URI crlUri) throws IOException,
 			CertificateException, CRLException, NoSuchProviderException,
-			NoSuchParserException, StreamParsingException {
+			NoSuchParserException, StreamParsingException, ServerNotAvailableException {
 		final DefaultHttpClient httpClient = new DefaultHttpClient();
+
 		if (null != this.networkConfig) {
-			final HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(),
-					this.networkConfig.getProxyPort());
-			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-					proxy);
+			final HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		}
+
 		if (null != this.credentials) {
 			this.credentials.init(httpClient.getCredentialsProvider());
 		}
+
 		final String downloadUrl = crlUri.toURL().toString();
 		LOG.debug("downloading CRL from: " + downloadUrl);
 		final HttpGet httpGet = new HttpGet(downloadUrl);
 		httpGet.addHeader("User-Agent", "jTrust CRL Client");
+
 		final HttpResponse httpResponse = httpClient.execute(httpGet);
 		final StatusLine statusLine = httpResponse.getStatusLine();
 		final int statusCode = statusLine.getStatusCode();
+
+		if (statusCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
+			LOG.error("CRL server responded with status code: " + statusCode );
+			throw new ServerNotAvailableException("CRL server responded with status code " + statusCode, ServerType.CRL);
+		}
+
 		if (HttpURLConnection.HTTP_OK != statusCode) {
 			LOG.debug("HTTP status code: " + statusCode);
 			return null;
 		}
 
-		final CertificateFactory certificateFactory = CertificateFactory.getInstance(
-				"X.509", "BC");
-		LOG.debug("certificate factory provider: "
-				+ certificateFactory.getProvider().getName());
-		LOG.debug("certificate factory class: "
-				+ certificateFactory.getClass().getName());
+		final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
+		LOG.debug("certificate factory provider: " + certificateFactory.getProvider().getName());
+		LOG.debug("certificate factory class: " + certificateFactory.getClass().getName());
+
 		final HttpEntity httpEntity = httpResponse.getEntity();
 		try (final InputStream content = httpEntity.getContent()) {
 			final X509CRL crl = (X509CRL) certificateFactory.generateCRL(content);
