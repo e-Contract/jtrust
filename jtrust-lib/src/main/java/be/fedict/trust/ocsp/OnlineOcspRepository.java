@@ -27,8 +27,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import be.fedict.trust.common.ServerNotAvailableException;
-import be.fedict.trust.common.ServerType;
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -147,19 +147,13 @@ public class OnlineOcspRepository implements OcspRepository {
 			httpResponse = httpClient.execute(httpPost);
 			StatusLine statusLine = httpResponse.getStatusLine();
 			responseCode = statusLine.getStatusCode();
-
-			if (responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
-				LOG.error("OCSP server responded with status code: " + responseCode );
-				throw new ServerNotAvailableException("OCSP server responded with status code " + responseCode, ServerType.OCSP);
-			}
 		} catch (ConnectException e) {
 			LOG.debug("OCSP responder is down");
 			return null;
 		}
 
 		if (HttpURLConnection.HTTP_OK != responseCode) {
-			LOG.error("HTTP response code: " + responseCode);
-			return null;
+			throw new ServerNotAvailableException("OCSP server responded with status code " + responseCode, ServerType.OCSP);
 		}
 
 		Header responseContentTypeHeader = httpResponse

@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.ServerNotAvailableException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -125,8 +125,7 @@ public class OcspTrustLinker implements TrustLinker {
 		try {
 			ocspResp = this.ocspRepository.findOcspResponse(ocspUri, childCertificate, certificate, validationDate);
 		} catch (ServerNotAvailableException e) {
-			LOG.error("OCSP server is unavailable!", e);
-			throw new TrustLinkerResultException(TrustLinkerResultReason.OCSP_UNAVAILABLE, "OCSP server is unavailable!");
+			throw new TrustLinkerResultException(TrustLinkerResultReason.OCSP_UNAVAILABLE, "OCSP server is unavailable!", e);
 		}
 		if (null == ocspResp) {
 			LOG.debug("OCSP response not found");

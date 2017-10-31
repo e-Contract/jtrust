@@ -18,7 +18,7 @@
 
 package be.fedict.trust.crl;
 
-import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.ServerNotAvailableException;
 
 import java.net.URI;
 import java.security.cert.X509CRL;

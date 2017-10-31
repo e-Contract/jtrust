@@ -22,7 +22,7 @@ import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.ServerNotAvailableException;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 
 /**

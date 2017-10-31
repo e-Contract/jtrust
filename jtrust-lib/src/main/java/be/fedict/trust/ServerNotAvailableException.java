@@ -1,4 +1,4 @@
-package be.fedict.trust.common;
+package be.fedict.trust;
 
 /**
  * Used by {@link be.fedict.trust.crl.CrlRepository}'s and {@link be.fedict.trust.ocsp.OcspRepository}'s to when the

@@ -31,15 +31,14 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import be.fedict.trust.common.ServerNotAvailableException;
-import be.fedict.trust.common.ServerType;
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -125,14 +124,8 @@ public class OnlineCrlRepository implements CrlRepository {
 		final StatusLine statusLine = httpResponse.getStatusLine();
 		final int statusCode = statusLine.getStatusCode();
 
-		if (statusCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
-			LOG.error("CRL server responded with status code: " + statusCode );
-			throw new ServerNotAvailableException("CRL server responded with status code " + statusCode, ServerType.CRL);
-		}
-
 		if (HttpURLConnection.HTTP_OK != statusCode) {
-			LOG.debug("HTTP status code: " + statusCode);
-			return null;
+			throw new ServerNotAvailableException("CRL server responded with status code " + statusCode, ServerType.CRL);
 		}
 
 		final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");

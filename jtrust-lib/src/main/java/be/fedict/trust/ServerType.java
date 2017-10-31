@@ -1,4 +1,4 @@
-package be.fedict.trust.common;
+package be.fedict.trust;
 
 /**
  * Used by {@link ServerNotAvailableException} to indicate which server is unavailable.

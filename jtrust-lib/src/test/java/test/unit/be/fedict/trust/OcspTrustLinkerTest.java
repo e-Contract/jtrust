@@ -28,8 +28,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
-import be.fedict.trust.common.ServerNotAvailableException;
-import be.fedict.trust.common.ServerType;
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;

@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import be.fedict.trust.common.ServerNotAvailableException;
+import be.fedict.trust.ServerNotAvailableException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,18 +98,14 @@ public class OnlineOcspRepositoryTest {
 		this.servletTester.stop();
 	}
 
-	@Test
+	@Test(expected = ServerNotAvailableException.class)
 	public void testInvalidStatusCode() throws Exception {
 		// setup
 		OcspResponderTestServlet
 				.setResponseStatus(HttpServletResponse.SC_NOT_FOUND);
 
 		// operate
-		OCSPResp ocspResp = this.testedInstance.findOcspResponse(this.ocspUri,
-				this.certificate, this.rootCertificate, new Date());
-
-		// verify
-		assertNull(ocspResp);
+		this.testedInstance.findOcspResponse(this.ocspUri, this.certificate, this.rootCertificate, new Date());
 	}
 
 	@Test(expected = ServerNotAvailableException.class)
