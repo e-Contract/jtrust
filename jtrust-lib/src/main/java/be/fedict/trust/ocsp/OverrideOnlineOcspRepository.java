@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import be.fedict.trust.ServerNotAvailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.cert.ocsp.OCSPResp;
@@ -40,8 +41,7 @@ import be.fedict.trust.NetworkConfig;
  */
 public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 
-	private static final Log LOG = LogFactory
-			.getLog(OverrideOnlineOcspRepository.class);
+	private static final Log LOG = LogFactory.getLog(OverrideOnlineOcspRepository.class);
 
 	private final Map<URI, URI> overrideURIs;
 
@@ -61,7 +61,7 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 
 	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate, Date validationDate) {
+			X509Certificate issuerCertificate, Date validationDate) throws ServerNotAvailableException {
 		URI overrideOcspUri = this.overrideURIs.get(ocspUri);
 		if (null != overrideOcspUri) {
 			LOG.debug("Overriding OCSP URI: " + ocspUri + " with "
@@ -70,7 +70,6 @@ public class OverrideOnlineOcspRepository extends OnlineOcspRepository {
 		} else {
 			LOG.debug("not overriding OCSP URI: " + ocspUri);
 		}
-		return super.findOcspResponse(ocspUri, certificate, issuerCertificate,
-				validationDate);
+		return super.findOcspResponse(ocspUri, certificate, issuerCertificate, validationDate);
 	}
 }

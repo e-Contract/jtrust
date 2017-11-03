@@ -31,6 +31,7 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import be.fedict.trust.ServerNotAvailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1Enumerated;
@@ -92,9 +93,13 @@ public class CrlTrustLinker implements TrustLinker {
 			return TrustLinkerResult.UNDECIDED;
 		}
 
-		LOG.debug("CRL URI: " + crlUri);
-		final X509CRL x509crl = this.crlRepository.findCrl(crlUri, certificate,
-				validationDate);
+		X509CRL x509crl = null;
+		try {
+			LOG.debug("CRL URI: " + crlUri);
+			x509crl = this.crlRepository.findCrl(crlUri, certificate, validationDate);
+		} catch (ServerNotAvailableException e) {
+			throw new TrustLinkerResultException(TrustLinkerResultReason.CRL_UNAVAILABLE, "CRL server is unavailable!", e);
+		}
 		if (null == x509crl) {
 			LOG.debug("CRL not found");
 			return TrustLinkerResult.UNDECIDED;
