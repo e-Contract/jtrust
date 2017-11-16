@@ -29,8 +29,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
-import be.fedict.trust.ServerNotAvailableException;
-import be.fedict.trust.ServerType;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
@@ -38,6 +36,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.linker.TrustLinkerResult;
@@ -594,6 +594,8 @@ public class CrlTrustLinkerTest {
 				new DefaultAlgorithmPolicy());
 
 		EasyMock.verify(mockCrlRepository);
+
+		fail("Expected TrustLinkerResultException, but got: " + result);
 	}
 
 }
