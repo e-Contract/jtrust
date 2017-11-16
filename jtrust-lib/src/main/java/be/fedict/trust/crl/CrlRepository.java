@@ -18,6 +18,8 @@
 
 package be.fedict.trust.crl;
 
+import be.fedict.trust.ServerNotAvailableException;
+
 import java.net.URI;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -40,8 +42,10 @@ public interface CrlRepository {
 	 *            the issuer certificate
 	 * @param validationDate
 	 *            the validation date.
+	 * @throws ServerNotAvailableException
+	 * 			  {@link ServerNotAvailableException} if the CRL server is not responding.
 	 * @return the X509 CRL, or <code>null</code> if not found.
 	 */
 	X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-			Date validationDate);
+			Date validationDate) throws ServerNotAvailableException;
 }

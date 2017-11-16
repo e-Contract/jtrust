@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import be.fedict.trust.ServerNotAvailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -84,8 +85,7 @@ public class CachedCrlRepository implements CrlRepository {
 	}
 
 	@Override
-	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-			Date validationDate) {
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate, Date validationDate) throws ServerNotAvailableException {
 		SoftReference<CacheEntry> cacheEntryRef = this.crlCache.get(crlUri);
 		if (null == cacheEntryRef) {
 			LOG.debug("no cache entry ref found: " + crlUri);
@@ -119,10 +119,8 @@ public class CachedCrlRepository implements CrlRepository {
 		return crl;
 	}
 
-	private X509CRL refreshCrl(URI crlUri, X509Certificate issuerCertificate,
-			Date validationDate) {
-		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate,
-				validationDate);
+	private X509CRL refreshCrl(URI crlUri, X509Certificate issuerCertificate, Date validationDate) throws ServerNotAvailableException {
+		X509CRL crl = this.crlRepository.findCrl(crlUri, issuerCertificate, validationDate);
 		if (null == crl) {
 			// we don't want to cache CRL retrieval errors
 			this.crlCache.remove(crlUri);

@@ -1,5 +1,7 @@
 # jTrust
 
+[![Build Status](https://travis-ci.org/Corilus/jtrust.svg?branch=master)](https://travis-ci.org/Corilus/jtrust)
+
 ## Introduction
 
 This project contains the source code tree of the jTrust library.

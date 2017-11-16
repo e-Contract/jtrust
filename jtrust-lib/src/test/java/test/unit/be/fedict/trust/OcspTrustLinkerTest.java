@@ -28,6 +28,8 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
@@ -632,6 +634,40 @@ public class OcspTrustLinkerTest {
 
 		// verify
 		assertEquals(TrustLinkerResult.UNDECIDED, result);
+		EasyMock.verify(mockOcspRepository);
+	}
+
+	@Test(expected = TrustLinkerResultException.class)
+	public void testOcspServerUnavailable() throws Exception {
+		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate rootCertificate = PKITestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter);
+
+		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		X509Certificate certificate = PKITestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, null,
+				"ocsp-uri");
+
+		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
+		EasyMock.expect(mockOcspRepository.findOcspResponse(new URI("ocsp-uri"),
+						certificate, rootCertificate, null))
+				.andThrow(new ServerNotAvailableException("OCSP server responded with status code 500", ServerType.OCSP));
+
+		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
+				mockOcspRepository);
+
+		EasyMock.replay(mockOcspRepository);
+
+		// operate
+		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate,
+				rootCertificate, null, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+
+		// verify
 		EasyMock.verify(mockOcspRepository);
 	}
 
