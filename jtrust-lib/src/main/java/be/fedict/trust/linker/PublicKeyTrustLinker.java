@@ -53,7 +53,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate,
 			X509Certificate certificate, Date validationDate,
 			RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
-			throws TrustLinkerResultException, Exception {
+			throws Exception {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
 			LOG.debug("child certificate issuer not the same as the issuer certificate subject");
@@ -67,7 +67,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"child certificate issuer not the same as the issuer certificate subject");
 		}
 		try {
-			childCertificate.verify(certificate.getPublicKey());
+			CustomCertSignValidator.verify(childCertificate, certificate);
 		} catch (Exception e) {
 			LOG.debug("verification error: " + e.getMessage(), e);
 			throw new TrustLinkerResultException(
@@ -113,7 +113,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			 * this is in violation with 4.2.1.10 Basic Constraints of RFC2459.
 			 */
 			try {
-				certificate.verify(certificate.getPublicKey());
+				CustomCertSignValidator.verify(certificate);
 				LOG.warn("allowing self-signed Root CA without CA flag set");
 			} catch (Exception e) {
 				throw new TrustLinkerResultException(

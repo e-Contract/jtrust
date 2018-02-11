@@ -25,14 +25,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import be.fedict.trust.linker.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import be.fedict.trust.constraints.CertificateConstraint;
-import be.fedict.trust.linker.TrustLinker;
-import be.fedict.trust.linker.TrustLinkerResult;
-import be.fedict.trust.linker.TrustLinkerResultException;
-import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.repository.CertificateRepository;
@@ -208,7 +205,7 @@ public class TrustValidator {
 							+ certificate.getSubjectX500Principal());
 		}
 		try {
-			certificate.verify(certificate.getPublicKey());
+			CustomCertSignValidator.verify(certificate);
 		} catch (Exception e) {
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_SIGNATURE,
