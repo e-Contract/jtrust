@@ -18,7 +18,7 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.security.KeyPair;
@@ -45,7 +45,7 @@ public class CodeSigningCertificateConstraintTest {
 	@Test
 	public void testCodeSigningCertificatePasses() throws Exception {
 		// setup
-		X509Certificate certificate = PKITestUtils
+		final X509Certificate certificate = PKITestUtils
 				.loadCertificate("/code-signing-fedict.der");
 
 		// operate
@@ -55,10 +55,10 @@ public class CodeSigningCertificateConstraintTest {
 	@Test
 	public void testNonCodeSigningCertificateFails() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate certificate = PKITestUtils
 				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 						notAfter);
 
@@ -66,7 +66,7 @@ public class CodeSigningCertificateConstraintTest {
 		try {
 			this.testedInstance.check(certificate);
 			fail();
-		} catch (TrustLinkerResultException e) {
+		} catch (final TrustLinkerResultException e) {
 			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 					e.getReason());
 		}

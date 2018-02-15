@@ -63,34 +63,35 @@ public class CertificatePoliciesCertificateConstraint implements
 	 * 
 	 * @param certificatePolicy
 	 */
-	public void addCertificatePolicy(String certificatePolicy) {
+	public void addCertificatePolicy(final String certificatePolicy) {
 		this.certificatePolicies.add(certificatePolicy);
 	}
 
 	@Override
-	public void check(X509Certificate certificate)
+	public void check(final X509Certificate certificate)
 			throws TrustLinkerResultException, Exception {
-		byte[] extensionValue = certificate
+		final byte[] extensionValue = certificate
 				.getExtensionValue(Extension.certificatePolicies.getId());
 		if (null == extensionValue) {
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 					"missing certificate policies X509 extension");
 		}
-		DEROctetString oct = (DEROctetString) (new ASN1InputStream(
-				new ByteArrayInputStream(extensionValue)).readObject());
-		ASN1Sequence certPolicies = (ASN1Sequence) new ASN1InputStream(
-				oct.getOctets()).readObject();
-		Enumeration<?> certPoliciesEnum = certPolicies.getObjects();
-		while (certPoliciesEnum.hasMoreElements()) {
-			PolicyInformation policyInfo = PolicyInformation
-					.getInstance(certPoliciesEnum.nextElement());
-			ASN1ObjectIdentifier policyOid = policyInfo.getPolicyIdentifier();
-			String policyId = policyOid.getId();
-			LOG.debug("present policy OID: " + policyId);
-			if (this.certificatePolicies.contains(policyId)) {
-				LOG.debug("matching certificate policy OID: " + policyId);
-				return;
+		try (final ASN1InputStream extensionStream = new ASN1InputStream(new ByteArrayInputStream(extensionValue))) {
+			final DEROctetString octetString = (DEROctetString) extensionStream.readObject();
+			try (final ASN1InputStream octetStream = new ASN1InputStream(octetString.getOctets())) {
+				final ASN1Sequence certPolicies = (ASN1Sequence) octetStream.readObject();
+				final Enumeration<?> certPoliciesEnum = certPolicies.getObjects();
+				while (certPoliciesEnum.hasMoreElements()) {
+					final PolicyInformation policyInfo = PolicyInformation.getInstance(certPoliciesEnum.nextElement());
+					final ASN1ObjectIdentifier policyOid = policyInfo.getPolicyIdentifier();
+					final String policyId = policyOid.getId();
+					LOG.debug("present policy OID: " + policyId);
+					if (this.certificatePolicies.contains(policyId)) {
+						LOG.debug("matching certificate policy OID: " + policyId);
+						return;
+					}
+				}
 			}
 		}
 		throw new TrustLinkerResultException(

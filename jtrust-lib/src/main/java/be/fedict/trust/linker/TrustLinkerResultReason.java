@@ -67,5 +67,15 @@ public enum TrustLinkerResultReason {
 	/**
 	 * Certificate status returned revoked or suspended.
 	 */
-	INVALID_REVOCATION_STATUS
+	INVALID_REVOCATION_STATUS,
+
+	/**
+	 * Indicates that the CRL server is unavailable.
+	 */
+	CRL_UNAVAILABLE,
+
+	/**
+	 * Indicates that the OCSP server is unavailable.
+	 */
+	OCSP_UNAVAILABLE
 }

@@ -36,6 +36,8 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.fedict.trust.ServerNotAvailableException;
+import be.fedict.trust.ServerType;
 import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.linker.TrustLinkerResult;
@@ -54,25 +56,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void noCrlUriInCertificate() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate());
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, null, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -82,26 +84,26 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void invalidCrlUriInCertificate() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1, "foobar");
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, null, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 		assertEquals(TrustLinkerResult.UNDECIDED, result);
@@ -109,22 +111,22 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void noEntryInCrlRepository() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = new Date();
+		final Date validationDate = new Date();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("http://crl-uri"),
@@ -132,9 +134,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -144,25 +146,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void emptyCrlPasses() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0, null, new KeyUsage(
 								KeyUsage.cRLSign));
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("http://crl-uri"),
@@ -170,9 +172,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -182,24 +184,24 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void crlMissingKeyUsage() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"https://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("https://crl-uri"),
@@ -207,9 +209,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -219,25 +221,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void crlMissingCRLSignKeyUsage() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0, null, new KeyUsage(
 								KeyUsage.dataEncipherment));
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"https://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("https://crl-uri"),
@@ -245,9 +247,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -257,24 +259,24 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void oldCrl() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore.minusMonths(2),
 				notAfter.minusMonths(2));
 		EasyMock.expect(
@@ -283,9 +285,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -295,24 +297,24 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void crlNotIssuedByRoot() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				certificate, notBefore, notAfter);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("http://crl-uri"),
@@ -320,9 +322,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -332,24 +334,24 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void crlNotSignedByRoot() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(keyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(keyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter);
 		EasyMock.expect(
 				mockCrlRepository.findCrl(new URI("http://crl-uri"),
@@ -357,9 +359,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -369,24 +371,24 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void tooFreshCrl() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0);
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"https://crl-uri");
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore.plusMonths(2),
 				notAfter.plusMonths(2));
 		EasyMock.expect(
@@ -395,9 +397,9 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
@@ -407,25 +409,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void revokedCertificate() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0, null, new KeyUsage(
 								KeyUsage.cRLSign));
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter,
 				certificate.getSerialNumber());
 		EasyMock.expect(
@@ -434,14 +436,14 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		try {
 			crlTrustLinker.hasTrustLink(certificate, rootCertificate,
 					validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
 			fail();
-		} catch (TrustLinkerResultException e) {
+		} catch (final TrustLinkerResultException e) {
 			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS,
 					e.getReason());
 		}
@@ -451,25 +453,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void crlMD5Signature() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0, null, new KeyUsage(
 								KeyUsage.cRLSign));
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"https://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter, "MD5withRSA",
 				certificate.getSerialNumber());
 		EasyMock.expect(
@@ -478,14 +480,14 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
 		try {
 			crlTrustLinker.hasTrustLink(certificate, rootCertificate,
 					validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
 			fail();
-		} catch (TrustLinkerResultException e) {
+		} catch (final TrustLinkerResultException e) {
 			assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM,
 					e.getReason());
 		}
@@ -495,25 +497,25 @@ public class CrlTrustLinkerTest {
 
 	@Test
 	public void futureRevokedCertificate() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
 				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 						notBefore, notAfter, true, 0, null, new KeyUsage(
 								KeyUsage.cRLSign));
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
 				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
 				rootCertificate, rootKeyPair.getPrivate(), false, -1,
 				"http://crl-uri");
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		final Date validationDate = notBefore.plusDays(1).toDate();
 
-		CrlRepository mockCrlRepository = EasyMock
+		final CrlRepository mockCrlRepository = EasyMock
 				.createMock(CrlRepository.class);
-		X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
+		final X509CRL x509crl = PKITestUtils.generateCrl(rootKeyPair.getPrivate(),
 				rootCertificate, notBefore, notAfter, Collections
 						.singletonList(new PKITestUtils.RevokedCertificate(
 								certificate.getSerialNumber(), notBefore
@@ -524,13 +526,76 @@ public class CrlTrustLinkerTest {
 
 		EasyMock.replay(mockCrlRepository);
 
-		CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
 
-		TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
 				rootCertificate, validationDate, new RevocationData(),
 				new DefaultAlgorithmPolicy());
 
 		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
+
+	@Test
+	public void testNullX509CRL() throws Exception {
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot", notBefore, notAfter,
+				true, 0, null, new KeyUsage(KeyUsage.cRLSign));
+
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, "http://crl-uri");
+
+		final Date validationDate = notBefore.plusDays(1).toDate();
+
+		final CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
+		EasyMock.expect(mockCrlRepository.findCrl(new URI("http://crl-uri"), rootCertificate, validationDate)).andReturn(null);
+
+		EasyMock.replay(mockCrlRepository);
+
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+
+		EasyMock.verify(mockCrlRepository);
+
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
+	}
+
+	@Test(expected = TrustLinkerResultException.class)
+	public void testCrlServerNotAvailable() throws Exception {
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils
+				.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
+						notBefore, notAfter, true, 0);
+
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(
+				keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1,
+				"http://crl-uri");
+
+		final Date validationDate = new Date();
+
+		final CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
+		EasyMock.expect(mockCrlRepository.findCrl(new URI("http://crl-uri"), rootCertificate, validationDate))
+				.andThrow(new ServerNotAvailableException("CRL server responded with status code 500", ServerType.CRL));
+
+		EasyMock.replay(mockCrlRepository);
+
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate,
+				rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+
+		EasyMock.verify(mockCrlRepository);
+
+		fail("Expected TrustLinkerResultException, but got: " + result);
+	}
+
 }
