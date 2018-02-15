@@ -147,9 +147,8 @@ public class OnlineOcspRepository implements OcspRepository {
 			httpResponse = httpClient.execute(httpPost);
 			StatusLine statusLine = httpResponse.getStatusLine();
 			responseCode = statusLine.getStatusCode();
-		} catch (ConnectException e) {
-			LOG.debug("OCSP responder is down");
-			return null;
+		} catch (IOException e) {
+			throw new ServerNotAvailableException("OCSP responder is down", ServerType.OCSP, e);
 		}
 
 		if (HttpURLConnection.HTTP_OK != responseCode) {

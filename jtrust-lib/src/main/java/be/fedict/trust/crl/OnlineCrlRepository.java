@@ -42,8 +42,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.bouncycastle.x509.NoSuchParserException;
-import org.bouncycastle.x509.util.StreamParsingException;
 
 import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
@@ -95,15 +93,14 @@ public class OnlineCrlRepository implements CrlRepository {
 		} catch (final CRLException e) {
 			LOG.debug("error parsing CRL: " + e.getMessage(), e);
 			return null;
-		} catch (final IOException | CertificateException | NoSuchProviderException | NoSuchParserException | StreamParsingException e) {
+		} catch (final IOException | CertificateException | NoSuchProviderException e) {
 			LOG.error("find CRL error: " + e.getMessage(), e);
 			return null;
 		}
 	}
 
 	private X509CRL getCrl(final URI crlUri) throws IOException,
-			CertificateException, CRLException, NoSuchProviderException,
-			NoSuchParserException, StreamParsingException, ServerNotAvailableException {
+			CertificateException, CRLException, NoSuchProviderException, ServerNotAvailableException {
 		final DefaultHttpClient httpClient = new DefaultHttpClient();
 
 		if (null != this.networkConfig) {
@@ -120,9 +117,15 @@ public class OnlineCrlRepository implements CrlRepository {
 		final HttpGet httpGet = new HttpGet(downloadUrl);
 		httpGet.addHeader("User-Agent", "jTrust CRL Client");
 
-		final HttpResponse httpResponse = httpClient.execute(httpGet);
-		final StatusLine statusLine = httpResponse.getStatusLine();
-		final int statusCode = statusLine.getStatusCode();
+		final HttpResponse httpResponse;
+		final int statusCode;
+		try {
+			httpResponse = httpClient.execute(httpGet);
+			final StatusLine statusLine = httpResponse.getStatusLine();
+			statusCode = statusLine.getStatusCode();
+		} catch (IOException e) {
+			throw new ServerNotAvailableException("CRL server is down", ServerType.CRL, e);
+		}
 
 		if (HttpURLConnection.HTTP_OK != statusCode) {
 			throw new ServerNotAvailableException("CRL server responded with status code " + statusCode, ServerType.CRL);

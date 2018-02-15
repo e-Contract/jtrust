@@ -47,6 +47,21 @@ public class ServerNotAvailableException extends Exception {
     }
 
 	/**
+	 * Creates a new {@link ServerNotAvailableException}.
+	 *
+	 * @param message
+	 * 			  the error message
+	 * @param serverType
+	 *            the {@link ServerType} that this exception pertains to
+	 * @param cause
+	 *            the cause
+	 */
+	public ServerNotAvailableException(final String message, final ServerType serverType, final Throwable cause) {
+		super(message, cause);
+		this.serverType = serverType;
+	}
+
+	/**
 	 * Returns the {@link ServerType} that this exception pertains to.
 	 * 
 	 * @return the serverType the {@link ServerType} that this exception pertains to
