@@ -56,7 +56,7 @@ public class ServerNotAvailableException extends Exception {
 	 * @param cause
 	 *            the cause
 	 */
-	public ServerNotAvailableException(final String message, final ServerType serverType, Throwable cause) {
+	public ServerNotAvailableException(final String message, final ServerType serverType, final Throwable cause) {
 		super(message, cause);
 		this.serverType = serverType;
 	}
