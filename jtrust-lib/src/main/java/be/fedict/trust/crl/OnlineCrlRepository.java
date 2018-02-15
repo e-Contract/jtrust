@@ -21,7 +21,6 @@ package be.fedict.trust.crl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.NoSuchProviderException;
@@ -118,16 +117,14 @@ public class OnlineCrlRepository implements CrlRepository {
 		final HttpGet httpGet = new HttpGet(downloadUrl);
 		httpGet.addHeader("User-Agent", "jTrust CRL Client");
 
-		// TODO: [BUG] Gooi een ServerNotAvailableException als de HttpClient#execute een ConnectionException gooit.
 		final HttpResponse httpResponse;
 		final int statusCode;
 		try {
 			httpResponse = httpClient.execute(httpGet);
 			final StatusLine statusLine = httpResponse.getStatusLine();
 			statusCode = statusLine.getStatusCode();
-		} catch (ConnectException e) {
-			// TODO: [REVIEW]
-			throw new ServerNotAvailableException("CRL server is down", ServerType.CRL);
+		} catch (IOException e) {
+			throw new ServerNotAvailableException("CRL server is down", ServerType.CRL, e);
 		}
 
 		if (HttpURLConnection.HTTP_OK != statusCode) {
