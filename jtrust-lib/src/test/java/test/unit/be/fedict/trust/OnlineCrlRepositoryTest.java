@@ -113,6 +113,19 @@ public class OnlineCrlRepositoryTest {
 		// verify
 		assertNull(crl);
 	}
+	
+	@Test
+	public void testEmptyCrl() throws Exception {
+		// setup
+		CrlRepositoryTestServlet.setCrlData(new byte[0]);
+
+		// operate
+		X509CRL crl = this.testedInstance.findCrl(this.crlUri, null,
+				this.validationDate);
+
+		// verify
+		assertNull(crl);
+	}
 
 	@Test
 	public void testDownloadCrl() throws Exception {

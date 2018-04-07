@@ -533,4 +533,32 @@ public class CrlTrustLinkerTest {
 		assertEquals(TrustLinkerResult.TRUSTED, result);
 		EasyMock.verify(mockCrlRepository);
 	}
+	
+	@Test
+	public void testNullX509CRL() throws Exception {
+		final KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		final DateTime notBefore = new DateTime();
+		final DateTime notAfter = notBefore.plusMonths(1);
+		final X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot", notBefore, notAfter,
+				true, 0, null, new KeyUsage(KeyUsage.cRLSign));
+
+		final KeyPair keyPair = PKITestUtils.generateKeyPair();
+		final X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore, notAfter,
+				rootCertificate, rootKeyPair.getPrivate(), false, -1, "http://crl-uri");
+
+		final Date validationDate = notBefore.plusDays(1).toDate();
+
+		final CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
+		EasyMock.expect(mockCrlRepository.findCrl(new URI("http://crl-uri"), rootCertificate, validationDate)).andReturn(null);
+
+		EasyMock.replay(mockCrlRepository);
+
+		final CrlTrustLinker crlTrustLinker = new CrlTrustLinker(mockCrlRepository);
+		final TrustLinkerResult result = crlTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
+				new DefaultAlgorithmPolicy());
+
+		EasyMock.verify(mockCrlRepository);
+
+		assertEquals(TrustLinkerResult.UNDECIDED, result);
+}
 }
