@@ -22,7 +22,7 @@ import org.mortbay.jetty.testing.ServletTester;
 
 public interface EndpointProvider {
 
-	void addEndpoints(ServletTester servletTester);
+	void addEndpoints(ServletTester servletTester) throws Exception;
 
-	void started(String url);
+	void started(String url) throws Exception;
 }

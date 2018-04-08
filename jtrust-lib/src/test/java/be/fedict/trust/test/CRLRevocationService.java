@@ -49,7 +49,7 @@ import org.mortbay.jetty.testing.ServletTester;
 
 public class CRLRevocationService implements RevocationService {
 
-	private String identifier;
+	private final String identifier;
 
 	private String crlUri;
 
@@ -65,7 +65,7 @@ public class CRLRevocationService implements RevocationService {
 
 	@Override
 	public void addExtension(X509v3CertificateBuilder x509v3CertificateBuilder) throws Exception {
-		GeneralName generalName = new GeneralName(GeneralName.uniformResourceIdentifier, new DERIA5String(crlUri));
+		GeneralName generalName = new GeneralName(GeneralName.uniformResourceIdentifier, new DERIA5String(this.crlUri));
 		GeneralNames generalNames = new GeneralNames(generalName);
 		DistributionPointName distPointName = new DistributionPointName(generalNames);
 		DistributionPoint distPoint = new DistributionPoint(distPointName, null, null);

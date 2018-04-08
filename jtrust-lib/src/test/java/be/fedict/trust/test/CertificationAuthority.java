@@ -29,11 +29,18 @@ import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
@@ -70,6 +77,10 @@ public class CertificationAuthority {
 		this(world, name, null);
 	}
 
+	public CertificationAuthority getIssuer() {
+		return this.issuer;
+	}
+
 	public void addRevocationService(RevocationService revocationService) {
 		this.revocationServices.add(revocationService);
 		revocationService.setCertificationAuthority(this);
@@ -96,7 +107,7 @@ public class CertificationAuthority {
 				extensionUtils.createSubjectKeyIdentifier(publicKey));
 
 		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
-				extensionUtils.createAuthorityKeyIdentifier(this.keyPair.getPublic()));
+				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
 
 		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(0));
 
@@ -129,6 +140,14 @@ public class CertificationAuthority {
 		return this.keyPair.getPrivate();
 	}
 
+	public PublicKey getPublicKey() throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalArgumentException();
+		}
+		getCertificate();
+		return this.keyPair.getPublic();
+	}
+
 	public X509Certificate getCertificate() throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
@@ -145,5 +164,152 @@ public class CertificationAuthority {
 			this.certificate = this.issuer.issueCertificationAuthority(this.keyPair.getPublic(), this.name);
 		}
 		return this.certificate;
+	}
+
+	public X509Certificate issueOCSPResponder(PublicKey publicKey, String name) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusYears(1);
+
+		X500Name issuerName = new X500Name(this.name);
+		X500Name subjectName = new X500Name(name);
+
+		BigInteger serial = new BigInteger(128, new SecureRandom());
+		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
+				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+
+		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(publicKey));
+
+		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
+
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+
+		for (RevocationService revocationService : this.revocationServices) {
+			revocationService.addExtension(x509v3CertificateBuilder);
+		}
+
+		x509v3CertificateBuilder.addExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nocheck, false, DERNull.INSTANCE);
+		x509v3CertificateBuilder.addExtension(Extension.extendedKeyUsage, true,
+				new ExtendedKeyUsage(KeyPurposeId.id_kp_OCSPSigning));
+
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+				.createKey(this.keyPair.getPrivate().getEncoded());
+
+		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+
+		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+		return certificate;
+	}
+
+	public X509Certificate issueTimeStampAuthority(PublicKey publicKey, String name) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusYears(1);
+
+		X500Name issuerName = new X500Name(this.name);
+		X500Name subjectName = new X500Name(name);
+
+		BigInteger serial = new BigInteger(128, new SecureRandom());
+		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
+				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+
+		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(publicKey));
+
+		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
+
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+
+		for (RevocationService revocationService : this.revocationServices) {
+			revocationService.addExtension(x509v3CertificateBuilder);
+		}
+
+		x509v3CertificateBuilder.addExtension(Extension.extendedKeyUsage, true,
+				new ExtendedKeyUsage(KeyPurposeId.id_kp_timeStamping));
+
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+				.createKey(this.keyPair.getPrivate().getEncoded());
+
+		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+
+		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+		return certificate;
+	}
+
+	public X509Certificate issueSigningCertificate(PublicKey publicKey, String name) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusYears(1);
+
+		X500Name issuerName = new X500Name(this.name);
+		X500Name subjectName = new X500Name(name);
+
+		BigInteger serial = new BigInteger(128, new SecureRandom());
+		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
+				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+
+		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(publicKey));
+
+		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
+
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+
+		for (RevocationService revocationService : this.revocationServices) {
+			revocationService.addExtension(x509v3CertificateBuilder);
+		}
+
+		ASN1EncodableVector vec = new ASN1EncodableVector();
+		vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcCompliance));
+		vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcSSCD));
+		x509v3CertificateBuilder.addExtension(Extension.qCStatements, true, new DERSequence(vec));
+
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+				.createKey(this.keyPair.getPrivate().getEncoded());
+
+		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+
+		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+		return certificate;
 	}
 }
