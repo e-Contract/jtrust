@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Java Trust Library">
+	<bannerRight>
+		<src>https://www.e-contract.be/images/logo.svg</src>
+	</bannerRight>
+	<body>
+		<menu name="Overview">
+			<item name="Introduction" href="index.html" />
+		</menu>
+	</body>
+	<skin>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.7</version>
+	</skin>
+</project>

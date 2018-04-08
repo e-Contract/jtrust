@@ -1,0 +1,91 @@
+Java X509 Certificate Trust Library
+
+ This Java library provides an implementation of a PKI validation algorithm for X509 certificates.
+ 
+ The jTrust library features OCSP and CRL revocation checking, automatic CRL fallback when OCSP fails, CRL caching, and a clean architecture that is ready for a scalable trust service implementation.
+ 
+* Maven
+ 
+ The Java client library is available within the e-contract.be Maven repository.
+ Configure this Maven repository within your <<<pom.xml>>> as follows:
+  
++--
+<repositories>
+	<repository>
+		<id>e-contract.be</id>
+		<url>https://www.e-contract.be/maven2/</url>
+	</repository>
+</repositories>
++--
+
+ Add the client library within your <<<pom.xml>>> dependencies element as follows:
+  
++--
+<dependency>
+	<groupId>be.fedict.jtrust</groupId>
+	<artifactId>jtrust-lib</artifactId>
+	<version>${project.version}</version>
+</dependency>
++--
+ 
+* Usage
+
+ Next example demonstrates the basic usage of the <<<TrustValidator>>>.
+ 
++--
+List<X509Certificate> certificateChain = ...
+
+TrustValidator trustValidator =
+    BelgianTrustValidatorFactory.createTrustValidator();
+
+trustValidator.isTrusted(certificateChain);
++--
+
+ Notice: the BouncyCastle Security provider should be registered in the JCA.
+
+ {{{./apidocs/index.html}Javadoc API documentation}}
+ 
+* Unit testing PKI
+
+ The project also provides a test Java libary for unit testing PKI.
+ 
+ Add the client library within your <<<pom.xml>>> dependencies element as follows:
+
++--
+<dependency>
+	<groupId>be.fedict.jtrust</groupId>
+	<artifactId>jtrust-lib</artifactId>
+	<version>${project.version}</version>
+	<type>test-jar</type>
+</dependency>
++--
+
+ Example usage:
+ 
++--
+World world = new World();
+CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+		rootCertificationAuthority);
+world.start();
+
+X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+X509Certificate cert = certificationAuthority.getCertificate();
+List<X509Certificate> certChain = new LinkedList<>();
+certChain.add(cert);
+certChain.add(rootCert);
+
+MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+memoryCertificateRepository.addTrustPoint(rootCert);
+TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+trustValidator.isTrusted(certChain);
+
+world.stop();
++--
+
+  {{{./testapidocs/index.html}Javadoc API documentation}}
