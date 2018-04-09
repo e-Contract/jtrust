@@ -52,6 +52,13 @@ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
 
+/**
+ * A certification authority. Can issue certificates and expose revocation
+ * services.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class CertificationAuthority {
 
 	private final String name;
@@ -66,6 +73,15 @@ public class CertificationAuthority {
 
 	private final World world;
 
+	/**
+	 * Creates a new certification authority, issued by another CA.
+	 * 
+	 * @param world
+	 * @param name
+	 *            the DN of this CA.
+	 * @param issuer
+	 *            the issuing CA.
+	 */
 	public CertificationAuthority(World world, String name, CertificationAuthority issuer) {
 		this.world = world;
 		this.name = name;
@@ -73,24 +89,55 @@ public class CertificationAuthority {
 		this.revocationServices = new LinkedList<>();
 	}
 
+	/**
+	 * Creates a root certification authority.
+	 * 
+	 * @param world
+	 * @param name
+	 *            the DN of the CA.
+	 */
 	public CertificationAuthority(World world, String name) {
 		this(world, name, null);
 	}
 
+	/**
+	 * The issuer of this CA. In case this is a root CA, returns <code>null</code>.
+	 * 
+	 * @return
+	 */
 	public CertificationAuthority getIssuer() {
 		return this.issuer;
 	}
 
+	/**
+	 * Adds a revocation service for this CA. The issued certificates by this CA
+	 * will have the appropriate extensions.
+	 * 
+	 * @param revocationService
+	 */
 	public void addRevocationService(RevocationService revocationService) {
 		this.revocationServices.add(revocationService);
 		revocationService.setCertificationAuthority(this);
 		this.world.addEndpointProvider(revocationService);
 	}
 
+	/**
+	 * Issues another CA, signed by this CA.
+	 * 
+	 * @param publicKey
+	 *            the public key of the new CA.
+	 * @param name
+	 *            the DN of the new CA.
+	 * @return the new CA certificate.
+	 * @throws Exception
+	 */
 	public X509Certificate issueCertificationAuthority(PublicKey publicKey, String name) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
 		}
+		// make sure our CA certificate is generated before the issued certificate
+		getCertificate();
+
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
 
@@ -132,6 +179,13 @@ public class CertificationAuthority {
 		return certificate;
 	}
 
+	/**
+	 * Gives back the private key of this CA. Useful for implementation of certain
+	 * revocation services (like CRL signing).
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public PrivateKey getPrivateKey() throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalArgumentException();
@@ -140,6 +194,12 @@ public class CertificationAuthority {
 		return this.keyPair.getPrivate();
 	}
 
+	/**
+	 * Gives back the public key of this CA.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public PublicKey getPublicKey() throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalArgumentException();
@@ -148,6 +208,12 @@ public class CertificationAuthority {
 		return this.keyPair.getPublic();
 	}
 
+	/**
+	 * Gives back the certificate of this CA.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public X509Certificate getCertificate() throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
@@ -166,10 +232,23 @@ public class CertificationAuthority {
 		return this.certificate;
 	}
 
+	/**
+	 * Issues an OCSP Responder certificate.
+	 * 
+	 * @param publicKey
+	 *            the public key of the OCSP responder.
+	 * @param name
+	 *            the DN of the OCSP responder.
+	 * @return
+	 * @throws Exception
+	 */
 	public X509Certificate issueOCSPResponder(PublicKey publicKey, String name) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
 		}
+		// make sure our CA certificate is generated before the issued certificate
+		getCertificate();
+
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
 
@@ -215,10 +294,23 @@ public class CertificationAuthority {
 		return certificate;
 	}
 
+	/**
+	 * Issues a timestamp authority certificate.
+	 * 
+	 * @param publicKey
+	 *            the public key of the TSA.
+	 * @param name
+	 *            the DN of the TSA.
+	 * @return
+	 * @throws Exception
+	 */
 	public X509Certificate issueTimeStampAuthority(PublicKey publicKey, String name) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
 		}
+		// make sure our CA certificate is generated before the issued certificate
+		getCertificate();
+
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
 
@@ -263,10 +355,23 @@ public class CertificationAuthority {
 		return certificate;
 	}
 
+	/**
+	 * Issues a signing end-entity certificate.
+	 * 
+	 * @param publicKey
+	 *            the public key of the end-entity certificate.
+	 * @param name
+	 *            the DN of the end-entity certificate.
+	 * @return
+	 * @throws Exception
+	 */
 	public X509Certificate issueSigningCertificate(PublicKey publicKey, String name) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
 		}
+		// make sure our CA certificate is generated before the issued certificate
+		getCertificate();
+
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
 

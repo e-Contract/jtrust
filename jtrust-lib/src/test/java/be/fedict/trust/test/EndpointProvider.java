@@ -20,9 +20,28 @@ package be.fedict.trust.test;
 
 import org.mortbay.jetty.testing.ServletTester;
 
+/**
+ * Interface for endpoint providers.
+ * 
+ * @author Frank Cornelis
+ * @see World
+ */
 public interface EndpointProvider {
 
+	/**
+	 * Adds a servlet endpoint to the Jetty servlet tester.
+	 * 
+	 * @param servletTester
+	 * @throws Exception
+	 */
 	void addEndpoints(ServletTester servletTester) throws Exception;
 
+	/**
+	 * Called when the corresponding world has been started.
+	 * 
+	 * @param url
+	 *            the base URL of the embedded Jetty servlet container.
+	 * @throws Exception
+	 */
 	void started(String url) throws Exception;
 }

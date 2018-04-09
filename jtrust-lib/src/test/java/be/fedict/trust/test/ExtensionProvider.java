@@ -20,7 +20,19 @@ package be.fedict.trust.test;
 
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 
+/**
+ * Interface for certificate extension providers.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public interface ExtensionProvider {
 
+	/**
+	 * Add extensions via this method.
+	 * 
+	 * @param x509v3CertificateBuilder
+	 * @throws Exception
+	 */
 	void addExtension(X509v3CertificateBuilder x509v3CertificateBuilder) throws Exception;
 }

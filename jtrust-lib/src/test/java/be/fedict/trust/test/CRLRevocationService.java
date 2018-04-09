@@ -20,8 +20,10 @@ package be.fedict.trust.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.PrivateKey;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +49,12 @@ import org.joda.time.DateTime;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
+/**
+ * CRL revocation service implementation.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class CRLRevocationService implements RevocationService {
 
 	private final String identifier;
@@ -59,6 +67,9 @@ public class CRLRevocationService implements RevocationService {
 		certificationAuthorities = new HashMap<>();
 	}
 
+	/**
+	 * Default constructor.
+	 */
 	public CRLRevocationService() {
 		this.identifier = UUID.randomUUID().toString();
 	}
@@ -92,12 +103,15 @@ public class CRLRevocationService implements RevocationService {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			CertificationAuthority certificationAuthority = getCertificationAuthority();
-			DateTime notBefore = new DateTime();
-			DateTime notAfter = notBefore.plusDays(1);
 			X509CRL crl;
 			try {
-				crl = PKITestUtils.generateCrl(certificationAuthority.getPrivateKey(),
-						certificationAuthority.getCertificate(), notBefore, notAfter);
+				// make sure we first get the CA certificate, so it gets generated before our
+				// CRL notBefore
+				PrivateKey caPrivateKey = certificationAuthority.getPrivateKey();
+				X509Certificate caCertificate = certificationAuthority.getCertificate();
+				DateTime notBefore = new DateTime();
+				DateTime notAfter = notBefore.plusDays(1);
+				crl = PKITestUtils.generateCrl(caPrivateKey, caCertificate, notBefore, notAfter);
 			} catch (Exception e) {
 				LOG.error("error: " + e.getMessage(), e);
 				throw new IOException(e);

@@ -56,11 +56,11 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			throws TrustLinkerResultException, Exception {
 		if (false == childCertificate.getIssuerX500Principal().equals(
 				certificate.getSubjectX500Principal())) {
-			LOG.debug("child certificate issuer not the same as the issuer certificate subject");
-			LOG.debug("child certificate: "
+			LOG.warn("child certificate issuer not the same as the issuer certificate subject");
+			LOG.warn("child certificate: "
 					+ childCertificate.getSubjectX500Principal());
-			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
-			LOG.debug("child certificate issuer: "
+			LOG.warn("certificate: " + certificate.getSubjectX500Principal());
+			LOG.warn("child certificate issuer: "
 					+ childCertificate.getIssuerX500Principal());
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.NO_TRUST,

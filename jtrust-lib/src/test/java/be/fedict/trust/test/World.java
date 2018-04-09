@@ -23,6 +23,14 @@ import java.util.List;
 
 import org.mortbay.jetty.testing.ServletTester;
 
+/**
+ * A world manages all entities that have endpoints (like CRL, OCSL, TSA). After
+ * adding all endpoints, you have to start the world. At the end, you can stop
+ * it.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class World {
 
 	private final List<EndpointProvider> endpointProviders;

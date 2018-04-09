@@ -18,7 +18,19 @@
 
 package be.fedict.trust.test;
 
+/**
+ * Interface for revocation services. A revocation service can provider
+ * endpoints and generate certificate extensions.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public interface RevocationService extends ExtensionProvider, EndpointProvider {
 
+	/**
+	 * Callback to receive the CA to which we belong.
+	 * 
+	 * @param certificationAuthority
+	 */
 	void setCertificationAuthority(CertificationAuthority certificationAuthority);
 }

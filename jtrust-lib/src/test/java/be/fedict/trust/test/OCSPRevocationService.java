@@ -61,6 +61,12 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
+/**
+ * Implementation of an OCSP revocation service.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class OCSPRevocationService implements RevocationService {
 
 	private final String identifier;
@@ -81,10 +87,20 @@ public class OCSPRevocationService implements RevocationService {
 		ocspRevocationServices = new HashMap<>();
 	}
 
+	/**
+	 * Default constructor.
+	 */
 	public OCSPRevocationService() {
 		this(false);
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param withOcspResponderCertificate
+	 *            set to <code>true</code> to have an explicit OCSP responder
+	 *            certificate.
+	 */
 	public OCSPRevocationService(boolean withOcspResponderCertificate) {
 		this.identifier = UUID.randomUUID().toString();
 		this.withOcspResponderCertificate = withOcspResponderCertificate;

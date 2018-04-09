@@ -54,6 +54,12 @@ import org.bouncycastle.util.Store;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
+/**
+ * Implementation of a timestamp authority according to RFC 3161.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class TimeStampAuthority implements EndpointProvider {
 
 	private final World world;
@@ -76,6 +82,13 @@ public class TimeStampAuthority implements EndpointProvider {
 		timeStampAuthorities = new HashMap<>();
 	}
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param world
+	 * @param certificationAuthority
+	 *            the TSA issuing CA.
+	 */
 	public TimeStampAuthority(World world, CertificationAuthority certificationAuthority) {
 		this.identifier = UUID.randomUUID().toString();
 		timeStampAuthorities.put(this.identifier, this);

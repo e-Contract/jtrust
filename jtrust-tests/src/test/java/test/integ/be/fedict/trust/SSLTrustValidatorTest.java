@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,16 +19,17 @@
 
 package test.integ.be.fedict.trust;
 
-import java.net.Proxy;
+import java.io.FileInputStream;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
-import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,16 +49,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import be.fedict.commons.eid.jca.BeIDProvider;
-import be.fedict.trust.NetworkConfig;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
-import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class SSLTrustValidatorTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(SSLTrustValidatorTest.class);
+	private static final Log LOG = LogFactory.getLog(SSLTrustValidatorTest.class);
 
 	@Before
 	public void setUp() throws Exception {
@@ -69,29 +67,23 @@ public class SSLTrustValidatorTest {
 		Security.addProvider(new BeIDProvider());
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
-		KeyManagerFactory keyManagerFactory = KeyManagerFactory
-				.getInstance("BeID");
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("BeID");
 
 		keyManagerFactory.init(null);
 		SecureRandom secureRandom = new SecureRandom();
-		sslContext.init(keyManagerFactory.getKeyManagers(),
-				new TrustManager[] { new ClientTestX509TrustManager() },
+		sslContext.init(keyManagerFactory.getKeyManagers(), new TrustManager[] { new ClientTestX509TrustManager() },
 				secureRandom);
 		SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-		SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(
-				"test.eid.belgium.be", 443);
+		SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket("test.eid.belgium.be", 443);
 		LOG.debug("socket created");
 		SSLSession sslSession = sslSocket.getSession();
 		Certificate[] peerCertificates = sslSession.getPeerCertificates();
 		for (Certificate peerCertificate : peerCertificates) {
-			LOG.debug("peer certificate: "
-					+ ((X509Certificate) peerCertificate)
-							.getSubjectX500Principal());
+			LOG.debug("peer certificate: " + ((X509Certificate) peerCertificate).getSubjectX500Principal());
 		}
 
 		MemoryCertificateRepository repository = new MemoryCertificateRepository();
-		repository
-				.addTrustPoint((X509Certificate) peerCertificates[peerCertificates.length - 1]);
+		repository.addTrustPoint((X509Certificate) peerCertificates[peerCertificates.length - 1]);
 
 		TrustValidator trustValidator = new TrustValidator(repository);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
@@ -99,21 +91,19 @@ public class SSLTrustValidatorTest {
 		trustValidator.isTrusted(peerCertificates);
 	}
 
-	private static final class ClientTestX509TrustManager implements
-			X509TrustManager {
+	private static final class ClientTestX509TrustManager implements X509TrustManager {
 
-		private static final Log LOG = LogFactory
-				.getLog(ClientTestX509TrustManager.class);
+		private static final Log LOG = LogFactory.getLog(ClientTestX509TrustManager.class);
 
 		@Override
-		public void checkClientTrusted(final X509Certificate[] chain,
-				final String authType) throws CertificateException {
+		public void checkClientTrusted(final X509Certificate[] chain, final String authType)
+				throws CertificateException {
 			LOG.debug("checkClientTrusted");
 		}
 
 		@Override
-		public void checkServerTrusted(final X509Certificate[] chain,
-				final String authType) throws CertificateException {
+		public void checkServerTrusted(final X509Certificate[] chain, final String authType)
+				throws CertificateException {
 			LOG.debug("checkServerTrusted: " + authType);
 		}
 
@@ -127,65 +117,68 @@ public class SSLTrustValidatorTest {
 
 	@Test
 	public void testValidation() throws Exception {
-		Proxy proxy = Proxy.NO_PROXY;
-		// Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
-		// "proxy.yourict.net", 8080));
-		NetworkConfig networkConfig = null; // new
-											// NetworkConfig("proxy.yourict.net",
-											// 8080);
-		// URL url = new URL("https://eid.belgium.be/"); // OK
-		// URL url = new URL("https://www.fortisbanking.be"); // OK
-		// URL url = new URL("https://www.e-contract.be/"); // OK
-		// URL url = new URL("https://idp.services.belgium.be"); // OK
-		// URL url = new URL("https://idp.int.belgium.be"); // OK
-		//URL url = new URL("https://test.eid.belgium.be/");
-		URL url = new URL("https://www.cloudflare.com/");
+		validate("https://www.e-contract.be/");
+		validate("https://eid.belgium.be/");
+		validate("https://www.cloudflare.com/");
+		validate("https://www.facebook.com");
+		validate("https://www.twitter.com");
+		validate("https://www.mozilla.org");
+		validate("https://www.verisign.com/");
+		validate("https://slashdot.org");
+		validate("https://google.com");
+		validate("https://linkedin.com");
+	}
 
-		// URL url = new URL("https://www.facebook.com");
-		// URL url = new URL("https://www.twitter.com");
-		// URL url = new URL("https://www.mozilla.org");
-		// URL url = new URL("https://www.verisign.com/");
-		HttpsURLConnection connection = (HttpsURLConnection) url
-				.openConnection(proxy);
+	private void validate(String domain) throws Exception {
+		URL url = new URL(domain);
+		HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 		connection.connect();
 		Certificate[] serverCertificates = connection.getServerCertificates();
 		List<X509Certificate> certificateChain = new LinkedList<>();
 		for (Certificate certificate : serverCertificates) {
 			X509Certificate x509Cert = (X509Certificate) certificate;
 			certificateChain.add(x509Cert);
-			LOG.debug("certificate subject: "
-					+ x509Cert.getSubjectX500Principal());
-			LOG.debug("certificate issuer: "
-					+ x509Cert.getIssuerX500Principal());
+			LOG.debug("certificate subject: " + x509Cert.getSubjectX500Principal());
+			LOG.debug("certificate issuer: " + x509Cert.getIssuerX500Principal());
 		}
-		
-		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-		X509Certificate rootCertificate = (X509Certificate) certificateFactory.generateCertificate(SSLTrustValidatorTest.class.getResourceAsStream("/ecc/AddTrustExternalCARoot.crt"));
-		certificateChain.add(rootCertificate);
+
+		X509Certificate rootCertificate = certificateChain.get(certificateChain.size() - 1);
+		if (!rootCertificate.getSubjectX500Principal().equals(rootCertificate.getIssuerX500Principal())) {
+			LOG.error("no a self-signed root in chain");
+			rootCertificate = getTrustAnchor(rootCertificate);
+			certificateChain.add(rootCertificate);
+		}
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-		certificateRepository.addTrustPoint(certificateChain
-				.get(certificateChain.size() - 1));
-		
-		//certificateRepository.addTrustPoint(rootCertificate);
-		TrustValidator trustValidator = new TrustValidator(
-				certificateRepository);
-		trustValidator.setAlgorithmPolicy(new AlgorithmPolicy() {
+		certificateRepository.addTrustPoint(rootCertificate);
 
-			@Override
-			public void checkSignatureAlgorithm(String signatureAlgorithm,
-					Date validationDate) throws SignatureException {
-				LOG.debug("signature algo: " + signatureAlgorithm);
-				// allow all
-			}
-		});
+		TrustValidator trustValidator = new TrustValidator(certificateRepository);
 
 		// next is kind of a default trust linked pattern.
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				networkConfig);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
 		// operate
 		trustValidator.isTrusted(certificateChain);
+	}
+
+	private X509Certificate getTrustAnchor(X509Certificate certificate) throws Exception {
+		String caCertsFile = System.getProperty("java.home") + "/lib/security/cacerts";
+		FileInputStream is = new FileInputStream(caCertsFile);
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		String password = "changeit";
+		keystore.load(is, password.toCharArray());
+
+		PKIXParameters params = new PKIXParameters(keystore);
+
+		Iterator it = params.getTrustAnchors().iterator();
+		while (it.hasNext()) {
+			TrustAnchor ta = (TrustAnchor) it.next();
+			X509Certificate rootCertificate = ta.getTrustedCert();
+			if (certificate.getIssuerX500Principal().equals(rootCertificate.getSubjectX500Principal())) {
+				return rootCertificate;
+			}
+		}
+		throw new IllegalArgumentException();
 	}
 }
