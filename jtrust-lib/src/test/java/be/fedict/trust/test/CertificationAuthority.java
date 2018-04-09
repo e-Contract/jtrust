@@ -26,8 +26,11 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERNull;
@@ -39,6 +42,7 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -73,6 +77,11 @@ public class CertificationAuthority {
 
 	private final World world;
 
+	private final List<X509Certificate> issuedCertificates;
+
+	// value is revocation date
+	private final Map<X509Certificate, Date> revokedCertificates;
+
 	/**
 	 * Creates a new certification authority, issued by another CA.
 	 * 
@@ -87,6 +96,8 @@ public class CertificationAuthority {
 		this.name = name;
 		this.issuer = issuer;
 		this.revocationServices = new LinkedList<>();
+		this.issuedCertificates = new LinkedList<>();
+		this.revokedCertificates = new HashMap<>();
 	}
 
 	/**
@@ -136,10 +147,10 @@ public class CertificationAuthority {
 			throw new IllegalStateException();
 		}
 		// make sure our CA certificate is generated before the issued certificate
-		getCertificate();
+		X509Certificate caCert = getCertificate();
 
 		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusYears(1);
+		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -156,7 +167,10 @@ public class CertificationAuthority {
 		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
 				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
 
-		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(0));
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
+
+		KeyUsage keyUsage = new KeyUsage(KeyUsage.cRLSign | KeyUsage.keyCertSign);
+		x509v3CertificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
 
 		for (RevocationService revocationService : this.revocationServices) {
 			revocationService.addExtension(x509v3CertificateBuilder);
@@ -176,6 +190,7 @@ public class CertificationAuthority {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
+		this.issuedCertificates.add(certificate);
 		return certificate;
 	}
 
@@ -223,13 +238,53 @@ public class CertificationAuthority {
 		}
 		this.keyPair = PKITestUtils.generateKeyPair();
 		if (this.issuer == null) {
-			DateTime notBefore = new DateTime();
-			DateTime notAfter = notBefore.plusYears(1);
-			this.certificate = PKITestUtils.generateSelfSignedCertificate(this.keyPair, this.name, notBefore, notAfter);
+			this.certificate = generateSelfSignedCertificate();
 		} else {
 			this.certificate = this.issuer.issueCertificationAuthority(this.keyPair.getPublic(), this.name);
 		}
 		return this.certificate;
+	}
+
+	private X509Certificate generateSelfSignedCertificate() throws Exception {
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusYears(1);
+
+		X500Name issuerName = new X500Name(this.name);
+		X500Name subjectName = new X500Name(this.name);
+
+		BigInteger serial = new BigInteger(128, new SecureRandom());
+		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(this.keyPair.getPublic().getEncoded());
+		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
+				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+
+		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(this.keyPair.getPublic()));
+
+		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(this.keyPair.getPublic()));
+
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
+
+		KeyUsage keyUsage = new KeyUsage(KeyUsage.cRLSign | KeyUsage.keyCertSign);
+		x509v3CertificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
+
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+				.createKey(this.keyPair.getPrivate().getEncoded());
+
+		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+
+		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+		this.issuedCertificates.add(certificate);
+		return certificate;
 	}
 
 	/**
@@ -247,10 +302,10 @@ public class CertificationAuthority {
 			throw new IllegalStateException();
 		}
 		// make sure our CA certificate is generated before the issued certificate
-		getCertificate();
+		X509Certificate caCertificate = getCertificate();
 
 		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusYears(1);
+		DateTime notAfter = new DateTime(caCertificate.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -291,6 +346,7 @@ public class CertificationAuthority {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
+		this.issuedCertificates.add(certificate);
 		return certificate;
 	}
 
@@ -309,10 +365,10 @@ public class CertificationAuthority {
 			throw new IllegalStateException();
 		}
 		// make sure our CA certificate is generated before the issued certificate
-		getCertificate();
+		X509Certificate caCert = getCertificate();
 
 		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusYears(1);
+		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -352,6 +408,7 @@ public class CertificationAuthority {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
+		this.issuedCertificates.add(certificate);
 		return certificate;
 	}
 
@@ -370,10 +427,10 @@ public class CertificationAuthority {
 			throw new IllegalStateException();
 		}
 		// make sure our CA certificate is generated before the issued certificate
-		getCertificate();
+		X509Certificate caCert = getCertificate();
 
 		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusYears(1);
+		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -415,6 +472,41 @@ public class CertificationAuthority {
 		X509Certificate certificate = (X509Certificate) certificateFactory
 				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
+		this.issuedCertificates.add(certificate);
 		return certificate;
+	}
+
+	/**
+	 * Revoked a given certificate.
+	 * 
+	 * @param certificate
+	 */
+	public void revoke(X509Certificate certificate) {
+		if (!this.issuedCertificates.contains(certificate)) {
+			throw new IllegalArgumentException();
+		}
+		if (this.revokedCertificates.containsKey(certificate)) {
+			throw new IllegalArgumentException();
+		}
+		Date revocationDate = new Date();
+		this.revokedCertificates.put(certificate, revocationDate);
+	}
+
+	/**
+	 * Gives back all certificates (including revoked onces) issued by this CA.
+	 * 
+	 * @return
+	 */
+	public List<X509Certificate> getIssuedCertificates() {
+		return this.issuedCertificates;
+	}
+
+	/**
+	 * Gives back all revoked certificates issued by this CA.
+	 * 
+	 * @return
+	 */
+	public Map<X509Certificate, Date> getRevokedCertificates() {
+		return this.revokedCertificates;
 	}
 }

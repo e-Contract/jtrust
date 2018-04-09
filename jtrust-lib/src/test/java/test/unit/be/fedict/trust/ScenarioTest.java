@@ -18,13 +18,18 @@
 
 package test.unit.be.fedict.trust;
 
+import static org.junit.Assert.fail;
+
+import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,6 +39,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.test.CRLRevocationService;
 import be.fedict.trust.test.CertificationAuthority;
 import be.fedict.trust.test.OCSPRevocationService;
+import be.fedict.trust.test.PKITestUtils;
 import be.fedict.trust.test.World;
 
 public class ScenarioTest {
@@ -56,6 +62,130 @@ public class ScenarioTest {
 		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
 		trustValidator.isTrusted(Collections.singletonList(rootCert));
+
+		world.stop();
+	}
+
+	@Test
+	public void testRevocation() throws Exception {
+		World world = new World();
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		certificationAuthority.addRevocationService(new CRLRevocationService());
+		world.start();
+
+		X509Certificate rootCert = certificationAuthority.getCertificate();
+
+		KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
+				"CN=Valid");
+		List<X509Certificate> validCertificateChain = Arrays
+				.asList(new X509Certificate[] { validCertificate, rootCert });
+
+		KeyPair revokedKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate revokedCertificate = certificationAuthority.issueSigningCertificate(revokedKeyPair.getPublic(),
+				"CN=Revoked");
+		certificationAuthority.revoke(revokedCertificate);
+		List<X509Certificate> revokedCertificationChain = Arrays
+				.asList(new X509Certificate[] { revokedCertificate, rootCert });
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(validCertificateChain);
+
+		try {
+			trustValidator.isTrusted(revokedCertificationChain);
+			fail();
+		} catch (Exception e) {
+			// expected
+		}
+
+		world.stop();
+	}
+
+	@Test
+	public void testRevocationOCSP() throws Exception {
+		World world = new World();
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		certificationAuthority.addRevocationService(new OCSPRevocationService());
+		world.start();
+
+		X509Certificate rootCert = certificationAuthority.getCertificate();
+
+		KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
+				"CN=Valid");
+		List<X509Certificate> validCertificateChain = Arrays
+				.asList(new X509Certificate[] { validCertificate, rootCert });
+
+		KeyPair revokedKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate revokedCertificate = certificationAuthority.issueSigningCertificate(revokedKeyPair.getPublic(),
+				"CN=Revoked");
+		certificationAuthority.revoke(revokedCertificate);
+		List<X509Certificate> revokedCertificationChain = Arrays
+				.asList(new X509Certificate[] { revokedCertificate, rootCert });
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(validCertificateChain);
+
+		try {
+			trustValidator.isTrusted(revokedCertificationChain);
+			fail();
+		} catch (Exception e) {
+			// expected
+		}
+
+		world.stop();
+	}
+
+	@Test
+	public void testNoProxy() throws Exception {
+		World world = new World();
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		certificationAuthority.addRevocationService(new OCSPRevocationService());
+		world.start();
+
+		X509Certificate rootCert = certificationAuthority.getCertificate();
+
+		KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+		X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
+				"CN=Valid");
+		List<X509Certificate> validCertificateChain = Arrays
+				.asList(new X509Certificate[] { validCertificate, rootCert });
+
+		KeyPair proxyKeyPair = PKITestUtils.generateKeyPair();
+		DateTime notBefore = new DateTime();
+		DateTime notAfter = notBefore.plusMonths(1);
+		X509Certificate proxyCertificate = PKITestUtils.generateCertificate(proxyKeyPair.getPublic(), "CN=Proxy",
+				notBefore, notAfter, validCertificate, validKeyPair.getPrivate());
+		List<X509Certificate> proxyCertificationChain = Arrays
+				.asList(new X509Certificate[] { proxyCertificate, validCertificate, rootCert });
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(validCertificateChain);
+
+		try {
+			trustValidator.isTrusted(proxyCertificationChain);
+			fail();
+		} catch (Exception e) {
+			// expected
+		}
 
 		world.stop();
 	}

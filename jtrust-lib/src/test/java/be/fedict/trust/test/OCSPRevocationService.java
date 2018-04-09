@@ -39,6 +39,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
@@ -52,6 +53,8 @@ import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.Req;
+import org.bouncycastle.cert.ocsp.RevokedStatus;
+import org.bouncycastle.cert.ocsp.UnknownStatus;
 import org.bouncycastle.cert.ocsp.jcajce.JcaBasicOCSPRespBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
@@ -170,7 +173,17 @@ public class OCSPRevocationService implements RevocationService {
 			Req[] requestList = ocspReq.getRequestList();
 			for (Req ocspRequest : requestList) {
 				CertificateID certificateID = ocspRequest.getCertID();
-				CertificateStatus certificateStatus = CertificateStatus.GOOD;
+				CertificateStatus certificateStatus;
+				if (ocspRevocationService.isUnknownCertificate(certificateID)) {
+					certificateStatus = new UnknownStatus();
+				} else {
+					Date revocationDate = ocspRevocationService.getRevocationDate(certificateID);
+					if (null == revocationDate) {
+						certificateStatus = CertificateStatus.GOOD;
+					} else {
+						certificateStatus = new RevokedStatus(revocationDate, CRLReason.privilegeWithdrawn);
+					}
+				}
 				basicOCSPRespBuilder.addResponse(certificateID, certificateStatus);
 			}
 
@@ -209,5 +222,25 @@ public class OCSPRevocationService implements RevocationService {
 	@Override
 	public void setCertificationAuthority(CertificationAuthority certificationAuthority) {
 		this.certificationAuthority = certificationAuthority;
+	}
+
+	private boolean isUnknownCertificate(CertificateID certificateID) {
+		for (X509Certificate certificate : this.certificationAuthority.getIssuedCertificates()) {
+			if (certificate.getSerialNumber().equals(certificateID.getSerialNumber())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private Date getRevocationDate(CertificateID certificateID) {
+		for (Map.Entry<X509Certificate, Date> revokedCertificateEntry : this.certificationAuthority
+				.getRevokedCertificates().entrySet()) {
+			X509Certificate revokedCertificate = revokedCertificateEntry.getKey();
+			if (revokedCertificate.getSerialNumber().equals(certificateID.getSerialNumber())) {
+				return revokedCertificateEntry.getValue();
+			}
+		}
+		return null;
 	}
 }

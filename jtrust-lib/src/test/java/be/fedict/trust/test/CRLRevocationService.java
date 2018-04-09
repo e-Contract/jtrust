@@ -20,10 +20,10 @@ package be.fedict.trust.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.security.PrivateKey;
-import java.security.cert.CRLException;
-import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,13 +38,26 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.CRLNumber;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.cert.X509CRLHolder;
+import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
@@ -59,12 +72,16 @@ public class CRLRevocationService implements RevocationService {
 
 	private final String identifier;
 
+	private BigInteger crlNumber;
+
 	private String crlUri;
 
-	private static final Map<String, CertificationAuthority> certificationAuthorities;
+	private CertificationAuthority certificationAuthority;
+
+	private static final Map<String, CRLRevocationService> crlRevocationServices;
 
 	static {
-		certificationAuthorities = new HashMap<>();
+		crlRevocationServices = new HashMap<>();
 	}
 
 	/**
@@ -72,6 +89,8 @@ public class CRLRevocationService implements RevocationService {
 	 */
 	public CRLRevocationService() {
 		this.identifier = UUID.randomUUID().toString();
+		this.crlNumber = BigInteger.ONE;
+		crlRevocationServices.put(this.identifier, this);
 	}
 
 	@Override
@@ -102,24 +121,50 @@ public class CRLRevocationService implements RevocationService {
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			CertificationAuthority certificationAuthority = getCertificationAuthority();
-			X509CRL crl;
+			CRLRevocationService crlRevocationService = getCRLRevocationService();
+			CertificationAuthority certificationAuthority = crlRevocationService.certificationAuthority;
 			try {
 				// make sure we first get the CA certificate, so it gets generated before our
 				// CRL notBefore
 				PrivateKey caPrivateKey = certificationAuthority.getPrivateKey();
 				X509Certificate caCertificate = certificationAuthority.getCertificate();
-				DateTime notBefore = new DateTime();
-				DateTime notAfter = notBefore.plusDays(1);
-				crl = PKITestUtils.generateCrl(caPrivateKey, caCertificate, notBefore, notAfter);
+				DateTime now = new DateTime();
+				// make sure the CRL is younger than the "now" of the CRL client
+				DateTime thisUpdate = new DateTime(caCertificate.getNotBefore());
+				DateTime nextUpdate = now.plusDays(1);
+
+				X500Name issuerName = new X500Name(caCertificate.getSubjectX500Principal().toString());
+				X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName, thisUpdate.toDate());
+				x509v2crlBuilder.setNextUpdate(nextUpdate.toDate());
+
+				for (Map.Entry<X509Certificate, Date> revokedCertificateEntry : certificationAuthority
+						.getRevokedCertificates().entrySet()) {
+					X509Certificate revokedCertificate = revokedCertificateEntry.getKey();
+					Date revocationDate = revokedCertificateEntry.getValue();
+					x509v2crlBuilder.addCRLEntry(revokedCertificate.getSerialNumber(), revocationDate,
+							CRLReason.privilegeWithdrawn);
+				}
+
+				JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+				x509v2crlBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+						extensionUtils.createAuthorityKeyIdentifier(caCertificate));
+				x509v2crlBuilder.addExtension(Extension.cRLNumber, false,
+						new CRLNumber(crlRevocationService.crlNumber));
+				crlRevocationService.crlNumber = crlRevocationService.crlNumber.add(BigInteger.ONE);
+
+				AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+				AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+				AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
+
+				ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
+						.build(asymmetricKeyParameter);
+
+				X509CRLHolder x509crlHolder = x509v2crlBuilder.build(contentSigner);
+				byte[] crlValue = x509crlHolder.getEncoded();
+				OutputStream outputStream = resp.getOutputStream();
+				IOUtils.write(crlValue, outputStream);
 			} catch (Exception e) {
 				LOG.error("error: " + e.getMessage(), e);
-				throw new IOException(e);
-			}
-			OutputStream outputStream = resp.getOutputStream();
-			try {
-				IOUtils.write(crl.getEncoded(), outputStream);
-			} catch (CRLException e) {
 				throw new IOException(e);
 			}
 		}
@@ -129,8 +174,8 @@ public class CRLRevocationService implements RevocationService {
 			this.identifier = config.getInitParameter("identifier");
 		}
 
-		private CertificationAuthority getCertificationAuthority() {
-			return certificationAuthorities.get(this.identifier);
+		private CRLRevocationService getCRLRevocationService() {
+			return crlRevocationServices.get(this.identifier);
 		}
 	}
 
@@ -141,6 +186,6 @@ public class CRLRevocationService implements RevocationService {
 
 	@Override
 	public void setCertificationAuthority(CertificationAuthority certificationAuthority) {
-		certificationAuthorities.put(this.identifier, certificationAuthority);
+		this.certificationAuthority = certificationAuthority;
 	}
 }

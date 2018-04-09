@@ -106,7 +106,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 					"certificate already expired");
 		}
 		if (-1 == certificate.getBasicConstraints()) {
-			LOG.debug("certificate not a CA: "
+			LOG.warn("certificate not a CA: "
 					+ certificate.getSubjectX500Principal());
 			/*
 			 * http://www.valicert.com/ Root CA has no CA flag set. Actually
