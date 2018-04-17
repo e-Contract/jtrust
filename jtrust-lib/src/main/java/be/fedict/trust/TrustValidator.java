@@ -41,7 +41,7 @@ import be.fedict.trust.revocation.RevocationData;
 /**
  * Trust Validator.
  * <p>
- * Note that this component is not thread-safe as it is using internal state.
+ * Notice that this component is not thread-safe as it is using internal state.
  * </p>
  * 
  * @author Frank Cornelis
