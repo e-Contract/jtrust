@@ -31,6 +31,24 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -101,14 +119,20 @@
 	<reporting>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.7</version>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1</version>
 				<configuration>
 					<excludePackageNames>test.unit.*</excludePackageNames>
 				</configuration>
@@ -116,7 +140,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.9</version>
+				<version>3.0.0</version>
 				<configuration>
 					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 				</configuration>
@@ -124,7 +148,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.21.0</version>
+				<version>2.22.0</version>
 			</plugin>
 		</plugins>
 	</reporting>
