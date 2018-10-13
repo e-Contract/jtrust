@@ -149,7 +149,8 @@ public class CertificationAuthority {
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCert = getCertificate();
 
-		DateTime notBefore = new DateTime();
+		Clock clock = this.world.getClock();
+		DateTime notBefore = clock.getTime();
 		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
@@ -246,7 +247,8 @@ public class CertificationAuthority {
 	}
 
 	private X509Certificate generateSelfSignedCertificate() throws Exception {
-		DateTime notBefore = new DateTime();
+		Clock clock = this.world.getClock();
+		DateTime notBefore = clock.getTime();
 		DateTime notAfter = notBefore.plusYears(1);
 
 		X500Name issuerName = new X500Name(this.name);
@@ -304,7 +306,8 @@ public class CertificationAuthority {
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCertificate = getCertificate();
 
-		DateTime notBefore = new DateTime();
+		Clock clock = this.world.getClock();
+		DateTime notBefore = clock.getTime();
 		DateTime notAfter = new DateTime(caCertificate.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
@@ -367,7 +370,8 @@ public class CertificationAuthority {
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCert = getCertificate();
 
-		DateTime notBefore = new DateTime();
+		Clock clock = this.world.getClock();
+		DateTime notBefore = clock.getTime();
 		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
@@ -429,7 +433,8 @@ public class CertificationAuthority {
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCert = getCertificate();
 
-		DateTime notBefore = new DateTime();
+		Clock clock = this.world.getClock();
+		DateTime notBefore = clock.getTime();
 		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);

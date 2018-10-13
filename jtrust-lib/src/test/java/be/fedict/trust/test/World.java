@@ -26,7 +26,7 @@ import org.mortbay.jetty.testing.ServletTester;
 /**
  * A world manages all entities that have endpoints (like CRL, OCSL, TSA). After
  * adding all endpoints, you have to start the world. At the end, you can stop
- * it.
+ * it. A world also managed the clock.
  * 
  * @author Frank Cornelis
  *
@@ -39,7 +39,14 @@ public class World {
 
 	private ServletTester servletTester;
 
+	private final Clock clock;
+
 	public World() {
+		this(new LocalClock());
+	}
+
+	public World(Clock clock) {
+		this.clock = clock;
 		this.endpointProviders = new LinkedList<>();
 	}
 
@@ -64,6 +71,10 @@ public class World {
 		for (EndpointProvider endpointProvider : this.endpointProviders) {
 			endpointProvider.started(url);
 		}
+	}
+
+	public Clock getClock() {
+		return this.clock;
 	}
 
 	public void stop() throws Exception {

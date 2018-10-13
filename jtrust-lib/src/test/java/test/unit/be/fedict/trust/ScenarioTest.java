@@ -35,9 +35,12 @@ import org.junit.Test;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
+import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.test.CRLRevocationService;
 import be.fedict.trust.test.CertificationAuthority;
+import be.fedict.trust.test.Clock;
+import be.fedict.trust.test.FixedClock;
 import be.fedict.trust.test.OCSPRevocationService;
 import be.fedict.trust.test.PKITestUtils;
 import be.fedict.trust.test.World;
@@ -269,5 +272,28 @@ public class ScenarioTest {
 		trustValidator.isTrusted(certChain);
 
 		world.stop();
+	}
+
+	@Test
+	public void testExpiredRootCA() throws Exception {
+		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		World world = new World(clock);
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		world.start();
+
+		X509Certificate rootCert = certificationAuthority.getCertificate();
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		try {
+			trustValidator.isTrusted(Collections.singletonList(rootCert));
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+		} finally {
+			world.stop();
+		}
 	}
 }
