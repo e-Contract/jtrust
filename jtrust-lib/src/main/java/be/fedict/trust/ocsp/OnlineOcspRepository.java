@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -96,6 +96,9 @@ public class OnlineOcspRepository implements OcspRepository {
 	@Override
 	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
 			X509Certificate issuerCertificate, Date validationDate) {
+		if (null == ocspUri) {
+			return null;
+		}
 		OCSPResp ocspResp = null;
 		try {
 			ocspResp = getOcspResponse(ocspUri, certificate, issuerCertificate);

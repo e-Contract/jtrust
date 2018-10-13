@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -116,7 +116,10 @@ public class OcspTrustLinker implements TrustLinker {
 			throws TrustLinkerResultException, Exception {
 		URI ocspUri = getOcspUri(childCertificate);
 		if (null == ocspUri) {
-			return TrustLinkerResult.UNDECIDED;
+			LOG.debug("no OCSP URI");
+			LOG.debug("certificate: " + childCertificate);
+			// allow finding OCSPResp in OCSP repository, even without explicit URI.
+			//return TrustLinkerResult.UNDECIDED;
 		}
 		LOG.debug("OCSP URI: " + ocspUri);
 

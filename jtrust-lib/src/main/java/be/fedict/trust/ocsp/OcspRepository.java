@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,7 +37,7 @@ public interface OcspRepository {
 	 * Finds the requested OCSP response in this OCSP repository.
 	 * 
 	 * @param ocspUri
-	 *            the OCSP responder URI.
+	 *            the OCSP responder URI. Can be <code>null</code>.
 	 * @param certificate
 	 *            the X509 certificate.
 	 * @param issuerCertificate

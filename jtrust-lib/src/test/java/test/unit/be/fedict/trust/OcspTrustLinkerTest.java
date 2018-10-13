@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -67,6 +68,9 @@ public class OcspTrustLinkerTest {
 
 		OcspRepository mockOcspRepository = EasyMock
 				.createMock(OcspRepository.class);
+		EasyMock.expect(
+				mockOcspRepository.findOcspResponse(null,
+						certificate, rootCertificate, null)).andReturn(null);
 
 		OcspTrustLinker ocspTrustLinker = new OcspTrustLinker(
 				mockOcspRepository);
