@@ -121,6 +121,15 @@ public class CertificationAuthority {
 	}
 
 	/**
+	 * Gives back the clock to be used.
+	 * 
+	 * @return
+	 */
+	public Clock getClock() {
+		return this.world.getClock();
+	}
+
+	/**
 	 * Adds a revocation service for this CA. The issued certificates by this CA
 	 * will have the appropriate extensions.
 	 * 
@@ -236,6 +245,10 @@ public class CertificationAuthority {
 		}
 		if (null != this.certificate) {
 			return this.certificate;
+		}
+		if (this.issuer != null) {
+			// make sure that the issuer is already issued
+			this.issuer.getCertificate();
 		}
 		this.keyPair = PKITestUtils.generateKeyPair();
 		if (this.issuer == null) {
@@ -432,10 +445,32 @@ public class CertificationAuthority {
 		}
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCert = getCertificate();
+		DateTime notAfter = new DateTime(caCert.getNotAfter());
+		return issueSigningCertificate(publicKey, name, notAfter);
+	}
+
+	/**
+	 * Issues a signing end-entity certificate.
+	 * 
+	 * @param publicKey
+	 *            the public key of the end-entity certificate.
+	 * @param name
+	 *            the DN of the end-entity certificate.
+	 * @param notAfter
+	 *            expiration date of issued certificate.
+	 * @return
+	 * @throws Exception
+	 */
+	public X509Certificate issueSigningCertificate(PublicKey publicKey, String name, DateTime notAfter)
+			throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		// make sure our CA certificate is generated before the issued certificate
+		X509Certificate caCert = getCertificate();
 
 		Clock clock = this.world.getClock();
 		DateTime notBefore = clock.getTime();
-		DateTime notAfter = new DateTime(caCert.getNotAfter());
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);

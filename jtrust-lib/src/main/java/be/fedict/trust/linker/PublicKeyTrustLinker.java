@@ -101,6 +101,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		}
 		if (true == validationDate.after(childCertificate.getNotAfter())) {
 			LOG.debug("certificate already expired");
+			LOG.debug("validation date: " + validationDate);
+			LOG.debug("not after: " + childCertificate.getNotAfter());
 			throw new TrustLinkerResultException(
 					TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate already expired");

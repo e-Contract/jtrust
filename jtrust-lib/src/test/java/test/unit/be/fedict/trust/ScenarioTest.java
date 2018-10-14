@@ -287,8 +287,117 @@ public class ScenarioTest {
 		memoryCertificateRepository.addTrustPoint(rootCert);
 		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
+		trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().toDate());
+
 		try {
 			trustValidator.isTrusted(Collections.singletonList(rootCert));
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+		} finally {
+			world.stop();
+		}
+	}
+
+	@Test
+	public void testTwoCAsExpired() throws Exception {
+		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		World world = new World(clock);
+		CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+				rootCertificationAuthority);
+		world.start();
+
+		X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+		X509Certificate cert = certificationAuthority.getCertificate();
+		List<X509Certificate> certChain = new LinkedList<>();
+		certChain.add(cert);
+		certChain.add(rootCert);
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(certChain, clock.getTime().toDate());
+
+		try {
+			trustValidator.isTrusted(certChain);
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+		} finally {
+			world.stop();
+		}
+	}
+
+	@Test
+	public void testExpiredCRL() throws Exception {
+		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		World world = new World(clock);
+		CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+				rootCertificationAuthority);
+		world.start();
+
+		X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+		X509Certificate cert = certificationAuthority.getCertificate();
+		List<X509Certificate> certChain = new LinkedList<>();
+		certChain.add(cert);
+		certChain.add(rootCert);
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(certChain, clock.getTime().toDate());
+
+		try {
+			DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
+			trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate());
+			fail();
+		} catch (TrustLinkerResultException e) {
+			// expected
+		} finally {
+			world.stop();
+		}
+	}
+
+	@Test
+	public void testExpiredOCSP() throws Exception {
+		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		World world = new World(clock);
+		CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+		rootCertificationAuthority.addRevocationService(new OCSPRevocationService());
+		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+				rootCertificationAuthority);
+		world.start();
+
+		X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+		X509Certificate cert = certificationAuthority.getCertificate();
+		List<X509Certificate> certChain = new LinkedList<>();
+		certChain.add(cert);
+		certChain.add(rootCert);
+
+		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+		memoryCertificateRepository.addTrustPoint(rootCert);
+		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+		trustValidator.isTrusted(certChain, clock.getTime().toDate());
+
+		try {
+			DateTime ocspExpiredDateTime = clock.getTime().plusDays(2);
+			trustValidator.isTrusted(certChain, ocspExpiredDateTime.toDate());
 			fail();
 		} catch (TrustLinkerResultException e) {
 			// expected

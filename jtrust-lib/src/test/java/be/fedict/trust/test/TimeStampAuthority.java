@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,10 +38,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -51,6 +57,7 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampResponseGenerator;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.bouncycastle.util.Store;
+import org.joda.time.DateTime;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
@@ -107,11 +114,17 @@ public class TimeStampAuthority implements EndpointProvider {
 	@Override
 	public void started(String url) throws Exception {
 		this.keyPair = PKITestUtils.generateKeyPair();
+
+		CertificationAuthority issuer = this.certificationAuthority;
+		if (issuer != null) {
+			// make sure that the CA's are generated before our TSA certificate
+			issuer.getCertificate();
+		}
+
 		this.certificate = this.certificationAuthority.issueTimeStampAuthority(this.keyPair.getPublic(), "CN=TSA");
 		this.url = url + "/" + this.identifier + "/tsa";
 		this.certificateChain = new LinkedList<>();
 		this.certificateChain.add(this.certificate);
-		CertificationAuthority issuer = this.certificationAuthority;
 		while (issuer != null) {
 			this.certificateChain.add(issuer.getCertificate());
 			issuer = issuer.getIssuer();
@@ -148,9 +161,17 @@ public class TimeStampAuthority implements EndpointProvider {
 			byte[] reqData = IOUtils.toByteArray(request.getInputStream());
 			TimeStampRequest timeStampRequest = new TimeStampRequest(reqData);
 
+			// CMS signing-time also has to change accordingly
+			DateTime now = timeStampAuthority.certificationAuthority.getClock().getTime();
+			Attribute attr = new Attribute(CMSAttributes.signingTime, new DERSet(new Time(now.toDate())));
+			ASN1EncodableVector v = new ASN1EncodableVector();
+			v.add(attr);
 			TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
-					new JcaSimpleSignerInfoGeneratorBuilder().build("SHA256withRSA",
-							timeStampAuthority.keyPair.getPrivate(), timeStampAuthority.certificate),
+					new JcaSimpleSignerInfoGeneratorBuilder()
+							.setSignedAttributeGenerator(
+									new DefaultSignedAttributeTableGenerator(new AttributeTable(v)))
+							.build("SHA256withRSA", timeStampAuthority.keyPair.getPrivate(),
+									timeStampAuthority.certificate),
 					new JcaDigestCalculatorProviderBuilder().build().get(
 							new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256)),
 					new ASN1ObjectIdentifier("1.2"));
@@ -161,8 +182,9 @@ public class TimeStampAuthority implements EndpointProvider {
 
 			TimeStampResponseGenerator timeStampResponseGenerator = new TimeStampResponseGenerator(tsTokenGen,
 					TSPAlgorithms.ALLOWED);
+			LOG.debug("genTime: " + now);
 			TimeStampResponse timeStampResponse = timeStampResponseGenerator.generate(timeStampRequest, BigInteger.ONE,
-					new Date());
+					now.toDate());
 
 			response.setContentType("application/timestamp-reply");
 			OutputStream outputStream = response.getOutputStream();

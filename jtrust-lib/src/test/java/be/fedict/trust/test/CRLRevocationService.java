@@ -128,9 +128,10 @@ public class CRLRevocationService implements RevocationService {
 				// CRL notBefore
 				PrivateKey caPrivateKey = certificationAuthority.getPrivateKey();
 				X509Certificate caCertificate = certificationAuthority.getCertificate();
-				DateTime now = new DateTime();
-				// make sure the CRL is younger than the "now" of the CRL client
-				DateTime thisUpdate = new DateTime(caCertificate.getNotBefore());
+				Clock clock = certificationAuthority.getClock();
+				DateTime now = clock.getTime();
+				// make sure the CRL is younger than the "now" of the world
+				DateTime thisUpdate = now.minusMinutes(1);
 				DateTime nextUpdate = now.plusDays(1);
 
 				X500Name issuerName = new X500Name(caCertificate.getSubjectX500Principal().toString());

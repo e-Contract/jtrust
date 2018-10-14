@@ -61,6 +61,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.joda.time.DateTime;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.testing.ServletTester;
 
@@ -71,6 +72,8 @@ import org.mortbay.jetty.testing.ServletTester;
  *
  */
 public class OCSPRevocationService implements RevocationService {
+
+	private static final Log LOG = LogFactory.getLog(OCSPRevocationService.class);
 
 	private final String identifier;
 
@@ -169,6 +172,11 @@ public class OCSPRevocationService implements RevocationService {
 			BasicOCSPRespBuilder basicOCSPRespBuilder = new JcaBasicOCSPRespBuilder(
 					ocspRevocationService.ocspResponderPublicKey, digCalcProv.get(CertificateID.HASH_SHA1));
 
+			Clock clock = ocspRevocationService.certificationAuthority.getClock();
+			DateTime now = clock.getTime();
+			DateTime thisUpdate = now.minusSeconds(1);
+			DateTime nextUpdate = thisUpdate.plusMinutes(1);
+
 			// request processing
 			Req[] requestList = ocspReq.getRequestList();
 			for (Req ocspRequest : requestList) {
@@ -184,7 +192,8 @@ public class OCSPRevocationService implements RevocationService {
 						certificateStatus = new RevokedStatus(revocationDate, CRLReason.privilegeWithdrawn);
 					}
 				}
-				basicOCSPRespBuilder.addResponse(certificateID, certificateStatus);
+				basicOCSPRespBuilder.addResponse(certificateID, certificateStatus, thisUpdate.toDate(),
+						nextUpdate.toDate(), null);
 			}
 
 			// basic response generation
@@ -198,7 +207,7 @@ public class OCSPRevocationService implements RevocationService {
 
 			ContentSigner contentSigner = new JcaContentSignerBuilder("SHA1withRSA")
 					.build(ocspRevocationService.ocspResponderPrivateKey);
-			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, new Date());
+			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, now.toDate());
 
 			// response generation
 			OCSPRespBuilder ocspRespBuilder = new OCSPRespBuilder();
