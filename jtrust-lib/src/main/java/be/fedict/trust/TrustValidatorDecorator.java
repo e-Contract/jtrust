@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,6 +23,7 @@ import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.linker.AlwaysTrustTrustLinker;
 import be.fedict.trust.linker.FallbackTrustLinker;
 import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.linker.TrustLinker;
@@ -43,8 +44,7 @@ public class TrustValidatorDecorator {
 	 * Main constructor.
 	 * 
 	 * @param networkConfig
-	 *            the network configuration to be used. Can be <code>null</code>
-	 *            .
+	 *            the network configuration to be used. Can be <code>null</code> .
 	 */
 	public TrustValidatorDecorator(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
@@ -65,8 +65,7 @@ public class TrustValidatorDecorator {
 	 * @param externalTrustLinker
 	 *            optional additional trust linker.
 	 */
-	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
-			TrustLinker externalTrustLinker) {
+	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker) {
 		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker, false);
 	}
 
@@ -80,10 +79,9 @@ public class TrustValidatorDecorator {
 	 * @param noOcsp
 	 *            set to <code>true</code> to avoid OCSP validation.
 	 */
-	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
-			TrustLinker externalTrustLinker, boolean noOcsp) {
-		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker,
-				noOcsp, null);
+	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker,
+			boolean noOcsp) {
+		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker, noOcsp, null);
 	}
 
 	/**
@@ -98,17 +96,14 @@ public class TrustValidatorDecorator {
 	 * @param crlRepository
 	 *            the optional CRL repository to use.
 	 */
-	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator,
-			TrustLinker externalTrustLinker, boolean noOcsp,
-			CrlRepository crlRepository) {
+	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker,
+			boolean noOcsp, CrlRepository crlRepository) {
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
 
-		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(
-				this.networkConfig);
+		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(this.networkConfig);
 
 		if (null == crlRepository) {
-			OnlineCrlRepository onlineCrlRepository = new OnlineCrlRepository(
-					this.networkConfig);
+			OnlineCrlRepository onlineCrlRepository = new OnlineCrlRepository(this.networkConfig);
 			crlRepository = new CachedCrlRepository(onlineCrlRepository);
 		}
 
@@ -117,8 +112,7 @@ public class TrustValidatorDecorator {
 			fallbackTrustLinker.addTrustLinker(externalTrustLinker);
 		}
 		if (false == noOcsp) {
-			fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(
-					ocspRepository));
+			fallbackTrustLinker.addTrustLinker(new OcspTrustLinker(ocspRepository));
 		}
 		fallbackTrustLinker.addTrustLinker(new CrlTrustLinker(crlRepository));
 
@@ -133,5 +127,18 @@ public class TrustValidatorDecorator {
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator) {
 		addDefaultTrustLinkerConfig(trustValidator, null);
+	}
+
+	/**
+	 * Adds a trust linker configuration to be used to validate already expired
+	 * certificates. Please notice that this configuration will not perform any
+	 * verification on the revocation status of the certificates.
+	 * 
+	 * @param trustValidator
+	 *            the trust validator to be configured.
+	 */
+	public void addTrustLinkerConfigWithoutRevocationStatus(TrustValidator trustValidator) {
+		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
+		trustValidator.addTrustLinker(new AlwaysTrustTrustLinker());
 	}
 }

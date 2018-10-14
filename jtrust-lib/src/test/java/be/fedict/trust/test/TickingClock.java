@@ -20,6 +20,12 @@ package be.fedict.trust.test;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation of a clock that ticks from a given starting point.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class TickingClock implements Clock {
 
 	private DateTime start;
@@ -35,6 +41,11 @@ public class TickingClock implements Clock {
 		return now;
 	}
 
+	/**
+	 * Resets the clock's start time to the given value.
+	 * 
+	 * @param start
+	 */
 	public void reset(DateTime start) {
 		this.start = start;
 	}

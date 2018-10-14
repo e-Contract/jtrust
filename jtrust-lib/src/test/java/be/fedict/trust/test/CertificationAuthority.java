@@ -528,7 +528,7 @@ public class CertificationAuthority {
 		if (this.revokedCertificates.containsKey(certificate)) {
 			throw new IllegalArgumentException();
 		}
-		Date revocationDate = new Date();
+		Date revocationDate = this.world.getClock().getTime().toDate();
 		this.revokedCertificates.put(certificate, revocationDate);
 	}
 

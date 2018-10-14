@@ -148,6 +148,24 @@ public class TrustValidator {
 
 	/**
 	 * Validates whether the given certificate path is valid according to the
+	 * configured trust linkers.
+	 * 
+	 * @param certificatePath
+	 *            the X509 certificate path to validate.
+	 * @param expiredMode
+	 *            set to <code>true</code> for validation mode of expired
+	 *            certificates.
+	 * @throws TrustLinkerResultException
+	 *             in case the certificate path is invalid.
+	 * @see #isTrusted(List, Date)
+	 */
+	public void isTrusted(List<X509Certificate> certificatePath, boolean expiredMode)
+			throws TrustLinkerResultException {
+		isTrusted(certificatePath, new Date(), expiredMode);
+	}
+
+	/**
+	 * Validates whether the given certificate path is valid according to the
 	 * configured trust linkers. Convenience method when loading a certificate chain
 	 * directly from a JCA key store implementation.
 	 * 
@@ -231,6 +249,25 @@ public class TrustValidator {
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath, Date validationDate)
 			throws TrustLinkerResultException {
+		isTrusted(certificatePath, validationDate, false);
+	}
+
+	/**
+	 * Validates whether the certificate path was valid at the given validation
+	 * date.
+	 * 
+	 * @param certificatePath
+	 *            the X509 certificate path to be validated.
+	 * @param validationDate
+	 *            the date at which the certificate path validation should be
+	 *            verified.
+	 * @param expiredMode
+	 *            set to <code>true</code> for validation mode of expired
+	 *            certificates.
+	 * @see #isTrusted(List)
+	 */
+	public void isTrusted(List<X509Certificate> certificatePath, Date validationDate, boolean expiredMode)
+			throws TrustLinkerResultException {
 		if (certificatePath.isEmpty()) {
 			throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED, "certificate path is empty");
 		}
@@ -240,6 +277,9 @@ public class TrustValidator {
 						"certificate path contains null certificate");
 			}
 		}
+		if (expiredMode) {
+			LOG.debug("expired certificate validation mode");
+		}
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
@@ -247,7 +287,7 @@ public class TrustValidator {
 		checkSelfSigned(certificate);
 		// check certificate signature
 		checkSignatureAlgorithm(certificate.getSigAlgName(), validationDate);
-		checkSelfSignedTrust(certificate, validationDate);
+		checkSelfSignedTrust(certificate, validationDate, expiredMode);
 
 		certIdx--;
 
@@ -311,17 +351,30 @@ public class TrustValidator {
 		}
 	}
 
-	private void checkSelfSignedTrust(X509Certificate certificate, Date validationDate)
+	private void checkSelfSignedTrust(X509Certificate certificate, Date validationDate, boolean expiredMode)
 			throws TrustLinkerResultException {
-		try {
-			certificate.checkValidity(validationDate);
-		} catch (Exception e) {
-			LOG.error("certificate is not within validity period");
+		if (certificate.getNotBefore().after(validationDate)) {
+			LOG.error("certificate not yet valid");
 			LOG.error("validation date: " + validationDate);
 			LOG.error("not before: " + certificate.getNotBefore());
 			LOG.error("not after: " + certificate.getNotAfter());
 			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
-					"certificate validity error: " + e.getMessage());
+					"certificate not yet valid");
+		}
+		if (certificate.getNotAfter().before(validationDate)) {
+			if (!expiredMode) {
+				LOG.error("certificate expired");
+				LOG.error("validation date: " + validationDate);
+				LOG.error("not before: " + certificate.getNotBefore());
+				LOG.error("not after: " + certificate.getNotAfter());
+				throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
+						"certificate expired");
+			} else {
+				LOG.warn("certificate expired");
+				LOG.warn("validation date: " + validationDate);
+				LOG.warn("not before: " + certificate.getNotBefore());
+				LOG.warn("not after: " + certificate.getNotAfter());
+			}
 		}
 		if (this.certificateRepository.isTrustPoint(certificate)) {
 			return;

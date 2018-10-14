@@ -131,11 +131,25 @@ public class TimeStampAuthority implements EndpointProvider {
 		}
 	}
 
+	/**
+	 * Gives back the URL on which the timestamp service is available.
+	 * 
+	 * @return
+	 */
 	public String getUrl() {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
 		}
 		return this.url;
+	}
+
+	/**
+	 * Gives back the TSA certificate.
+	 * 
+	 * @return
+	 */
+	public X509Certificate getCertificate() {
+		return this.certificate;
 	}
 
 	public static final class TSAServlet extends HttpServlet {

@@ -20,10 +20,22 @@ package be.fedict.trust.test;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation of a clock that yields a fixed time.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class FixedClock implements Clock {
 
 	private final DateTime now;
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param now
+	 *            the fixed time for this clock.
+	 */
 	public FixedClock(DateTime now) {
 		this.now = now;
 	}

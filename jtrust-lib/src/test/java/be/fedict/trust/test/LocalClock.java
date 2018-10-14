@@ -20,6 +20,12 @@ package be.fedict.trust.test;
 
 import org.joda.time.DateTime;
 
+/**
+ * Implementation of a clock that used the local machine time.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class LocalClock implements Clock {
 
 	@Override

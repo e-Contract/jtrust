@@ -41,15 +41,29 @@ public class World {
 
 	private final Clock clock;
 
+	/**
+	 * Default constructor. The default world is using a local machine clock.
+	 */
 	public World() {
 		this(new LocalClock());
 	}
 
+	/**
+	 * Main constructor.
+	 * 
+	 * @param clock
+	 *            the clock to be used by the unit test PKI world.
+	 */
 	public World(Clock clock) {
 		this.clock = clock;
 		this.endpointProviders = new LinkedList<>();
 	}
 
+	/**
+	 * Adds an endpoint that has to be published by this world.
+	 * 
+	 * @param endpointProvider
+	 */
 	public void addEndpointProvider(EndpointProvider endpointProvider) {
 		if (this.running) {
 			throw new IllegalStateException();
@@ -57,6 +71,12 @@ public class World {
 		this.endpointProviders.add(endpointProvider);
 	}
 
+	/**
+	 * Starts the unit test PKI world. This action will start a servlet container
+	 * exposing all previously registered endpoints.
+	 * 
+	 * @throws Exception
+	 */
 	public void start() throws Exception {
 		this.servletTester = new ServletTester();
 
@@ -73,15 +93,31 @@ public class World {
 		}
 	}
 
+	/**
+	 * Gives back the clock of this unit test PKI world.
+	 * 
+	 * @return
+	 */
 	public Clock getClock() {
 		return this.clock;
 	}
 
+	/**
+	 * Stops the unit test PKI world. This will shut down the underlying servlet
+	 * container with all the endpoints.
+	 * 
+	 * @throws Exception
+	 */
 	public void stop() throws Exception {
 		this.servletTester.stop();
 		this.running = false;
 	}
 
+	/**
+	 * Verifies whether this unit test PKI world is running or not.
+	 * 
+	 * @return
+	 */
 	public boolean isRunning() {
 		return this.running;
 	}

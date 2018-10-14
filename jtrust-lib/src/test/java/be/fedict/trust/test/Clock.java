@@ -20,7 +20,18 @@ package be.fedict.trust.test;
 
 import org.joda.time.DateTime;
 
+/**
+ * Interface for a clock used by a unit test PKI world.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public interface Clock {
 
+	/**
+	 * Gives back the "current" time of the clock.
+	 * 
+	 * @return
+	 */
 	DateTime getTime();
 }
