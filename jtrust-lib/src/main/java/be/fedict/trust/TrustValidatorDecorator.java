@@ -138,7 +138,7 @@ public class TrustValidatorDecorator {
 	 *            the trust validator to be configured.
 	 */
 	public void addTrustLinkerConfigWithoutRevocationStatus(TrustValidator trustValidator) {
-		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
+		trustValidator.addTrustLinker(new PublicKeyTrustLinker(true));
 		trustValidator.addTrustLinker(new AlwaysTrustTrustLinker());
 	}
 }

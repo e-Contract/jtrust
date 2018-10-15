@@ -31,8 +31,6 @@ import org.junit.Test;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
-import be.fedict.trust.linker.AlwaysTrustTrustLinker;
-import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.test.CRLRevocationService;
 import be.fedict.trust.test.CertificationAuthority;
@@ -94,6 +92,8 @@ public class ExpiredCertificateTest {
 
 		DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
 		trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate(), true);
+
+		trustValidator.isTrusted(certChain, true);
 
 		world.stop();
 	}
