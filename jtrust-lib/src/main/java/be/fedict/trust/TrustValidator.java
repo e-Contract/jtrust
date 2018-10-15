@@ -379,6 +379,7 @@ public class TrustValidator {
 		if (this.certificateRepository.isTrustPoint(certificate)) {
 			return;
 		}
+		LOG.warn("self-signed certificate not in repository: " + certificate.getSubjectX500Principal());
 		throw new TrustLinkerResultException(TrustLinkerResultReason.ROOT,
 				"self-signed certificate not in repository: " + certificate.getSubjectX500Principal());
 	}

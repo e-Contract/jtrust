@@ -665,6 +665,9 @@ public class PKITestUtils {
 
 	public static X509Certificate loadCertificate(String resourceName) throws CertificateException {
 		InputStream inputStream = PKITestUtils.class.getResourceAsStream(resourceName);
+		if (null == inputStream) {
+			throw new IllegalArgumentException("unknown resource: " + resourceName);
+		}
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(inputStream);
 		return certificate;
