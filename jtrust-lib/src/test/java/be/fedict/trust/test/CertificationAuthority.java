@@ -65,7 +65,7 @@ import org.joda.time.DateTime;
  */
 public class CertificationAuthority {
 
-	private final String name;
+	private String name;
 
 	private final CertificationAuthority issuer;
 
@@ -257,6 +257,24 @@ public class CertificationAuthority {
 			this.certificate = this.issuer.issueCertificationAuthority(this.keyPair.getPublic(), this.name);
 		}
 		return this.certificate;
+	}
+
+	public void reissueCertificate(String name) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		this.name = name;
+
+		if (this.issuer != null) {
+			// make sure that the issuer is already issued
+			this.issuer.getCertificate();
+		}
+		this.keyPair = PKITestUtils.generateKeyPair();
+		if (this.issuer == null) {
+			this.certificate = generateSelfSignedCertificate();
+		} else {
+			this.certificate = this.issuer.issueCertificationAuthority(this.keyPair.getPublic(), this.name);
+		}
 	}
 
 	private X509Certificate generateSelfSignedCertificate() throws Exception {

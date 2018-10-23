@@ -92,6 +92,8 @@ public class PublicKeyTrustLinker implements TrustLinker {
 		}
 		if (true == validationDate.before(childCertificate.getNotBefore())) {
 			LOG.debug("certificate is not yet valid");
+			LOG.debug("validation date: " + validationDate);
+			LOG.debug("not before: " + childCertificate.getNotBefore());
 			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate is not yet valid");
 		}

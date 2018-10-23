@@ -113,6 +113,15 @@ public class TimeStampAuthority implements EndpointProvider {
 
 	@Override
 	public void started(String url) throws Exception {
+		this.url = url + "/" + this.identifier + "/tsa";
+		reissueCertificate("CN=TSA");
+	}
+
+	public void reissueCertificate(String dn) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+
 		this.keyPair = PKITestUtils.generateKeyPair();
 
 		CertificationAuthority issuer = this.certificationAuthority;
@@ -121,8 +130,7 @@ public class TimeStampAuthority implements EndpointProvider {
 			issuer.getCertificate();
 		}
 
-		this.certificate = this.certificationAuthority.issueTimeStampAuthority(this.keyPair.getPublic(), "CN=TSA");
-		this.url = url + "/" + this.identifier + "/tsa";
+		this.certificate = this.certificationAuthority.issueTimeStampAuthority(this.keyPair.getPublic(), dn);
 		this.certificateChain = new LinkedList<>();
 		this.certificateChain.add(this.certificate);
 		while (issuer != null) {
