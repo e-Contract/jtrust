@@ -331,8 +331,10 @@ public class TrustValidator {
 						this.revocationData, this.algorithmPolicy);
 			} catch (TrustLinkerResultException e) {
 				// we let this type of exception pass as is
+				LOG.warn("trust linker exception: " + e.getMessage(), e);
 				throw e;
 			} catch (Exception e) {
+				LOG.warn("trust linker error: " + e.getMessage(), e);
 				throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED,
 						"trust linker error: " + e.getMessage(), e);
 			}
@@ -346,8 +348,10 @@ public class TrustValidator {
 			}
 		}
 		if (false == sometrustLinkerTrusts) {
-			throw new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST, "no trust between "
-					+ childCertificate.getSubjectX500Principal() + " and " + certificate.getSubjectX500Principal());
+			String message = "no trust between " + childCertificate.getSubjectX500Principal() + " and "
+					+ certificate.getSubjectX500Principal();
+			LOG.warn(message);
+			throw new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST, message);
 		}
 	}
 

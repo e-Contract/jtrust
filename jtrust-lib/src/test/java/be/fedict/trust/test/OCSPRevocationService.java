@@ -132,12 +132,22 @@ public class OCSPRevocationService implements RevocationService {
 	@Override
 	public void started(String url) throws Exception {
 		this.ocspUri = url + "/" + this.identifier + "/ocsp";
+		reissueCertificate("CN=OCSP Responder");
+	}
+
+	/**
+	 * Reissue the OCSP responder certificate with the new DN.
+	 * 
+	 * @param dn
+	 * @throws Exception
+	 */
+	public void reissueCertificate(String dn) throws Exception {
 		if (this.withOcspResponderCertificate) {
 			KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
 			this.ocspResponderPublicKey = ocspResponderKeyPair.getPublic();
 			this.ocspResponderPrivateKey = ocspResponderKeyPair.getPrivate();
 			this.ocspResponderCertificate = this.certificationAuthority.issueOCSPResponder(this.ocspResponderPublicKey,
-					"CN=OCSP Responder");
+					dn);
 		} else {
 			this.ocspResponderPublicKey = this.certificationAuthority.getCertificate().getPublicKey();
 			this.ocspResponderPrivateKey = this.certificationAuthority.getPrivateKey();

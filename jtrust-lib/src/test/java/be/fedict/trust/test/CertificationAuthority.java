@@ -259,6 +259,12 @@ public class CertificationAuthority {
 		return this.certificate;
 	}
 
+	/**
+	 * Reissue the CA certificate using the new DN.
+	 * 
+	 * @param name
+	 * @throws Exception
+	 */
 	public void reissueCertificate(String name) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();

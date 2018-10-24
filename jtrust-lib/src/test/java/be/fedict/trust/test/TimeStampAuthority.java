@@ -117,6 +117,12 @@ public class TimeStampAuthority implements EndpointProvider {
 		reissueCertificate("CN=TSA");
 	}
 
+	/**
+	 * Reissue the TSA certificate using the new DN.
+	 * 
+	 * @param dn
+	 * @throws Exception
+	 */
 	public void reissueCertificate(String dn) throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
