@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -51,12 +51,11 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
  */
 public class BelgianTrustValidatorFactory {
 
-	private static final Log LOG = LogFactory
-			.getLog(BelgianTrustValidatorFactory.class);
+	private static final Log LOG = LogFactory.getLog(BelgianTrustValidatorFactory.class);
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * authentication certificates.
+	 * Creates a trust validator according to Belgian PKI rules for authentication
+	 * certificates.
 	 * 
 	 * @return a trust validator instance.
 	 */
@@ -65,17 +64,15 @@ public class BelgianTrustValidatorFactory {
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * authentication certificates.
+	 * Creates a trust validator according to Belgian PKI rules for authentication
+	 * certificates.
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig) {
-		TrustValidator trustValidator = createTrustValidator(networkConfig,
-				null);
+	public static TrustValidator createTrustValidator(NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(networkConfig, null);
 		return trustValidator;
 	}
 
@@ -84,8 +81,8 @@ public class BelgianTrustValidatorFactory {
 	};
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * authentication certificates.
+	 * Creates a trust validator according to Belgian PKI rules for authentication
+	 * certificates.
 	 * 
 	 * <p>
 	 * Via the external trust linker one can implement a CRL fetcher validation
@@ -98,18 +95,16 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
-		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.AUTHN, networkConfig, externalTrustLinker,
+	public static TrustValidator createTrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+		TrustValidator trustValidator = createTrustValidator(CertificateType.AUTHN, networkConfig, externalTrustLinker,
 				null, null);
 
 		return trustValidator;
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * non-repudiation certificates.
+	 * Creates a trust validator according to Belgian PKI rules for non-repudiation
+	 * certificates.
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
@@ -117,27 +112,24 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
-		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, externalTrustLinker, null,
-				null);
+	public static TrustValidator createNonRepudiationTrustValidator(NetworkConfig networkConfig,
+			TrustLinker externalTrustLinker) {
+		TrustValidator trustValidator = createTrustValidator(CertificateType.SIGN, networkConfig, externalTrustLinker,
+				null, null);
 
 		return trustValidator;
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * non-repudiation certificates.
+	 * Creates a trust validator according to Belgian PKI rules for non-repudiation
+	 * certificates.
 	 * 
 	 * @param networkConfig
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createNonRepudiationTrustValidator(
-			NetworkConfig networkConfig) {
-		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.SIGN, networkConfig, null, null, null);
+	public static TrustValidator createNonRepudiationTrustValidator(NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(CertificateType.SIGN, networkConfig, null, null, null);
 
 		return trustValidator;
 	}
@@ -150,11 +142,9 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createNationalRegistryTrustValidator(
-			NetworkConfig networkConfig) {
-		TrustValidator trustValidator = createTrustValidator(
-				CertificateType.NATIONAL_REGISTRY, networkConfig, null, null,
-				null);
+	public static TrustValidator createNationalRegistryTrustValidator(NetworkConfig networkConfig) {
+		TrustValidator trustValidator = createTrustValidator(CertificateType.NATIONAL_REGISTRY, networkConfig, null,
+				null, null);
 
 		return trustValidator;
 	}
@@ -167,8 +157,7 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTSATrustValidator(
-			NetworkConfig networkConfig) {
+	public static TrustValidator createTSATrustValidator(NetworkConfig networkConfig) {
 		return createTSATrustValidator(networkConfig, null);
 	}
 
@@ -182,29 +171,25 @@ public class BelgianTrustValidatorFactory {
 	 *            the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTSATrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
+	public static TrustValidator createTSATrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
 
 		CertificateRepository certificateRepository = createTSACertificateRepository();
 
-		TrustValidator trustValidator = new TrustValidator(
-				certificateRepository);
+		TrustValidator trustValidator = new TrustValidator(certificateRepository);
 
 		// add trust linkers
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				networkConfig);
-		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
-				externalTrustLinker);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(networkConfig);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker);
 
 		// add certificate constraints
-		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+		trustValidator.addCertificateConstraint(new TSACertificateConstraint());
 
 		return trustValidator;
 	}
 
 	/**
-	 * Creates a trust validator according to Belgian PKI rules for
-	 * authentication certificates.
+	 * Creates a trust validator according to Belgian PKI rules for authentication
+	 * certificates.
 	 * 
 	 * <p>
 	 * Via the external trust linker one can implement a CRL fetcher validation
@@ -219,11 +204,10 @@ public class BelgianTrustValidatorFactory {
 	 *            containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
-	public static TrustValidator createTrustValidator(
-			NetworkConfig networkConfig, TrustLinker externalTrustLinker,
+	public static TrustValidator createTrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker,
 			CertificateRepository certificateRepository) {
-		return createTrustValidator(CertificateType.AUTHN, networkConfig,
-				externalTrustLinker, certificateRepository, null);
+		return createTrustValidator(CertificateType.AUTHN, networkConfig, externalTrustLinker, certificateRepository,
+				null);
 	}
 
 	public static CertificateRepository createCertificateRepository() {
@@ -253,17 +237,15 @@ public class BelgianTrustValidatorFactory {
 		X509Certificate rootTsaCertificate = loadCertificate("be/fedict/trust/belgiumtsa.crt");
 		memoryCertificateRepository.addTrustPoint(rootTsaCertificate);
 
-		X509Certificate newRootTsaCertificate = loadPemCertificate("be/fedict/trust/roots/Baltimore Cybertrust Root.pem");
+		X509Certificate newRootTsaCertificate = loadPemCertificate(
+				"be/fedict/trust/roots/Baltimore Cybertrust Root.pem");
 		memoryCertificateRepository.addTrustPoint(newRootTsaCertificate);
 
 		return memoryCertificateRepository;
 	}
 
-	private static TrustValidator createTrustValidator(
-			CertificateType certificateType, NetworkConfig networkConfig,
-			TrustLinker externalTrustLinker,
-			CertificateRepository certificateRepository,
-			CrlRepository crlRepository) {
+	private static TrustValidator createTrustValidator(CertificateType certificateType, NetworkConfig networkConfig,
+			TrustLinker externalTrustLinker, CertificateRepository certificateRepository, CrlRepository crlRepository) {
 
 		TrustValidator trustValidator;
 		if (null == certificateRepository) {
@@ -274,10 +256,8 @@ public class BelgianTrustValidatorFactory {
 			trustValidator = new TrustValidator(certificateRepository);
 		}
 
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				networkConfig);
-		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator,
-				externalTrustLinker, false, crlRepository);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(networkConfig);
+		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker, false, crlRepository);
 
 		KeyUsageCertificateConstraint keyUsageCertificateConstraint = new KeyUsageCertificateConstraint();
 		switch (certificateType) {
@@ -294,79 +274,58 @@ public class BelgianTrustValidatorFactory {
 			keyUsageCertificateConstraint.setNonRepudiationFilter(true);
 			break;
 		}
-		trustValidator.addCertificateConstrain(keyUsageCertificateConstraint);
+		trustValidator.addCertificateConstraint(keyUsageCertificateConstraint);
 
 		CertificatePoliciesCertificateConstraint certificatePoliciesCertificateConstraint = new CertificatePoliciesCertificateConstraint();
 		switch (certificateType) {
 		case AUTHN:
 			// RootCA citizen authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.1.1.1.2.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.1.1.1.2.2");
 			// RootCA foreigner authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.1.1.1.7.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.1.1.1.7.2");
 			// RootCA2 citizen authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.9.1.1.2.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.9.1.1.2.2");
 			// RootCA2 foreigner authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.9.1.1.7.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.9.1.1.7.2");
 			// RootCA3 citizen authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.10.1.1.2.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.2.2");
 			// RootCA3 foreigner authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.10.1.1.7.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.7.2");
 			// RootCA4 citizen authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.12.1.1.2.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.2.2");
 			// RootCA4 foreigner authn
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.12.1.1.7.2");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.7.2");
 			break;
 		case SIGN:
 			// RootCA citizen sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.1.1.1.2.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.1.1.1.2.1");
 			// RootCA foreigner sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.1.1.1.7.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.1.1.1.7.1");
 			// RootCA2 citizen sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.9.1.1.2.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.9.1.1.2.1");
 			// RootCA2 foreigner sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.9.1.1.7.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.9.1.1.7.1");
 			// RootCA3 citizen sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.10.1.1.2.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.2.1");
 			// RootCA3 foreigner sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.10.1.1.7.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.7.1");
 			// RootCA4 citizen sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.12.1.1.2.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.2.1");
 			// RootCA4 foreigner sign
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.12.1.1.7.1");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.7.1");
 			break;
 		case NATIONAL_REGISTRY:
 			// Root CA
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.1.1.1.4");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.1.1.1.4");
 			// Root CA 2
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.9.1.1.4");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.9.1.1.4");
 			// Root CA 3
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.10.1.1.4");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.4");
 			// Root CA 4
-			certificatePoliciesCertificateConstraint
-					.addCertificatePolicy("2.16.56.12.1.1.4");
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.4");
 			break;
 		}
-		trustValidator
-				.addCertificateConstrain(certificatePoliciesCertificateConstraint);
+		trustValidator.addCertificateConstrain(certificatePoliciesCertificateConstraint);
 
 		if (CertificateType.NATIONAL_REGISTRY == certificateType) {
 			DistinguishedNameCertificateConstraint nameConstraint = new DistinguishedNameCertificateConstraint(
@@ -377,8 +336,7 @@ public class BelgianTrustValidatorFactory {
 		if (CertificateType.SIGN == certificateType) {
 			QCStatementsCertificateConstraint qcStatementsCertificateConstraint = new QCStatementsCertificateConstraint(
 					true);
-			trustValidator
-					.addCertificateConstrain(qcStatementsCertificateConstraint);
+			trustValidator.addCertificateConstrain(qcStatementsCertificateConstraint);
 		}
 
 		return trustValidator;
@@ -389,26 +347,21 @@ public class BelgianTrustValidatorFactory {
 		try {
 			certificateFactory = CertificateFactory.getInstance("X.509");
 		} catch (CertificateException e) {
-			throw new RuntimeException(
-					"X.509 factory error: " + e.getMessage(), e);
+			throw new RuntimeException("X.509 factory error: " + e.getMessage(), e);
 		}
 		Thread currentThread = Thread.currentThread();
 		ClassLoader classLoader = currentThread.getContextClassLoader();
-		InputStream certificateInputStream = classLoader
-				.getResourceAsStream(pemResourceName);
+		InputStream certificateInputStream = classLoader.getResourceAsStream(pemResourceName);
 		if (null == certificateInputStream) {
-			throw new IllegalArgumentException("resource not found: "
-					+ pemResourceName);
+			throw new IllegalArgumentException("resource not found: " + pemResourceName);
 		}
-		PemReader pemReader = new PemReader(new InputStreamReader(
-				certificateInputStream));
+		PemReader pemReader = new PemReader(new InputStreamReader(certificateInputStream));
 		try {
 			try {
 				PemObject pemObject;
 				pemObject = pemReader.readPemObject();
 				X509Certificate certificate = (X509Certificate) certificateFactory
-						.generateCertificate(new ByteArrayInputStream(pemObject
-								.getContent()));
+						.generateCertificate(new ByteArrayInputStream(pemObject.getContent()));
 				return certificate;
 			} finally {
 				pemReader.close();
@@ -424,15 +377,12 @@ public class BelgianTrustValidatorFactory {
 		LOG.debug("loading certificate: " + resourceName);
 		Thread currentThread = Thread.currentThread();
 		ClassLoader classLoader = currentThread.getContextClassLoader();
-		InputStream certificateInputStream = classLoader
-				.getResourceAsStream(resourceName);
+		InputStream certificateInputStream = classLoader.getResourceAsStream(resourceName);
 		if (null == certificateInputStream) {
-			throw new IllegalArgumentException("resource not found: "
-					+ resourceName);
+			throw new IllegalArgumentException("resource not found: " + resourceName);
 		}
 		try {
-			CertificateFactory certificateFactory = CertificateFactory
-					.getInstance("X.509");
+			CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 			X509Certificate certificate = (X509Certificate) certificateFactory
 					.generateCertificate(certificateInputStream);
 			return certificate;

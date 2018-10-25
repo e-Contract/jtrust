@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2013-2014 e-Contract.be BVBA.
+ * Copyright (C) 2013-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -95,8 +95,7 @@ public class TSATest {
 		// setup
 		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
 		requestGen.setCertReq(true);
-		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1,
-				new byte[20], BigInteger.valueOf(100));
+		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
 		byte[] requestData = request.getEncoded();
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -104,8 +103,7 @@ public class TSATest {
 		// httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
 		// proxy);
 		HttpPost postMethod = new HttpPost(tsaLocation);
-		ContentType contentType = ContentType
-				.create("application/timestamp-query");
+		ContentType contentType = ContentType.create("application/timestamp-query");
 		HttpEntity requestEntity = new ByteArrayEntity(requestData, contentType);
 		postMethod.addHeader("User-Agent", "jTrust TSP Client");
 		postMethod.setEntity(requestEntity);
@@ -123,39 +121,31 @@ public class TSATest {
 		}
 
 		HttpEntity httpEntity = httpResponse.getEntity();
-		TimeStampResponse tspResponse = new TimeStampResponse(
-				httpEntity.getContent());
+		TimeStampResponse tspResponse = new TimeStampResponse(httpEntity.getContent());
 		postMethod.releaseConnection();
 
 		TimeStampToken timeStampToken = tspResponse.getTimeStampToken();
 		SignerId signerId = timeStampToken.getSID();
 		Store certificatesStore = timeStampToken.getCertificates();
-		Collection<X509CertificateHolder> signerCollection = certificatesStore
-				.getMatches(signerId);
+		Collection<X509CertificateHolder> signerCollection = certificatesStore.getMatches(signerId);
 
-		Iterator<X509CertificateHolder> signerCollectionIterator = signerCollection
-				.iterator();
-		X509CertificateHolder signerCertificateHolder = signerCollectionIterator
-				.next();
+		Iterator<X509CertificateHolder> signerCollectionIterator = signerCollection.iterator();
+		X509CertificateHolder signerCertificateHolder = signerCollectionIterator.next();
 
 		// TODO: check time-stamp token signature
 
-		List<X509Certificate> certificateChain = getCertificateChain(
-				signerCertificateHolder, certificatesStore);
+		List<X509Certificate> certificateChain = getCertificateChain(signerCertificateHolder, certificatesStore);
 
 		for (X509Certificate cert : certificateChain) {
 			LOG.debug("certificate subject: " + cert.getSubjectX500Principal());
 			LOG.debug("certificate issuer: " + cert.getIssuerX500Principal());
 		}
 
-		CertificateRepository certificateRepository = BelgianTrustValidatorFactory
-				.createTSACertificateRepository();
-		TrustValidator trustValidator = new TrustValidator(
-				certificateRepository);
+		CertificateRepository certificateRepository = BelgianTrustValidatorFactory.createTSACertificateRepository();
+		TrustValidator trustValidator = new TrustValidator(certificateRepository);
 		// NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
 		// 8080);
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				null);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
 		trustValidator.isTrusted(certificateChain);
@@ -164,12 +154,10 @@ public class TSATest {
 	@Test
 	public void testTSA2013() throws Exception {
 		LOG.debug("test TSA 2013");
-		InputStream inputStream = TSATest.class
-				.getResourceAsStream("/Fedict-2013.txt");
+		InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
 		byte[] data = IOUtils.toByteArray(inputStream);
 		byte[] derData = Base64.decode(data);
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory
 				.generateCertificates(new ByteArrayInputStream(derData));
 		List<X509Certificate> certificateChain = new LinkedList<>();
@@ -179,32 +167,24 @@ public class TSATest {
 
 		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
 		X509Certificate gsCert = (X509Certificate) certificateFactory
-				.generateCertificate(TSATest.class
-						.getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
+				.generateCertificate(TSATest.class.getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
 		certificateRepository.addTrustPoint(gsCert);
-		TrustValidator trustValidator = new TrustValidator(
-				certificateRepository);
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(
-				null);
+		TrustValidator trustValidator = new TrustValidator(certificateRepository);
+		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+		trustValidator.addCertificateConstraint(new TSACertificateConstraint());
 
 		trustValidator.isTrusted(certificateChain);
 	}
 
-	private X509Certificate loadCertificate(String pemResourceName)
-			throws IOException, CertificateException {
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
-		InputStream tsaCertInputStream = TSATest.class
-				.getResourceAsStream(pemResourceName);
-		PemReader pemReader = new PemReader(new InputStreamReader(
-				tsaCertInputStream));
+	private X509Certificate loadCertificate(String pemResourceName) throws IOException, CertificateException {
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		InputStream tsaCertInputStream = TSATest.class.getResourceAsStream(pemResourceName);
+		PemReader pemReader = new PemReader(new InputStreamReader(tsaCertInputStream));
 		PemObject pemObject = pemReader.readPemObject();
 		X509Certificate certificate = (X509Certificate) certificateFactory
-				.generateCertificate(new ByteArrayInputStream(pemObject
-						.getContent()));
+				.generateCertificate(new ByteArrayInputStream(pemObject.getContent()));
 		pemReader.close();
 		return certificate;
 	}
@@ -214,22 +194,17 @@ public class TSATest {
 		LOG.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();
 
-		certificateChain
-				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
 		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
-		certificateChain
-				.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
-		certificateChain
-				.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
 
-		CertificateRepository tsaCertificateRepository = BelgianTrustValidatorFactory
-				.createTSACertificateRepository();
-		TrustValidator trustValidator = new TrustValidator(
-				tsaCertificateRepository);
+		CertificateRepository tsaCertificateRepository = BelgianTrustValidatorFactory.createTSACertificateRepository();
+		TrustValidator trustValidator = new TrustValidator(tsaCertificateRepository);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-		trustValidator.addCertificateConstrain(new TSACertificateConstraint());
+		trustValidator.addCertificateConstraint(new TSACertificateConstraint());
 
 		trustValidator.isTrusted(certificateChain);
 	}
@@ -248,36 +223,27 @@ public class TSATest {
 		LOG.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();
 
-		certificateChain
-				.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
 		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
-		certificateChain
-				.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
-		certificateChain
-				.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
+		certificateChain.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
 
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTSATrustValidator(null);
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTSATrustValidator(null);
 
 		trustValidator.isTrusted(certificateChain);
 	}
 
-	private static List<X509Certificate> getCertificateChain(
-			X509CertificateHolder certificateHolder, Store certificatesStore)
-			throws CertificateException, IOException {
-		CertificateFactory certificateFactory = CertificateFactory
-				.getInstance("X.509");
+	private static List<X509Certificate> getCertificateChain(X509CertificateHolder certificateHolder,
+			Store certificatesStore) throws CertificateException, IOException {
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		List<X509Certificate> certificateChain = new LinkedList<>();
 		while (true) {
 			X509Certificate certificate = (X509Certificate) certificateFactory
-					.generateCertificate(new ByteArrayInputStream(
-							certificateHolder.getEncoded()));
+					.generateCertificate(new ByteArrayInputStream(certificateHolder.getEncoded()));
 			certificateChain.add(certificate);
 			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
-			IssuerSelector issuerSelector = new IssuerSelector(
-					certificateHolder);
-			Collection<X509CertificateHolder> issuerCollection = certificatesStore
-					.getMatches(issuerSelector);
+			IssuerSelector issuerSelector = new IssuerSelector(certificateHolder);
+			Collection<X509CertificateHolder> issuerCollection = certificatesStore.getMatches(issuerSelector);
 			if (issuerCollection.isEmpty()) {
 				break;
 			}
@@ -294,8 +260,7 @@ public class TSATest {
 
 		public IssuerSelector(X509CertificateHolder certificateHolder) {
 			this.subject = certificateHolder.getIssuer();
-			this.isSelfSigned = certificateHolder.getSubject().equals(
-					certificateHolder.getIssuer());
+			this.isSelfSigned = certificateHolder.getSubject().equals(certificateHolder.getIssuer());
 		}
 
 		@Override

@@ -117,6 +117,8 @@ public class TrustValidator {
 	 * 
 	 * @param certificateConstraint
 	 *            the certificate constraint component.
+	 * @deprecated
+	 * @see TrustValidator#addCertificateConstraint(CertificateConstraint)
 	 */
 	public void addCertificateConstrain(CertificateConstraint certificateConstraint) {
 		this.certificateConstraints.add(certificateConstraint);
