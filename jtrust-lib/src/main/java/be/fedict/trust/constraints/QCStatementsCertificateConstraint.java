@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
- * Copyright (C) 2014-2017 e-Contract.be BVBA.
+ * Copyright (C) 2014-2018 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,6 +25,7 @@ import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -49,17 +50,33 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 	private static final Log LOG = LogFactory.getLog(QCStatementsCertificateConstraint.class);
 
+	static final ASN1ObjectIdentifier id_etsi_qcs_QcType = new ASN1ObjectIdentifier("0.4.0.1862.1.6");
+
+	static final ASN1ObjectIdentifier id_etsi_qcs_QcType_eSign = id_etsi_qcs_QcType.branch("1");
+	static final ASN1ObjectIdentifier id_etsi_qcs_QcType_eSeal = id_etsi_qcs_QcType.branch("2");
+
 	private final Boolean qcComplianceFilter;
 
 	private final Boolean qcSSCDFilter;
+
+	private final Boolean qcTypeSignFilter;
+
+	private final Boolean qcTypeSealFilter;
 
 	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter) {
 		this(qcComplianceFilter, null);
 	}
 
 	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter, Boolean qcSSCDFilter) {
+		this(qcComplianceFilter, qcSSCDFilter, null, null);
+	}
+
+	public QCStatementsCertificateConstraint(Boolean qcComplianceFilter, Boolean qcSSCDFilter, Boolean qcTypeSignFilter,
+			Boolean qcTypeSealFilter) {
 		this.qcComplianceFilter = qcComplianceFilter;
 		this.qcSSCDFilter = qcSSCDFilter;
+		this.qcTypeSignFilter = qcTypeSignFilter;
+		this.qcTypeSealFilter = qcTypeSealFilter;
 	}
 
 	@Override
@@ -75,6 +92,8 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		Enumeration<?> qcStatementEnum = qcStatements.getObjects();
 		boolean qcCompliance = false;
 		boolean qcSSCD = false;
+		boolean eSign = false;
+		boolean eSeal = false;
 		while (qcStatementEnum.hasMoreElements()) {
 			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
 			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
@@ -84,6 +103,21 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 			}
 			if (QCStatement.id_etsi_qcs_QcSSCD.equals(statementId)) {
 				qcSSCD = true;
+			}
+			if (id_etsi_qcs_QcType.equals(statementId)) {
+				ASN1Encodable statementInfo = qcStatement.getStatementInfo();
+				ASN1Sequence qcTypeSequence = ASN1Sequence.getInstance(statementInfo);
+				Enumeration<?> qcType = qcTypeSequence.getObjects();
+				while (qcType.hasMoreElements()) {
+					ASN1ObjectIdentifier qcTypeOID = ASN1ObjectIdentifier.getInstance(qcType.nextElement());
+					LOG.debug("QcType: " + qcTypeOID);
+					if (id_etsi_qcs_QcType_eSign.equals(qcTypeOID)) {
+						eSign = true;
+					}
+					if (id_etsi_qcs_QcType_eSeal.equals(qcTypeOID)) {
+						eSeal = true;
+					}
+				}
 			}
 		}
 
@@ -100,6 +134,22 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 				LOG.error("qcSSCD QCStatements error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QCStatements not matching");
+			}
+		}
+
+		if (null != this.qcTypeSignFilter) {
+			if (eSign != this.qcTypeSignFilter) {
+				LOG.error("QcType eSign error");
+				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+						"QcType eSign not matching");
+			}
+		}
+
+		if (null != this.qcTypeSealFilter) {
+			if (eSeal != this.qcTypeSealFilter) {
+				LOG.error("QcType eSeal error");
+				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
+						"QcType eSeal not matching");
 			}
 		}
 	}
