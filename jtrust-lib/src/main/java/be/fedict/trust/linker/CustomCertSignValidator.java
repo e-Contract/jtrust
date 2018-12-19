@@ -18,8 +18,8 @@ public class CustomCertSignValidator {
     /**
      * Verifies that the public key of the given self-signed Root CA is used to sign itself.
      *
-     * We first tried to to verify the signature with the standard algorithm.
-     * If this doesn't succeed. we verify the signature with PKCS1 padding added
+     * Try to verify the signature with the standard algorithm.
+     * If that doesn't succeed, the signature is verified with PKCS1 padding.
      *
      * @param certificate
      * @throws NoSuchAlgorithmException
@@ -35,8 +35,8 @@ public class CustomCertSignValidator {
     /**
      * Verifies that the public key in the first certificate is used to encrypt the second certificate.
      *
-     * We first tried to to verify the signature with the standard algorithm.
-     * If this doesn't succeed. we verify the signature with PKCS1 padding added.
+     * Try to verify the signature with the standard algorithm.
+     * If that doesn't succeed, the signature is verified with PKCS1 padding.
      * If a SignatureException occurs with the message describing an issue with the signature length,
      * we move over the verifyWithPKCS1Padding.
      *
