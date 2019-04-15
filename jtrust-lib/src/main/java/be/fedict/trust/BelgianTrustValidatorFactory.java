@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -325,18 +325,18 @@ public class BelgianTrustValidatorFactory {
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.4");
 			break;
 		}
-		trustValidator.addCertificateConstrain(certificatePoliciesCertificateConstraint);
+		trustValidator.addCertificateConstraint(certificatePoliciesCertificateConstraint);
 
 		if (CertificateType.NATIONAL_REGISTRY == certificateType) {
 			DistinguishedNameCertificateConstraint nameConstraint = new DistinguishedNameCertificateConstraint(
 					"CN=RRN, O=RRN, C=BE");
-			trustValidator.addCertificateConstrain(nameConstraint);
+			trustValidator.addCertificateConstraint(nameConstraint);
 		}
 
 		if (CertificateType.SIGN == certificateType) {
 			QCStatementsCertificateConstraint qcStatementsCertificateConstraint = new QCStatementsCertificateConstraint(
 					true);
-			trustValidator.addCertificateConstrain(qcStatementsCertificateConstraint);
+			trustValidator.addCertificateConstraint(qcStatementsCertificateConstraint);
 		}
 
 		return trustValidator;

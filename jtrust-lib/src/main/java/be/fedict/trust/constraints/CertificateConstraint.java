@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -35,7 +36,7 @@ public interface CertificateConstraint {
 	 * 
 	 * @param certificate
 	 *            the X509 certificate.
+	 * @throws be.fedict.trust.linker.TrustLinkerResultException
 	 */
-	void check(X509Certificate certificate) throws TrustLinkerResultException,
-			Exception;
+	void check(X509Certificate certificate) throws TrustLinkerResultException, Exception;
 }

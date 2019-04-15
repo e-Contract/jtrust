@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -34,10 +34,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -59,6 +57,10 @@ import org.bouncycastle.util.Arrays;
 
 import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder
@@ -144,23 +146,31 @@ public class OnlineOcspRepository implements OcspRepository {
 		httpPost.addHeader("User-Agent", "jTrust OCSP Client");
 		httpPost.setEntity(requestEntity);
 
-		DefaultHttpClient httpClient = new DefaultHttpClient();
+		int timeout = 10;
+		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom().setConnectTimeout(timeout * 1000)
+				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000);
+
 		if (null != this.networkConfig) {
 			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
-			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+			requestConfigBuilder.setProxy(proxy);
 		}
+		HttpClientContext httpClientContext = HttpClientContext.create();
 		if (null != this.credentials) {
-			this.credentials.init(httpClient.getCredentialsProvider());
+			this.credentials.init(httpClientContext);
 		}
+		RequestConfig requestConfig = requestConfigBuilder.build();
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+		httpClientBuilder.setDefaultRequestConfig(requestConfig);
+		HttpClient httpClient = httpClientBuilder.build();
 
 		HttpResponse httpResponse;
 		int responseCode;
 		try {
-			httpResponse = httpClient.execute(httpPost);
+			httpResponse = httpClient.execute(httpPost, httpClientContext);
 			StatusLine statusLine = httpResponse.getStatusLine();
 			responseCode = statusLine.getStatusCode();
 		} catch (ConnectException e) {
-			LOG.debug("OCSP responder is down");
+			LOG.error("OCSP responder is down");
 			return null;
 		}
 

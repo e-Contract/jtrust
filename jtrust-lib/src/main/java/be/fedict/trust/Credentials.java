@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2010 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,6 +25,8 @@ import java.util.List;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 
 /**
  * Stores credentials required to access protected online PKI services.
@@ -62,20 +64,23 @@ public class Credentials {
 	}
 
 	/**
-	 * Initializes the Commons HTTPClient state using the credentials stores in
-	 * this credential store.
+	 * Initializes the Commons HTTPClient state using the credentials stores in this
+	 * credential store.
 	 * 
-	 * @param credentialsProvider
+	 * @param httpClientContext
 	 */
-	public void init(CredentialsProvider credentialsProvider) {
+	public void init(HttpClientContext httpClientContext) {
+		if (this.credentials.isEmpty()) {
+			return;
+		}
+		CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		httpClientContext.setCredentialsProvider(credentialsProvider);
 		for (Credential credential : this.credentials) {
-			AuthScope authScope = new AuthScope(credential.getHost(),
-					credential.getPort(), credential.getRealm(),
+			AuthScope authScope = new AuthScope(credential.getHost(), credential.getPort(), credential.getRealm(),
 					credential.getScheme());
 			UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(
 					credential.getUsername(), credential.getPassword());
-			credentialsProvider.setCredentials(authScope,
-					usernamePasswordCredentials);
+			credentialsProvider.setCredentials(authScope, usernamePasswordCredentials);
 		}
 	}
 }
