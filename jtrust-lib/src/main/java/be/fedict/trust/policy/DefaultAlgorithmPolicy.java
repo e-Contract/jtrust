@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -21,8 +21,8 @@ package be.fedict.trust.policy;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
@@ -38,18 +38,15 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
  */
 public class DefaultAlgorithmPolicy implements AlgorithmPolicy {
 
-	private static final Log LOG = LogFactory
-			.getLog(DefaultAlgorithmPolicy.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAlgorithmPolicy.class);
 
 	@Override
-	public void checkSignatureAlgorithm(String signatureAlgorithm,
-			Date validationDate) throws TrustLinkerResultException {
-		LOG.debug("validate signature algorithm: " + signatureAlgorithm);
-		if (signatureAlgorithm.contains("MD5")
-				|| signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
-			throw new TrustLinkerResultException(
-					TrustLinkerResultReason.INVALID_ALGORITHM,
-					"MD5 not allowed");
+	public void checkSignatureAlgorithm(String signatureAlgorithm, Date validationDate)
+			throws TrustLinkerResultException {
+		LOGGER.debug("validate signature algorithm: {}", signatureAlgorithm);
+		if (signatureAlgorithm.contains("MD5") || signatureAlgorithm.equals("1.2.840.113549.1.1.4")) {
+			LOGGER.error("MD5 used");
+			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_ALGORITHM, "MD5 not allowed");
 		}
 	}
 }

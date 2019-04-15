@@ -26,16 +26,18 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -54,13 +56,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder
@@ -71,7 +71,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class OnlineOcspRepository implements OcspRepository {
 
-	private static final Log LOG = LogFactory.getLog(OnlineOcspRepository.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OnlineOcspRepository.class);
 
 	private final NetworkConfig networkConfig;
 
@@ -121,7 +121,7 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	private OCSPResp getOcspResponse(URI ocspUri, X509Certificate certificate, X509Certificate issuerCertificate)
 			throws Exception {
-		LOG.debug("OCSP URI: " + ocspUri);
+		LOGGER.debug("OCSP URI: {}", ocspUri);
 		OCSPReqBuilder ocspReqBuilder = new OCSPReqBuilder();
 		DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder()
 				.setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
@@ -170,26 +170,26 @@ public class OnlineOcspRepository implements OcspRepository {
 			StatusLine statusLine = httpResponse.getStatusLine();
 			responseCode = statusLine.getStatusCode();
 		} catch (ConnectException e) {
-			LOG.error("OCSP responder is down");
+			LOGGER.error("OCSP responder is down");
 			return null;
 		}
 
 		if (HttpURLConnection.HTTP_OK != responseCode) {
-			LOG.error("HTTP response code: " + responseCode);
+			LOGGER.error("HTTP response code: {}", responseCode);
 			return null;
 		}
 
 		Header responseContentTypeHeader = httpResponse.getFirstHeader("Content-Type");
 		if (null == responseContentTypeHeader) {
-			LOG.error("no Content-Type response header");
+			LOGGER.error("no Content-Type response header");
 			return null;
 		}
 		String resultContentType = responseContentTypeHeader.getValue();
 		if (!"application/ocsp-response".equals(resultContentType)) {
-			LOG.error("result content type not application/ocsp-response");
-			LOG.error("actual content-type: " + resultContentType);
+			LOGGER.error("result content type not application/ocsp-response");
+			LOGGER.error("actual content-type: {}", resultContentType);
 			if ("text/html".equals(resultContentType)) {
-				LOG.error("content: " + EntityUtils.toString(httpResponse.getEntity()));
+				LOGGER.error("content: {}", EntityUtils.toString(httpResponse.getEntity()));
 			}
 			return null;
 		}
@@ -198,19 +198,19 @@ public class OnlineOcspRepository implements OcspRepository {
 		if (null != responseContentLengthHeader) {
 			String resultContentLength = responseContentLengthHeader.getValue();
 			if ("0".equals(resultContentLength)) {
-				LOG.debug("no content returned");
+				LOGGER.debug("no content returned");
 				return null;
 			}
 		}
 
 		HttpEntity httpEntity = httpResponse.getEntity();
 		OCSPResp ocspResp = new OCSPResp(httpEntity.getContent());
-		LOG.debug("OCSP response size: " + ocspResp.getEncoded().length + " bytes");
+		LOGGER.debug("OCSP response size: {} bytes", ocspResp.getEncoded().length);
 		httpPost.releaseConnection();
 
 		int ocspRespStatus = ocspResp.getStatus();
 		if (OCSPResponseStatus.SUCCESSFUL != ocspRespStatus) {
-			LOG.debug("OCSP response status: " + ocspRespStatus);
+			LOGGER.debug("OCSP response status: {}", ocspRespStatus);
 			return ocspResp;
 		}
 
@@ -218,7 +218,7 @@ public class OnlineOcspRepository implements OcspRepository {
 		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
 		Extension nonceExtension = basicOCSPResp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 		if (null == nonceExtension) {
-			LOG.debug("no nonce extension is response");
+			LOGGER.debug("no nonce extension is response");
 			return ocspResp;
 		}
 
@@ -226,10 +226,10 @@ public class OnlineOcspRepository implements OcspRepository {
 		ASN1Primitive nonceValue = ASN1Primitive.fromByteArray(nonceExtensionValue.getOctets());
 		byte[] responseNonce = ((DEROctetString) nonceValue).getOctets();
 		if (!Arrays.areEqual(nonce, responseNonce)) {
-			LOG.error("nonce mismatch");
+			LOGGER.error("nonce mismatch");
 			return null;
 		}
-		LOG.debug("nonce match");
+		LOGGER.debug("nonce match");
 
 		return ocspResp;
 	}

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2013-2018 e-Contract.be BVBA.
+ * Copyright (C) 2013-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -37,15 +37,14 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerId;
@@ -61,7 +60,10 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.BelgianTrustValidatorFactory;
 import be.fedict.trust.TrustValidator;
@@ -72,7 +74,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class TSATest {
 
-	private static final Log LOG = LogFactory.getLog(TSATest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TSATest.class);
 
 	private static final String TSA_LOCATION = "http://tsa.belgium.be/connect";
 
@@ -98,7 +100,8 @@ public class TSATest {
 		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
 		byte[] requestData = request.getEncoded();
 
-		DefaultHttpClient httpClient = new DefaultHttpClient();
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+		HttpClient httpClient = httpClientBuilder.build();
 		// HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
 		// httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
 		// proxy);
@@ -114,9 +117,9 @@ public class TSATest {
 		StatusLine statusLine = httpResponse.getStatusLine();
 		int statusCode = statusLine.getStatusCode();
 		long t1 = System.currentTimeMillis();
-		LOG.debug("dt TSP: " + (t1 - t0) + " ms");
+		LOGGER.debug("dt TSP: {} ms ", (t1 - t0));
 		if (statusCode != HttpURLConnection.HTTP_OK) {
-			LOG.error("Error contacting TSP server " + TSA_LOCATION);
+			LOGGER.error("Error contacting TSP server {}", TSA_LOCATION);
 			throw new Exception("Error contacting TSP server " + TSA_LOCATION);
 		}
 
@@ -137,8 +140,8 @@ public class TSATest {
 		List<X509Certificate> certificateChain = getCertificateChain(signerCertificateHolder, certificatesStore);
 
 		for (X509Certificate cert : certificateChain) {
-			LOG.debug("certificate subject: " + cert.getSubjectX500Principal());
-			LOG.debug("certificate issuer: " + cert.getIssuerX500Principal());
+			LOGGER.debug("certificate subject: {}", cert.getSubjectX500Principal());
+			LOGGER.debug("certificate issuer: {}", cert.getIssuerX500Principal());
 		}
 
 		CertificateRepository certificateRepository = BelgianTrustValidatorFactory.createTSACertificateRepository();
@@ -152,8 +155,9 @@ public class TSATest {
 	}
 
 	@Test
+	@Ignore("expired certificate")
 	public void testTSA2013() throws Exception {
-		LOG.debug("test TSA 2013");
+		LOGGER.debug("test TSA 2013");
 		InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
 		byte[] data = IOUtils.toByteArray(inputStream);
 		byte[] derData = Base64.decode(data);
@@ -190,8 +194,9 @@ public class TSATest {
 	}
 
 	@Test
+	@Ignore("expired certificate")
 	public void testTSA2014() throws Exception {
-		LOG.debug("test TSA 2014");
+		LOGGER.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();
 
 		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
@@ -212,15 +217,16 @@ public class TSATest {
 	@Test
 	public void testReadTSA2014() throws Exception {
 		X509Certificate tsaCert = loadCertificate("/tsa2014/TimeStampingAuthority.pem");
-		LOG.debug("TSA cert: " + tsaCert);
+		LOGGER.debug("TSA cert: {}", tsaCert);
 		File tmpFile = File.createTempFile("tsa-2014-", ".der");
 		FileUtils.writeByteArrayToFile(tmpFile, tsaCert.getEncoded());
-		LOG.debug("TSA cert file: " + tmpFile.getAbsolutePath());
+		LOGGER.debug("TSA cert file: {}", tmpFile.getAbsolutePath());
 	}
 
 	@Test
+	@Ignore("expired certificate")
 	public void testTSA2014_2() throws Exception {
-		LOG.debug("test TSA 2014");
+		LOGGER.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();
 
 		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
@@ -241,7 +247,7 @@ public class TSATest {
 			X509Certificate certificate = (X509Certificate) certificateFactory
 					.generateCertificate(new ByteArrayInputStream(certificateHolder.getEncoded()));
 			certificateChain.add(certificate);
-			LOG.debug("certificate: " + certificate.getSubjectX500Principal());
+			LOGGER.debug("certificate: {}", certificate.getSubjectX500Principal());
 			IssuerSelector issuerSelector = new IssuerSelector(certificateHolder);
 			Collection<X509CertificateHolder> issuerCollection = certificatesStore.getMatches(issuerSelector);
 			if (issuerCollection.isEmpty()) {

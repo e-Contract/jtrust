@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2010 FedICT.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,8 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -32,6 +30,8 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
@@ -48,7 +48,7 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
  */
 public class QCStatementsCertificateConstraint implements CertificateConstraint {
 
-	private static final Log LOG = LogFactory.getLog(QCStatementsCertificateConstraint.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(QCStatementsCertificateConstraint.class);
 
 	static final ASN1ObjectIdentifier id_etsi_qcs_QcType = new ASN1ObjectIdentifier("0.4.0.1862.1.6");
 
@@ -97,7 +97,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 		while (qcStatementEnum.hasMoreElements()) {
 			QCStatement qcStatement = QCStatement.getInstance(qcStatementEnum.nextElement());
 			ASN1ObjectIdentifier statementId = qcStatement.getStatementId();
-			LOG.debug("statement Id: " + statementId.getId());
+			LOGGER.debug("statement Id: {}", statementId.getId());
 			if (QCStatement.id_etsi_qcs_QcCompliance.equals(statementId)) {
 				qcCompliance = true;
 			}
@@ -110,7 +110,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 				Enumeration<?> qcType = qcTypeSequence.getObjects();
 				while (qcType.hasMoreElements()) {
 					ASN1ObjectIdentifier qcTypeOID = ASN1ObjectIdentifier.getInstance(qcType.nextElement());
-					LOG.debug("QcType: " + qcTypeOID);
+					LOGGER.debug("QcType: {}", qcTypeOID);
 					if (id_etsi_qcs_QcType_eSign.equals(qcTypeOID)) {
 						eSign = true;
 					}
@@ -123,7 +123,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 		if (null != this.qcComplianceFilter) {
 			if (qcCompliance != this.qcComplianceFilter) {
-				LOG.error("qcCompliance QCStatements error");
+				LOGGER.error("qcCompliance QCStatements error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QCStatements not matching");
 			}
@@ -131,7 +131,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 		if (null != this.qcSSCDFilter) {
 			if (qcSSCD != this.qcSSCDFilter) {
-				LOG.error("qcSSCD QCStatements error");
+				LOGGER.error("qcSSCD QCStatements error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QCStatements not matching");
 			}
@@ -139,7 +139,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 		if (null != this.qcTypeSignFilter) {
 			if (eSign != this.qcTypeSignFilter) {
-				LOG.error("QcType eSign error");
+				LOGGER.error("QcType eSign error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QcType eSign not matching");
 			}
@@ -147,7 +147,7 @@ public class QCStatementsCertificateConstraint implements CertificateConstraint 
 
 		if (null != this.qcTypeSealFilter) {
 			if (eSeal != this.qcTypeSealFilter) {
-				LOG.error("QcType eSeal error");
+				LOGGER.error("QcType eSeal error");
 				throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
 						"QcType eSeal not matching");
 			}

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2017 e-Contract.be BVBA.
+ * Copyright (C) 2017-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -27,20 +27,19 @@ import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.test.PKITestUtils;
-import test.unit.be.fedict.trust.MemoryCertificateRepositoryTest;
 
 public class QCStatementsCertificateConstraintTest {
 
-	private static final Log LOG = LogFactory.getLog(QCStatementsCertificateConstraintTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(QCStatementsCertificateConstraintTest.class);
 
 	@Test
 	public void testNoQCStatements() throws Exception {
@@ -143,7 +142,7 @@ public class QCStatementsCertificateConstraintTest {
 				.getResourceAsStream("/qcstatements.der");
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(certInputStream);
-		LOG.debug("certificate: " + certificate);
+		LOGGER.debug("certificate: {}", certificate);
 
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(true, true);
 

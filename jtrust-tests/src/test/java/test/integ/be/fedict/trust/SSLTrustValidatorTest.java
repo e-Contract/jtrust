@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -47,6 +47,8 @@ import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.TrustValidator;
@@ -55,7 +57,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class SSLTrustValidatorTest {
 
-	private static final Log LOG = LogFactory.getLog(SSLTrustValidatorTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SSLTrustValidatorTest.class);
 
 	@Before
 	public void setUp() throws Exception {
@@ -75,11 +77,11 @@ public class SSLTrustValidatorTest {
 				secureRandom);
 		SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 		SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket("test.eid.belgium.be", 443);
-		LOG.debug("socket created");
+		LOGGER.debug("socket created");
 		SSLSession sslSession = sslSocket.getSession();
 		Certificate[] peerCertificates = sslSession.getPeerCertificates();
 		for (Certificate peerCertificate : peerCertificates) {
-			LOG.debug("peer certificate: " + ((X509Certificate) peerCertificate).getSubjectX500Principal());
+			LOGGER.debug("peer certificate: {}", ((X509Certificate) peerCertificate).getSubjectX500Principal());
 		}
 
 		MemoryCertificateRepository repository = new MemoryCertificateRepository();
@@ -138,13 +140,13 @@ public class SSLTrustValidatorTest {
 		for (Certificate certificate : serverCertificates) {
 			X509Certificate x509Cert = (X509Certificate) certificate;
 			certificateChain.add(x509Cert);
-			LOG.debug("certificate subject: " + x509Cert.getSubjectX500Principal());
-			LOG.debug("certificate issuer: " + x509Cert.getIssuerX500Principal());
+			LOGGER.debug("certificate subject: {}", x509Cert.getSubjectX500Principal());
+			LOGGER.debug("certificate issuer: {}", x509Cert.getIssuerX500Principal());
 		}
 
 		X509Certificate rootCertificate = certificateChain.get(certificateChain.size() - 1);
 		if (!rootCertificate.getSubjectX500Principal().equals(rootCertificate.getIssuerX500Principal())) {
-			LOG.error("no a self-signed root in chain");
+			LOGGER.error("no a self-signed root in chain");
 			rootCertificate = getTrustAnchor(rootCertificate);
 			certificateChain.add(rootCertificate);
 		}

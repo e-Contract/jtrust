@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2011 FedICT.
+ * Copyright (C) 2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -29,8 +30,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.eid.tsl.jaxb.tsl.ObjectFactory;
 import be.fedict.eid.tsl.jaxb.tsl.TSLSchemeInformationType;
@@ -42,7 +43,7 @@ import be.fedict.eid.tsl.jaxb.tsl.TrustStatusListType;
  */
 public class TSLParser {
 
-	private static final Log LOG = LogFactory.getLog(TSLParser.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TSLParser.class);
 
 	private final InputStream tslInputStream;
 
@@ -71,15 +72,12 @@ public class TSLParser {
 		try {
 			trustStatusList = parseTslInputStream();
 		} catch (JAXBException e) {
-			throw new RuntimeException("TSL parsing error: " + e.getMessage(),
-					e);
+			throw new RuntimeException("TSL parsing error: " + e.getMessage(), e);
 		}
-		LOG.debug("TSL parsed");
-		TSLSchemeInformationType tslSchemeInformation = trustStatusList
-				.getSchemeInformation();
-		BigInteger tslSequenceNumber = tslSchemeInformation
-				.getTSLSequenceNumber();
-		LOG.debug("TSL sequence number: " + tslSequenceNumber);
+		LOGGER.debug("TSL parsed");
+		TSLSchemeInformationType tslSchemeInformation = trustStatusList.getSchemeInformation();
+		BigInteger tslSequenceNumber = tslSchemeInformation.getTSLSequenceNumber();
+		LOGGER.debug("TSL sequence number: {}", tslSequenceNumber);
 		for (TSLConsumer tslConsumer : this.tslConsumers) {
 			tslConsumer.setTSLSequenceNumber(tslSequenceNumber);
 		}

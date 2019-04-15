@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,8 +23,8 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
@@ -35,11 +35,9 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
  * @author Frank Cornelis
  * 
  */
-public class DistinguishedNameCertificateConstraint implements
-		CertificateConstraint {
+public class DistinguishedNameCertificateConstraint implements CertificateConstraint {
 
-	private static final Log LOG = LogFactory
-			.getLog(DistinguishedNameCertificateConstraint.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistinguishedNameCertificateConstraint.class);
 
 	private final X500Principal acceptedSubject;
 
@@ -48,15 +46,12 @@ public class DistinguishedNameCertificateConstraint implements
 	}
 
 	@Override
-	public void check(X509Certificate certificate)
-			throws TrustLinkerResultException {
-		X500Principal certificateSubject = certificate
-				.getSubjectX500Principal();
-		LOG.debug("accepted subject: " + this.acceptedSubject);
+	public void check(X509Certificate certificate) throws TrustLinkerResultException {
+		X500Principal certificateSubject = certificate.getSubjectX500Principal();
+		LOGGER.debug("accepted subject: {}", this.acceptedSubject);
 		if (this.acceptedSubject.equals(certificateSubject)) {
 			return;
 		}
-		throw new TrustLinkerResultException(
-				TrustLinkerResultReason.CONSTRAINT_VIOLATION, "DN mismatch");
+		throw new TrustLinkerResultException(TrustLinkerResultReason.CONSTRAINT_VIOLATION, "DN mismatch");
 	}
 }

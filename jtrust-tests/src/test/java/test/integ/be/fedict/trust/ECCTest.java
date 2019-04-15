@@ -23,9 +23,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -33,7 +34,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class ECCTest {
 
-	private static final Log LOG = LogFactory.getLog(ECCTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ECCTest.class);
 
 	/**
 	 * The CRL of the Entrust Demo ECC CA does not exist online.
@@ -41,11 +42,12 @@ public class ECCTest {
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore("expired certificate")
 	public void testEntrustDemoECCPKI() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		X509Certificate rootCertificate = (X509Certificate) certificateFactory
 				.generateCertificate(ECCTest.class.getResourceAsStream("/ecc/root.cer"));
-		LOG.debug("Root CA: " + rootCertificate);
+		LOGGER.debug("Root CA: {}", rootCertificate);
 
 		KeyStore keyStore = KeyStore.getInstance("PKCS12");
 		keyStore.load(ECCTest.class.getResourceAsStream("/ecc/www.e-contract.be.p12"), "EntrustSSL".toCharArray());
@@ -53,7 +55,7 @@ public class ECCTest {
 		String alias = keyStore.aliases().nextElement();
 		Certificate[] certificates = keyStore.getCertificateChain(alias);
 		for (Certificate certificate : certificates) {
-			LOG.debug("Certificate: " + certificate);
+			LOGGER.debug("Certificate: {}", certificate);
 		}
 
 		MemoryCertificateRepository repository = new MemoryCertificateRepository();

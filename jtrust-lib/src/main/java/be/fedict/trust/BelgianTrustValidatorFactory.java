@@ -28,10 +28,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
@@ -51,7 +51,7 @@ import be.fedict.trust.repository.MemoryCertificateRepository;
  */
 public class BelgianTrustValidatorFactory {
 
-	private static final Log LOG = LogFactory.getLog(BelgianTrustValidatorFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BelgianTrustValidatorFactory.class);
 
 	/**
 	 * Creates a trust validator according to Belgian PKI rules for authentication
@@ -374,7 +374,7 @@ public class BelgianTrustValidatorFactory {
 	}
 
 	private static X509Certificate loadCertificate(String resourceName) {
-		LOG.debug("loading certificate: " + resourceName);
+		LOGGER.debug("loading certificate: {}", resourceName);
 		Thread currentThread = Thread.currentThread();
 		ClassLoader classLoader = currentThread.getContextClassLoader();
 		InputStream certificateInputStream = classLoader.getResourceAsStream(resourceName);

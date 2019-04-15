@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,8 +26,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.CertificateID;
@@ -38,6 +36,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Off line OCSP repository. This implementation receives a list of
@@ -51,8 +51,7 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
  */
 public class OfflineOcspRepository implements OcspRepository {
 
-	private static final Log LOG = LogFactory
-			.getLog(OfflineOcspRepository.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OfflineOcspRepository.class);
 
 	private final List<OCSPResp> ocspResponses;
 
@@ -63,8 +62,7 @@ public class OfflineOcspRepository implements OcspRepository {
 	 *            the list of encoded OCSP responses that can be queried.
 	 * @throws IOException
 	 */
-	public OfflineOcspRepository(List<byte[]> encodedOcspResponses)
-			throws IOException {
+	public OfflineOcspRepository(List<byte[]> encodedOcspResponses) throws IOException {
 
 		this.ocspResponses = new LinkedList<>();
 		for (byte[] encodedOcspResponse : encodedOcspResponses) {
@@ -74,46 +72,43 @@ public class OfflineOcspRepository implements OcspRepository {
 	}
 
 	@Override
-	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate,
-			X509Certificate issuerCertificate, Date validationDate) {
+	public OCSPResp findOcspResponse(URI ocspUri, X509Certificate certificate, X509Certificate issuerCertificate,
+			Date validationDate) {
 
-		LOG.debug("find OCSP response");
+		LOGGER.debug("find OCSP response");
 
 		DigestCalculatorProvider digCalcProv;
 		try {
-			digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(
-					BouncyCastleProvider.PROVIDER_NAME).build();
+			digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME)
+					.build();
 		} catch (OperatorCreationException e) {
 			throw new RuntimeException(e);
 		}
 
 		CertificateID certId;
 		try {
-			certId = new CertificateID(
-					digCalcProv.get(CertificateID.HASH_SHA1),
-					new JcaX509CertificateHolder(issuerCertificate),
-					certificate.getSerialNumber());
+			certId = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1),
+					new JcaX509CertificateHolder(issuerCertificate), certificate.getSerialNumber());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
 		try {
 			for (OCSPResp ocspResp : this.ocspResponses) {
-				BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp
-						.getResponseObject();
+				BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp.getResponseObject();
 				for (SingleResp singleResp : basicOCSPResp.getResponses()) {
 					if (singleResp.getCertID().equals(certId)) {
-						LOG.debug("OCSP response found");
+						LOGGER.debug("OCSP response found");
 						return ocspResp;
 					}
 				}
 			}
 		} catch (OCSPException e) {
-			LOG.error("OCSPException: " + e.getMessage(), e);
+			LOGGER.error("OCSPException: " + e.getMessage(), e);
 			return null;
 		}
 
-		LOG.debug("OCSP response not found");
+		LOGGER.debug("OCSP response not found");
 		return null;
 	}
 }

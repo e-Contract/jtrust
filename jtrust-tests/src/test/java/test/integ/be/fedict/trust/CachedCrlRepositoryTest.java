@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2015 e-Contract.be BVBA.
+ * Copyright (C) 2015-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -22,19 +22,18 @@ import java.net.URI;
 import java.security.Security;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.OnlineCrlRepository;
 
 public class CachedCrlRepositoryTest {
 
-	private static final Log LOG = LogFactory
-			.getLog(CachedCrlRepositoryTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CachedCrlRepositoryTest.class);
 
 	@Before
 	public void setUp() throws Exception {
@@ -45,24 +44,19 @@ public class CachedCrlRepositoryTest {
 	public void testCachingBehavior() throws Exception {
 		// setup
 		OnlineCrlRepository onlineCrlRepository = new OnlineCrlRepository();
-		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(
-				onlineCrlRepository);
+		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(onlineCrlRepository);
 
 		Date validationDate = new Date();
 
 		// operate
 		long t0 = System.currentTimeMillis();
-		cachedCrlRepository
-				.findCrl(new URI("http://crl.eid.belgium.be/belgium3.crl"),
-						null, validationDate);
+		cachedCrlRepository.findCrl(new URI("http://crl.eid.belgium.be/belgium3.crl"), null, validationDate);
 		long t1 = System.currentTimeMillis();
-		LOG.debug("dt: " + (t1 - t0));
-		LOG.debug("---------------------------------------------");
+		LOGGER.debug("dt: {} ms", (t1 - t0));
+		LOGGER.debug("---------------------------------------------");
 		t0 = System.currentTimeMillis();
-		cachedCrlRepository
-				.findCrl(new URI("http://crl.eid.belgium.be/belgium3.crl"),
-						null, validationDate);
+		cachedCrlRepository.findCrl(new URI("http://crl.eid.belgium.be/belgium3.crl"), null, validationDate);
 		t1 = System.currentTimeMillis();
-		LOG.debug("dt: " + (t1 - t0));
+		LOGGER.debug("dt: {} ms", (t1 - t0));
 	}
 }

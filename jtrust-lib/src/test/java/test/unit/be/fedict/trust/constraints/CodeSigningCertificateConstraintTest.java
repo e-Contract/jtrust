@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2012 FedICT.
+ * Copyright (C) 2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +19,7 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.security.KeyPair;
@@ -45,8 +46,7 @@ public class CodeSigningCertificateConstraintTest {
 	@Test
 	public void testCodeSigningCertificatePasses() throws Exception {
 		// setup
-		X509Certificate certificate = PKITestUtils
-				.loadCertificate("/code-signing-fedict.der");
+		X509Certificate certificate = PKITestUtils.loadCertificate("/code-signing-fedict.der");
 
 		// operate
 		this.testedInstance.check(certificate);
@@ -58,17 +58,15 @@ public class CodeSigningCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+				notAfter);
 
 		// operate & verify
 		try {
 			this.testedInstance.check(certificate);
 			fail();
 		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
-					e.getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
 		}
 	}
 }

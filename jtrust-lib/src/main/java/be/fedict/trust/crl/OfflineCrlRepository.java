@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -31,8 +31,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Off line CRL repository. This implementation receives a list of
@@ -44,8 +44,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class OfflineCrlRepository implements CrlRepository {
 
-	private static final Log LOG = LogFactory
-			.getLog(OfflineCrlRepository.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OfflineCrlRepository.class);
 
 	private final List<X509CRL> crls;
 
@@ -61,8 +60,7 @@ public class OfflineCrlRepository implements CrlRepository {
 	public OfflineCrlRepository(List<byte[]> encodedCrls)
 			throws CertificateException, NoSuchProviderException, CRLException {
 
-		CertificateFactory certificateFactory = CertificateFactory.getInstance(
-				"X.509", "BC");
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
 		this.crls = new LinkedList<>();
 		for (byte[] encodedCrl : encodedCrls) {
 			ByteArrayInputStream bais = new ByteArrayInputStream(encodedCrl);
@@ -71,23 +69,18 @@ public class OfflineCrlRepository implements CrlRepository {
 	}
 
 	@Override
-	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate,
-			Date validationDate) {
+	public X509CRL findCrl(URI crlUri, X509Certificate issuerCertificate, Date validationDate) {
 
 		List<X509CRL> matchingCrls = new LinkedList<>();
 		for (X509CRL crl : this.crls) {
-			if (crl.getIssuerX500Principal().equals(
-					issuerCertificate.getSubjectX500Principal())) {
-				LOG.debug("CRL found for issuer "
-						+ issuerCertificate.getSubjectX500Principal()
-								.toString());
+			if (crl.getIssuerX500Principal().equals(issuerCertificate.getSubjectX500Principal())) {
+				LOGGER.debug("CRL found for issuer {}", issuerCertificate.getSubjectX500Principal());
 				matchingCrls.add(crl);
 			}
 		}
 
 		if (matchingCrls.isEmpty()) {
-			LOG.debug("CRL not found for issuer "
-					+ issuerCertificate.getSubjectX500Principal().toString());
+			LOGGER.debug("CRL not found for issuer {}", issuerCertificate.getSubjectX500Principal());
 			return null;
 		}
 
@@ -95,7 +88,7 @@ public class OfflineCrlRepository implements CrlRepository {
 			return matchingCrls.get(0);
 		}
 
-		LOG.debug("multiple matching CRLs found");
+		LOGGER.debug("multiple matching CRLs found");
 		for (X509CRL crl : matchingCrls) {
 			if (isCrlInValidationDate(crl, validationDate)) {
 				return crl;
@@ -106,15 +99,15 @@ public class OfflineCrlRepository implements CrlRepository {
 
 	private boolean isCrlInValidationDate(X509CRL crl, Date validationDate) {
 		Date thisUpdate = crl.getThisUpdate();
-		LOG.debug("validation date: " + validationDate);
-		LOG.debug("CRL this update: " + thisUpdate);
+		LOGGER.debug("validation date: {}", validationDate);
+		LOGGER.debug("CRL this update: {}", thisUpdate);
 		if (thisUpdate.after(validationDate)) {
-			LOG.warn("CRL too young");
+			LOGGER.warn("CRL too young");
 			return false;
 		}
-		LOG.debug("CRL next update: " + crl.getNextUpdate());
+		LOGGER.debug("CRL next update: {}", crl.getNextUpdate());
 		if (validationDate.after(crl.getNextUpdate())) {
-			LOG.debug("CRL too old");
+			LOGGER.debug("CRL too old");
 			return false;
 		}
 		return true;

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2016-2018 e-Contract.be BVBA.
+ * Copyright (C) 2016-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,10 +25,10 @@ import java.security.Security;
 import java.security.cert.Certificate;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.BelgianTrustValidatorFactory;
@@ -46,7 +46,7 @@ import be.fedict.trust.repository.CertificateRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
 
-	private static final Log LOG = LogFactory.getLog(BelgianIdentityCardTrustValidatorTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BelgianIdentityCardTrustValidatorTest.class);
 
 	@Test
 	public void testValidity() throws Exception {
@@ -55,23 +55,17 @@ public class BelgianIdentityCardTrustValidatorTest {
 		keyStore.load(null);
 		Certificate[] authnCertificateChain = keyStore.getCertificateChain("Authentication");
 
-		LOG.debug("authn cert: " + authnCertificateChain[0]);
+		LOGGER.debug("authn cert: {}", authnCertificateChain[0]);
 
 		Security.addProvider(new BouncyCastleProvider());
 
 		NetworkConfig networkConfig = null;
-		// new NetworkConfig("proxy.yourict.net", 8080);
 		CertificateRepository certificateRepository = BelgianTrustValidatorFactory.createCertificateRepository();
 		TrustValidator trustValidator = new TrustValidator(certificateRepository);
 
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
 
-		// OverrideOnlineOcspRepository ocspRepository = new
-		// OverrideOnlineOcspRepository(
-		// networkConfig);
 		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(networkConfig);
-		// ocspRepository.overrideOCSP(new URI("http://ocsp.eid.belgium.be"),
-		// new URI("http://64.18.17.111"));
 
 		OnlineCrlRepository crlRepository = new OnlineCrlRepository(networkConfig);
 		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(crlRepository);
@@ -89,7 +83,7 @@ public class BelgianIdentityCardTrustValidatorTest {
 		keyStore.load(null);
 		Certificate[] certificateChain = keyStore.getCertificateChain("Signature");
 
-		LOG.debug("certificate: " + certificateChain[0]);
+		LOGGER.debug("certificate: {}", certificateChain[0]);
 
 		Security.addProvider(new BouncyCastleProvider());
 
@@ -113,6 +107,6 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 		File tmpFile = File.createTempFile("sign-cert-", ".der");
 		FileUtils.writeByteArrayToFile(tmpFile, certificateChain[0].getEncoded());
-		LOG.debug("sign cert file: " + tmpFile.getAbsolutePath());
+		LOGGER.debug("sign cert file: {}", tmpFile.getAbsolutePath());
 	}
 }

@@ -30,22 +30,22 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.Credentials;
 import be.fedict.trust.NetworkConfig;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Online CRL repository. This CRL repository implementation will download the
@@ -55,7 +55,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class OnlineCrlRepository implements CrlRepository {
 
-	private static final Log LOG = LogFactory.getLog(OnlineCrlRepository.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OnlineCrlRepository.class);
 
 	private final NetworkConfig networkConfig;
 
@@ -92,10 +92,10 @@ public class OnlineCrlRepository implements CrlRepository {
 		try {
 			return getCrl(crlUri);
 		} catch (CRLException e) {
-			LOG.debug("error parsing CRL: " + e.getMessage(), e);
+			LOGGER.debug("error parsing CRL: {}", e.getMessage(), e);
 			return null;
 		} catch (Exception e) {
-			LOG.error("find CRL error: " + e.getMessage(), e);
+			LOGGER.error("find CRL error: {}", e.getMessage(), e);
 			return null;
 		}
 	}
@@ -120,29 +120,29 @@ public class OnlineCrlRepository implements CrlRepository {
 		HttpClient httpClient = httpClientBuilder.build();
 
 		String downloadUrl = crlUri.toURL().toString();
-		LOG.debug("downloading CRL from: " + downloadUrl);
+		LOGGER.debug("downloading CRL from: {}", downloadUrl);
 		HttpGet httpGet = new HttpGet(downloadUrl);
 		httpGet.addHeader("User-Agent", "jTrust CRL Client");
 		HttpResponse httpResponse = httpClient.execute(httpGet);
 		StatusLine statusLine = httpResponse.getStatusLine();
 		int statusCode = statusLine.getStatusCode();
 		if (HttpURLConnection.HTTP_OK != statusCode) {
-			LOG.debug("HTTP status code: " + statusCode);
+			LOGGER.debug("HTTP status code: {}", statusCode);
 			return null;
 		}
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
-		LOG.debug("certificate factory provider: " + certificateFactory.getProvider().getName());
-		LOG.debug("certificate factory class: " + certificateFactory.getClass().getName());
+		LOGGER.debug("certificate factory provider: {}", certificateFactory.getProvider().getName());
+		LOGGER.debug("certificate factory class: {}", certificateFactory.getClass().getName());
 		HttpEntity httpEntity = httpResponse.getEntity();
 		X509CRL crl = (X509CRL) certificateFactory.generateCRL(httpEntity.getContent());
 		httpGet.releaseConnection();
 		if (null == crl) {
-			LOG.error("null CRL");
+			LOGGER.error("null CRL");
 			return null;
 		}
-		LOG.debug("X509CRL class: " + crl.getClass().getName());
-		LOG.debug("CRL size: " + crl.getEncoded().length + " bytes");
+		LOGGER.debug("X509CRL class: {}", crl.getClass().getName());
+		LOGGER.debug("CRL size: {} bytes", crl.getEncoded().length);
 		return crl;
 	}
 }

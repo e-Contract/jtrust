@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,8 +25,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.constraints.CertificateConstraint;
 import be.fedict.trust.linker.TrustLinker;
@@ -49,7 +49,7 @@ import be.fedict.trust.revocation.RevocationData;
  */
 public class TrustValidator {
 
-	private static final Log LOG = LogFactory.getLog(TrustValidator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TrustValidator.class);
 
 	private final CertificateRepository certificateRepository;
 
@@ -280,12 +280,12 @@ public class TrustValidator {
 			}
 		}
 		if (expiredMode) {
-			LOG.debug("expired certificate validation mode");
+			LOGGER.debug("expired certificate validation mode");
 		}
 
 		int certIdx = certificatePath.size() - 1;
 		X509Certificate certificate = certificatePath.get(certIdx);
-		LOG.debug("verifying root certificate: " + certificate.getSubjectX500Principal());
+		LOGGER.debug("verifying root certificate: {}", certificate.getSubjectX500Principal());
 		checkSelfSigned(certificate);
 		// check certificate signature
 		checkSignatureAlgorithm(certificate.getSigAlgName(), validationDate);
@@ -295,7 +295,7 @@ public class TrustValidator {
 
 		while (certIdx >= 0) {
 			X509Certificate childCertificate = certificatePath.get(certIdx);
-			LOG.debug("verifying certificate: " + childCertificate.getSubjectX500Principal());
+			LOGGER.debug("verifying certificate: {}", childCertificate.getSubjectX500Principal());
 			certIdx--;
 			checkTrustLink(childCertificate, certificate, validationDate);
 			certificate = childCertificate;
@@ -303,7 +303,7 @@ public class TrustValidator {
 
 		for (CertificateConstraint certificateConstraint : this.certificateConstraints) {
 			String certificateConstraintName = certificateConstraint.getClass().getSimpleName();
-			LOG.debug("certificate constraint check: " + certificateConstraintName);
+			LOGGER.debug("certificate constraint check: {}", certificateConstraintName);
 			try {
 				certificateConstraint.check(certificate);
 			} catch (TrustLinkerResultException e) {
@@ -326,22 +326,22 @@ public class TrustValidator {
 
 		boolean sometrustLinkerTrusts = false;
 		for (TrustLinker trustLinker : this.trustLinkers) {
-			LOG.debug("trying trust linker: " + trustLinker.getClass().getSimpleName());
+			LOGGER.debug("trying trust linker: {}", trustLinker.getClass().getSimpleName());
 			TrustLinkerResult trustLinkerResult;
 			try {
 				trustLinkerResult = trustLinker.hasTrustLink(childCertificate, certificate, validationDate,
 						this.revocationData, this.algorithmPolicy);
 			} catch (TrustLinkerResultException e) {
 				// we let this type of exception pass as is
-				LOG.warn("trust linker exception: " + e.getMessage(), e);
+				LOGGER.warn("trust linker exception: " + e.getMessage(), e);
 				throw e;
 			} catch (Exception e) {
-				LOG.warn("trust linker error: " + e.getMessage(), e);
+				LOGGER.warn("trust linker error: " + e.getMessage(), e);
 				throw new TrustLinkerResultException(TrustLinkerResultReason.UNSPECIFIED,
 						"trust linker error: " + e.getMessage(), e);
 			}
 			if (null == trustLinkerResult) {
-				LOG.warn("trust linker result should not be NULL");
+				LOGGER.warn("trust linker result should not be NULL");
 			}
 			if (TrustLinkerResult.TRUSTED == trustLinkerResult) {
 				// we don't break as there still might be a trust linker that
@@ -352,7 +352,7 @@ public class TrustValidator {
 		if (false == sometrustLinkerTrusts) {
 			String message = "no trust between " + childCertificate.getSubjectX500Principal() + " and "
 					+ certificate.getSubjectX500Principal();
-			LOG.warn(message);
+			LOGGER.warn(message);
 			throw new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST, message);
 		}
 	}
@@ -360,32 +360,32 @@ public class TrustValidator {
 	private void checkSelfSignedTrust(X509Certificate certificate, Date validationDate, boolean expiredMode)
 			throws TrustLinkerResultException {
 		if (certificate.getNotBefore().after(validationDate)) {
-			LOG.error("certificate not yet valid");
-			LOG.error("validation date: " + validationDate);
-			LOG.error("not before: " + certificate.getNotBefore());
-			LOG.error("not after: " + certificate.getNotAfter());
+			LOGGER.error("certificate not yet valid");
+			LOGGER.error("validation date: {}", validationDate);
+			LOGGER.error("not before: {}", certificate.getNotBefore());
+			LOGGER.error("not after: {}", certificate.getNotAfter());
 			throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 					"certificate not yet valid");
 		}
 		if (certificate.getNotAfter().before(validationDate)) {
 			if (!expiredMode) {
-				LOG.error("certificate expired");
-				LOG.error("validation date: " + validationDate);
-				LOG.error("not before: " + certificate.getNotBefore());
-				LOG.error("not after: " + certificate.getNotAfter());
+				LOGGER.error("certificate expired");
+				LOGGER.error("validation date: {}", validationDate);
+				LOGGER.error("not before: {}", certificate.getNotBefore());
+				LOGGER.error("not after: {}", certificate.getNotAfter());
 				throw new TrustLinkerResultException(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL,
 						"certificate expired");
 			} else {
-				LOG.warn("certificate expired");
-				LOG.warn("validation date: " + validationDate);
-				LOG.warn("not before: " + certificate.getNotBefore());
-				LOG.warn("not after: " + certificate.getNotAfter());
+				LOGGER.warn("certificate expired");
+				LOGGER.warn("validation date: {}", validationDate);
+				LOGGER.warn("not before: {}", certificate.getNotBefore());
+				LOGGER.warn("not after: {}", certificate.getNotAfter());
 			}
 		}
 		if (this.certificateRepository.isTrustPoint(certificate)) {
 			return;
 		}
-		LOG.warn("self-signed certificate not in repository: " + certificate.getSubjectX500Principal());
+		LOGGER.warn("self-signed certificate not in repository: {}", certificate.getSubjectX500Principal());
 		throw new TrustLinkerResultException(TrustLinkerResultReason.ROOT,
 				"self-signed certificate not in repository: " + certificate.getSubjectX500Principal());
 	}

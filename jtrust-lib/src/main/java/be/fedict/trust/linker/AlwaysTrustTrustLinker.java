@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2019 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -21,8 +21,8 @@ package be.fedict.trust.linker;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.revocation.RevocationData;
@@ -36,13 +36,13 @@ import be.fedict.trust.revocation.RevocationData;
  */
 public class AlwaysTrustTrustLinker implements TrustLinker {
 
-	private static final Log LOG = LogFactory.getLog(AlwaysTrustTrustLinker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlwaysTrustTrustLinker.class);
 
 	@Override
 	public TrustLinkerResult hasTrustLink(X509Certificate childCertificate, X509Certificate certificate,
 			Date validationDate, RevocationData revocationData, AlgorithmPolicy algorithmPolicy)
 			throws TrustLinkerResultException, Exception {
-		LOG.debug("trusting certificate as is: " + certificate.getSubjectX500Principal());
+		LOGGER.warn("trusting certificate as is: {}", certificate.getSubjectX500Principal());
 		return TrustLinkerResult.TRUSTED;
 	}
 }
