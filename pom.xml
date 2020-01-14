@@ -17,7 +17,7 @@
 		</license>
 	</licenses>
 	<organization>
-		<name>e-Contract.be BVBA</name>
+		<name>e-Contract.be BV</name>
 		<url>https://www.e-contract.be/</url>
 	</organization>
 	<url>https://github.com/e-Contract/jtrust</url>
@@ -113,6 +113,11 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>5.2.4</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
