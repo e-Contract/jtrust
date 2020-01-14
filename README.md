@@ -23,8 +23,8 @@ https://www.e-contract.be/sites/jtrust/jtrust-lib/
 ## Requirements
 
 The following is required for compiling the jTrust software:
-* Oracle Java 1.8.0_162
-* Apache Maven 3.5.3+
+* Oracle Java 1.8.0_232
+* Apache Maven 3.6.3+
 
 
 ## Build
