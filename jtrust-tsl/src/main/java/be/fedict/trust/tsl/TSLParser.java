@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2011 FedICT.
- * Copyright (C) 2019 e-Contract.be BVBA.
+ * Copyright (C) 2019-2020 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -20,10 +20,8 @@
 package be.fedict.trust.tsl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -74,44 +72,76 @@ public class TSLParser {
 
 	private final CertificateFactory certificateFactory;
 
+	private final String tslLocation;
+
 	/**
 	 * Main constructor.
 	 * 
 	 * @param tslInputStream
 	 * @throws CertificateException
 	 */
-	public TSLParser(InputStream tslInputStream) throws CertificateException {
+	public TSLParser(InputStream tslInputStream) {
+		this.tslLocation = "unknown";
 		this.tslInputStream = tslInputStream;
 		this.tslConsumers = new LinkedList<TSLConsumer>();
 		this.tslParserState = new TSLParserState();
-		this.certificateFactory = CertificateFactory.getInstance("X.509");
+		try {
+			this.certificateFactory = CertificateFactory.getInstance("X.509");
+		} catch (CertificateException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public TSLParser(String location) throws MalformedURLException, IOException, CertificateException {
+	public TSLParser(String location) {
+		this.tslLocation = location;
 		this.tslParserState = new TSLParserState();
 		this.tslParserState.addParsedLocation(location);
-		this.tslInputStream = new URL(location).openStream();
+		this.tslInputStream = null;
 		this.tslConsumers = new LinkedList<>();
-		this.certificateFactory = CertificateFactory.getInstance("X.509");
+		try {
+			this.certificateFactory = CertificateFactory.getInstance("X.509");
+		} catch (CertificateException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public TSLParser(String location, TSLParserState tslParserState, List<TSLConsumer> tslConsumers)
-			throws MalformedURLException, IOException, CertificateException {
+	public TSLParser(String location, TSLParserState tslParserState, List<TSLConsumer> tslConsumers) {
+		this.tslLocation = location;
 		this.tslParserState = tslParserState;
 		this.tslParserState.addParsedLocation(location);
-		this.tslInputStream = new URL(location).openStream();
 		this.tslConsumers = tslConsumers;
-		this.certificateFactory = CertificateFactory.getInstance("X.509");
+		this.tslInputStream = null;
+		try {
+			this.certificateFactory = CertificateFactory.getInstance("X.509");
+		} catch (CertificateException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void addTSLConsumer(TSLConsumer tslConsumer) {
 		this.tslConsumers.add(tslConsumer);
 	}
 
-	public void parseTrustedList() throws Exception {
+	public void parseTrustedList() {
+		try {
+			_parseTrustedList();
+		} catch (Exception e) {
+			for (TSLConsumer tslConsumer : this.tslConsumers) {
+				tslConsumer.error(this.tslLocation, e);
+			}
+		}
+	}
+
+	public void _parseTrustedList() throws Exception {
+		InputStream inputStream;
+		if (null == this.tslInputStream) {
+			inputStream = new URL(this.tslLocation).openStream();
+		} else {
+			inputStream = this.tslInputStream;
+		}
 		TrustStatusListType trustStatusList;
 		try {
-			trustStatusList = parseTslInputStream();
+			trustStatusList = parseTslInputStream(inputStream);
 		} catch (JAXBException e) {
 			throw new RuntimeException("TSL parsing error: " + e.getMessage(), e);
 		}
@@ -201,10 +231,10 @@ public class TSLParser {
 		}
 	}
 
-	private TrustStatusListType parseTslInputStream() throws JAXBException {
+	private TrustStatusListType parseTslInputStream(InputStream inputStream) throws JAXBException {
 		Unmarshaller unmarshaller = getUnmarshaller();
 		JAXBElement<TrustStatusListType> jaxbElement = (JAXBElement<TrustStatusListType>) unmarshaller
-				.unmarshal(this.tslInputStream);
+				.unmarshal(inputStream);
 		TrustStatusListType trustServiceStatusList = jaxbElement.getValue();
 		return trustServiceStatusList;
 	}

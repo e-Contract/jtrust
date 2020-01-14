@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2011 FedICT.
- * Copyright (C) 2019 e-Contract.be BVBA.
+ * Copyright (C) 2019-2020 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -38,5 +38,7 @@ public interface TSLConsumer {
 	 */
 	void setTSLSequenceNumber(BigInteger tslSequenceNumber);
 
-	void service(String serviceTypeIdentifier, X509Certificate serviceCertificate);
+	void service(String serviceTypeIdentifier, X509Certificate serviceCertificate) throws Exception;
+
+	void error(String tslLocation, Exception e);
 }

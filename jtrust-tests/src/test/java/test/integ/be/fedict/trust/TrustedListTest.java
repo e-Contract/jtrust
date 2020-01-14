@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2019 e-Contract.be BVBA.
+ * Copyright (C) 2019-2020 e-Contract.be BVBA.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,6 +18,8 @@
 
 package test.integ.be.fedict.trust;
 
+import static org.junit.Assert.fail;
+
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Comparator;
@@ -27,6 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.PolicyInformation;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +63,38 @@ public class TrustedListTest {
 		for (Map.Entry<String, Integer> entry : entryList) {
 			LOGGER.debug("service: {} - count {}", entry.getKey(), entry.getValue());
 		}
+
+		Map<String, Integer> signatureAlgNameHistogram = testTSLConsumer.getSignatureAlgNameHistorgram();
+		entryList = new LinkedList<>(signatureAlgNameHistogram.entrySet());
+		entryList.sort(new HistogramEntryComparator());
+		for (Map.Entry<String, Integer> entry : entryList) {
+			LOGGER.debug("signature alg name: {} - count {}", entry.getKey(), entry.getValue());
+		}
+
+		Map<String, Integer> cnHistogram = testTSLConsumer.getCNHistogram();
+		entryList = new LinkedList<>(cnHistogram.entrySet());
+		entryList.sort(new HistogramEntryComparator());
+		for (Map.Entry<String, Integer> entry : entryList) {
+			LOGGER.debug("CN field: {} - count {}", entry.getKey(), entry.getValue());
+		}
+
+		Map<String, Integer> extensionHistogram = testTSLConsumer.getExtensionHistogram();
+		entryList = new LinkedList<>(extensionHistogram.entrySet());
+		entryList.sort(new HistogramEntryComparator());
+		for (Map.Entry<String, Integer> entry : entryList) {
+			LOGGER.debug("extension OID: {} - count {}", entry.getKey(), entry.getValue());
+		}
+
+		Map<String, Integer> policyHistogram = testTSLConsumer.getPolicyHistogram();
+		entryList = new LinkedList<>(policyHistogram.entrySet());
+		entryList.sort(new HistogramEntryComparator());
+		for (Map.Entry<String, Integer> entry : entryList) {
+			LOGGER.debug("policy OID: {} - count {}", entry.getKey(), entry.getValue());
+		}
+
+		for (TestTSLConsumer.TSLError tslError : testTSLConsumer.errors) {
+			LOGGER.debug("TSL error on " + tslError.tslLocation + ": " + tslError.error.getMessage());
+		}
 	}
 
 	private final class HistogramEntryComparator implements Comparator<Map.Entry<String, Integer>> {
@@ -66,12 +109,48 @@ public class TrustedListTest {
 
 		private final Map<String, Integer> serviceTypeIdentifierHistogram;
 
+		private final Map<String, Integer> signatureAlgNameHistogram;
+
+		private final Map<String, Integer> cnHistogram;
+
+		private final Map<String, Integer> extensionHistogram;
+
+		private final Map<String, Integer> policyHistogram;
+
+		private final List<TSLError> errors;
+
+		private final class TSLError {
+			String tslLocation;
+			Exception error;
+		}
+
 		public TestTSLConsumer() {
 			this.serviceTypeIdentifierHistogram = new HashMap<>();
+			this.signatureAlgNameHistogram = new HashMap<>();
+			this.cnHistogram = new HashMap<>();
+			this.extensionHistogram = new HashMap<>();
+			this.policyHistogram = new HashMap<>();
+			this.errors = new LinkedList<>();
 		}
 
 		public Map<String, Integer> getServiceTypeIdentifierHistogram() {
 			return this.serviceTypeIdentifierHistogram;
+		}
+
+		public Map<String, Integer> getSignatureAlgNameHistorgram() {
+			return this.signatureAlgNameHistogram;
+		}
+
+		public Map<String, Integer> getCNHistogram() {
+			return this.cnHistogram;
+		}
+
+		public Map<String, Integer> getExtensionHistogram() {
+			return this.extensionHistogram;
+		}
+
+		public Map<String, Integer> getPolicyHistogram() {
+			return this.policyHistogram;
 		}
 
 		@Override
@@ -79,7 +158,7 @@ public class TrustedListTest {
 		}
 
 		@Override
-		public void service(String serviceTypeIdentifier, X509Certificate serviceCertificate) {
+		public void service(String serviceTypeIdentifier, X509Certificate serviceCertificate) throws Exception {
 			Integer count = this.serviceTypeIdentifierHistogram.get(serviceTypeIdentifier);
 			if (count == null) {
 				count = 1;
@@ -87,6 +166,73 @@ public class TrustedListTest {
 				count++;
 			}
 			this.serviceTypeIdentifierHistogram.put(serviceTypeIdentifier, count);
+			if (!"http://uri.etsi.org/TrstSvc/Svctype/CA/QC".equals(serviceTypeIdentifier)) {
+				return;
+			}
+			if (null == serviceCertificate) {
+				fail("no service certificate");
+				return;
+			}
+
+			String sigAlgName = serviceCertificate.getSigAlgName();
+			count = this.signatureAlgNameHistogram.get(sigAlgName);
+			if (null == count) {
+				count = 1;
+			} else {
+				count++;
+			}
+			this.signatureAlgNameHistogram.put(sigAlgName, count);
+
+			X509CertificateHolder certificateHolder = new JcaX509CertificateHolder(serviceCertificate);
+			X500Name x500name = certificateHolder.getSubject();
+			for (RDN rdn : x500name.getRDNs()) {
+				for (AttributeTypeAndValue attributeTypeAndValue : rdn.getTypesAndValues()) {
+					ASN1ObjectIdentifier type = attributeTypeAndValue.getType();
+					String typeId = type.getId();
+					count = this.cnHistogram.get(typeId);
+					if (null == count) {
+						count = 1;
+					} else {
+						count++;
+					}
+					this.cnHistogram.put(typeId, count);
+				}
+			}
+
+			List<ASN1ObjectIdentifier> extensionOids = certificateHolder.getExtensionOIDs();
+			for (ASN1ObjectIdentifier extensionOid : extensionOids) {
+				String oid = extensionOid.getId();
+				count = this.extensionHistogram.get(oid);
+				if (null == count) {
+					count = 1;
+				} else {
+					count++;
+				}
+				this.extensionHistogram.put(oid, count);
+				if (oid.equals("2.5.29.32")) {
+					Extension certificatePoliciesExtension = certificateHolder.getExtension(extensionOid);
+					CertificatePolicies certificatePolicies = CertificatePolicies
+							.getInstance(certificatePoliciesExtension.getParsedValue());
+					for (PolicyInformation policyInformation : certificatePolicies.getPolicyInformation()) {
+						String certPolicyId = policyInformation.getPolicyIdentifier().getId();
+						count = this.policyHistogram.get(certPolicyId);
+						if (null == count) {
+							count = 1;
+						} else {
+							count++;
+						}
+						this.policyHistogram.put(certPolicyId, count);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void error(String tslLocation, Exception e) {
+			TSLError tslError = new TSLError();
+			tslError.error = e;
+			tslError.tslLocation = tslLocation;
+			this.errors.add(tslError);
 		}
 	}
 }
