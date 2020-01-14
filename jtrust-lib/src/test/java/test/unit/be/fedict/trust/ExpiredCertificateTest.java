@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -48,53 +48,51 @@ public class ExpiredCertificateTest {
 	@Test
 	public void testExpiredRootCA() throws Exception {
 		Clock clock = new FixedClock(new DateTime().minusYears(10));
-		World world = new World(clock);
-		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
-		world.start();
+		try (World world = new World(clock)) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			world.start();
 
-		X509Certificate rootCert = certificationAuthority.getCertificate();
+			X509Certificate rootCert = certificationAuthority.getCertificate();
 
-		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
-		memoryCertificateRepository.addTrustPoint(rootCert);
-		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
-		trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().toDate());
+			trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().toDate());
 
-		trustValidator.isTrusted(Collections.singletonList(rootCert), true);
-
-		world.stop();
+			trustValidator.isTrusted(Collections.singletonList(rootCert), true);
+		}
 	}
 
 	@Test
 	public void testExpiredCRL() throws Exception {
 		Clock clock = new FixedClock(new DateTime().minusYears(10));
-		World world = new World(clock);
-		CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
-		rootCertificationAuthority.addRevocationService(new CRLRevocationService());
-		CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
-				rootCertificationAuthority);
-		world.start();
+		try (World world = new World(clock)) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+					rootCertificationAuthority);
+			world.start();
 
-		X509Certificate rootCert = rootCertificationAuthority.getCertificate();
-		X509Certificate cert = certificationAuthority.getCertificate();
-		List<X509Certificate> certChain = new LinkedList<>();
-		certChain.add(cert);
-		certChain.add(rootCert);
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate cert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(cert);
+			certChain.add(rootCert);
 
-		MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
-		memoryCertificateRepository.addTrustPoint(rootCert);
-		TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
-		trustValidatorDecorator.addTrustLinkerConfigWithoutRevocationStatus(trustValidator);
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addTrustLinkerConfigWithoutRevocationStatus(trustValidator);
 
-		trustValidator.isTrusted(certChain, clock.getTime().toDate());
+			trustValidator.isTrusted(certChain, clock.getTime().toDate());
 
-		DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
-		trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate(), true);
+			DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
+			trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate(), true);
 
-		trustValidator.isTrusted(certChain, true);
-
-		world.stop();
+			trustValidator.isTrusted(certChain, true);
+		}
 	}
 }

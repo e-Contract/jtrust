@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.mortbay.jetty.testing.ServletTester;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A world manages all entities that have endpoints (like CRL, OCSL, TSA). After
@@ -31,7 +33,9 @@ import org.mortbay.jetty.testing.ServletTester;
  * @author Frank Cornelis
  *
  */
-public class World {
+public class World implements AutoCloseable {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(World.class);
 
 	private final List<EndpointProvider> endpointProviders;
 
@@ -51,8 +55,7 @@ public class World {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param clock
-	 *            the clock to be used by the unit test PKI world.
+	 * @param clock the clock to be used by the unit test PKI world.
 	 */
 	public World(Clock clock) {
 		this.clock = clock;
@@ -120,5 +123,13 @@ public class World {
 	 */
 	public boolean isRunning() {
 		return this.running;
+	}
+
+	@Override
+	public void close() throws Exception {
+		LOGGER.debug("close");
+		if (this.running) {
+			stop();
+		}
 	}
 }
