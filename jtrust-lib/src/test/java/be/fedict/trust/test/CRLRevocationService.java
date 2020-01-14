@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -153,7 +153,8 @@ public class CRLRevocationService implements RevocationService {
 						new CRLNumber(crlRevocationService.crlNumber));
 				crlRevocationService.crlNumber = crlRevocationService.crlNumber.add(BigInteger.ONE);
 
-				AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+				AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+						.find(certificationAuthority.getSignatureAlgorithm());
 				AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 				AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
 

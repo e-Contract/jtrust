@@ -70,9 +70,27 @@ public class ScenarioTest {
 	}
 
 	@Test
+	public void testRootCA_SHA256withRSA() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withRSA");
+			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			trustValidator.isTrusted(Collections.singletonList(rootCert));
+		}
+	}
+
+	@Test
 	public void testRevocation() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withRSA");
 			certificationAuthority.addRevocationService(new CRLRevocationService());
 			world.start();
 
@@ -113,6 +131,7 @@ public class ScenarioTest {
 	public void testRevocationOCSP() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withRSA");
 			certificationAuthority.addRevocationService(new OCSPRevocationService());
 			world.start();
 
@@ -194,9 +213,11 @@ public class ScenarioTest {
 	public void testTwoCAs() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.setSignatureAlgorithm("SHA256withRSA");
 			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
 					rootCertificationAuthority);
+			certificationAuthority.setSignatureAlgorithm("SHA256withRSA");
 			world.start();
 
 			X509Certificate rootCert = rootCertificationAuthority.getCertificate();

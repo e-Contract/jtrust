@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2019 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -101,9 +101,8 @@ public class OCSPRevocationService implements RevocationService {
 	/**
 	 * Constructor.
 	 * 
-	 * @param withOcspResponderCertificate
-	 *            set to <code>true</code> to have an explicit OCSP responder
-	 *            certificate.
+	 * @param withOcspResponderCertificate set to <code>true</code> to have an
+	 *                                     explicit OCSP responder certificate.
 	 */
 	public OCSPRevocationService(boolean withOcspResponderCertificate) {
 		this.identifier = UUID.randomUUID().toString();
@@ -213,8 +212,9 @@ public class OCSPRevocationService implements RevocationService {
 								ocspRevocationService.certificationAuthority.getCertificate().getEncoded()) };
 			}
 
-			ContentSigner contentSigner = new JcaContentSignerBuilder("SHA1withRSA")
-					.build(ocspRevocationService.ocspResponderPrivateKey);
+			ContentSigner contentSigner = new JcaContentSignerBuilder(
+					ocspRevocationService.certificationAuthority.getSignatureAlgorithm())
+							.build(ocspRevocationService.ocspResponderPrivateKey);
 			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, now.toDate());
 
 			// response generation

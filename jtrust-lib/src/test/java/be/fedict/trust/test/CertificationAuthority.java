@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -82,14 +82,14 @@ public class CertificationAuthority {
 	// value is revocation date
 	private final Map<X509Certificate, Date> revokedCertificates;
 
+	private String signatureAlgorithm;
+
 	/**
 	 * Creates a new certification authority, issued by another CA.
 	 * 
 	 * @param world
-	 * @param name
-	 *            the DN of this CA.
-	 * @param issuer
-	 *            the issuing CA.
+	 * @param name   the DN of this CA.
+	 * @param issuer the issuing CA.
 	 */
 	public CertificationAuthority(World world, String name, CertificationAuthority issuer) {
 		this.world = world;
@@ -98,17 +98,35 @@ public class CertificationAuthority {
 		this.revocationServices = new LinkedList<>();
 		this.issuedCertificates = new LinkedList<>();
 		this.revokedCertificates = new HashMap<>();
+		this.signatureAlgorithm = "SHA1withRSA";
 	}
 
 	/**
 	 * Creates a root certification authority.
 	 * 
 	 * @param world
-	 * @param name
-	 *            the DN of the CA.
+	 * @param name  the DN of the CA.
 	 */
 	public CertificationAuthority(World world, String name) {
 		this(world, name, null);
+	}
+
+	/**
+	 * Gives back the used signature algorithm for issuing certificates and such.
+	 * 
+	 * @return
+	 */
+	public String getSignatureAlgorithm() {
+		return this.signatureAlgorithm;
+	}
+
+	/**
+	 * Sets the signature algorithm for issing certificates and such.
+	 * 
+	 * @param signatureAlgorithm
+	 */
+	public void setSignatureAlgorithm(String signatureAlgorithm) {
+		this.signatureAlgorithm = signatureAlgorithm;
 	}
 
 	/**
@@ -144,10 +162,8 @@ public class CertificationAuthority {
 	/**
 	 * Issues another CA, signed by this CA.
 	 * 
-	 * @param publicKey
-	 *            the public key of the new CA.
-	 * @param name
-	 *            the DN of the new CA.
+	 * @param publicKey the public key of the new CA.
+	 * @param name      the DN of the new CA.
 	 * @return the new CA certificate.
 	 * @throws Exception
 	 */
@@ -186,7 +202,7 @@ public class CertificationAuthority {
 			revocationService.addExtension(x509v3CertificateBuilder);
 		}
 
-		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
 		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
@@ -308,7 +324,7 @@ public class CertificationAuthority {
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.cRLSign | KeyUsage.keyCertSign);
 		x509v3CertificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
 
-		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
 		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
@@ -329,10 +345,8 @@ public class CertificationAuthority {
 	/**
 	 * Issues an OCSP Responder certificate.
 	 * 
-	 * @param publicKey
-	 *            the public key of the OCSP responder.
-	 * @param name
-	 *            the DN of the OCSP responder.
+	 * @param publicKey the public key of the OCSP responder.
+	 * @param name      the DN of the OCSP responder.
 	 * @return
 	 * @throws Exception
 	 */
@@ -372,7 +386,7 @@ public class CertificationAuthority {
 		x509v3CertificateBuilder.addExtension(Extension.extendedKeyUsage, true,
 				new ExtendedKeyUsage(KeyPurposeId.id_kp_OCSPSigning));
 
-		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
 		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
@@ -393,10 +407,8 @@ public class CertificationAuthority {
 	/**
 	 * Issues a timestamp authority certificate.
 	 * 
-	 * @param publicKey
-	 *            the public key of the TSA.
-	 * @param name
-	 *            the DN of the TSA.
+	 * @param publicKey the public key of the TSA.
+	 * @param name      the DN of the TSA.
 	 * @return
 	 * @throws Exception
 	 */
@@ -435,7 +447,7 @@ public class CertificationAuthority {
 		x509v3CertificateBuilder.addExtension(Extension.extendedKeyUsage, true,
 				new ExtendedKeyUsage(KeyPurposeId.id_kp_timeStamping));
 
-		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
 		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
@@ -456,10 +468,8 @@ public class CertificationAuthority {
 	/**
 	 * Issues a signing end-entity certificate.
 	 * 
-	 * @param publicKey
-	 *            the public key of the end-entity certificate.
-	 * @param name
-	 *            the DN of the end-entity certificate.
+	 * @param publicKey the public key of the end-entity certificate.
+	 * @param name      the DN of the end-entity certificate.
 	 * @return
 	 * @throws Exception
 	 */
@@ -476,12 +486,9 @@ public class CertificationAuthority {
 	/**
 	 * Issues a signing end-entity certificate.
 	 * 
-	 * @param publicKey
-	 *            the public key of the end-entity certificate.
-	 * @param name
-	 *            the DN of the end-entity certificate.
-	 * @param notAfter
-	 *            expiration date of issued certificate.
+	 * @param publicKey the public key of the end-entity certificate.
+	 * @param name      the DN of the end-entity certificate.
+	 * @param notAfter  expiration date of issued certificate.
 	 * @return
 	 * @throws Exception
 	 */
@@ -522,7 +529,7 @@ public class CertificationAuthority {
 		vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcSSCD));
 		x509v3CertificateBuilder.addExtension(Extension.qCStatements, true, new DERSequence(vec));
 
-		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA");
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
 		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
