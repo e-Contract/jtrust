@@ -53,6 +53,7 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
 
@@ -207,7 +208,12 @@ public class CertificationAuthority {
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
 
-		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		ContentSigner contentSigner;
+		if (this.signatureAlgorithm.contains("RSA")) {
+			contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		} else {
+			contentSigner = new BcECContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		}
 		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
 
 		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
@@ -266,7 +272,11 @@ public class CertificationAuthority {
 			// make sure that the issuer is already issued
 			this.issuer.getCertificate();
 		}
-		this.keyPair = PKITestUtils.generateKeyPair();
+		if (this.signatureAlgorithm.contains("RSA")) {
+			this.keyPair = PKITestUtils.generateKeyPair();
+		} else {
+			this.keyPair = PKITestUtils.generateKeyPair("EC");
+		}
 		if (this.issuer == null) {
 			this.certificate = generateSelfSignedCertificate();
 		} else {
@@ -329,7 +339,12 @@ public class CertificationAuthority {
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
 
-		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		ContentSigner contentSigner;
+		if (this.signatureAlgorithm.contains("RSA")) {
+			contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		} else {
+			contentSigner = new BcECContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		}
 		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
 
 		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
@@ -391,7 +406,12 @@ public class CertificationAuthority {
 		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
 				.createKey(this.keyPair.getPrivate().getEncoded());
 
-		ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		ContentSigner contentSigner;
+		if (this.signatureAlgorithm.contains("RSA")) {
+			contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		} else {
+			contentSigner = new BcECContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		}
 		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
 
 		byte[] encodedCertificate = x509CertificateHolder.getEncoded();

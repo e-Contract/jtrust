@@ -57,6 +57,7 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.joda.time.DateTime;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -158,8 +159,12 @@ public class CRLRevocationService implements RevocationService {
 				AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 				AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory.createKey(caPrivateKey.getEncoded());
 
-				ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
-						.build(asymmetricKeyParameter);
+				ContentSigner contentSigner;
+				if (certificationAuthority.getSignatureAlgorithm().contains("RSA")) {
+					contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+				} else {
+					contentSigner = new BcECContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+				}
 
 				X509CRLHolder x509crlHolder = x509v2crlBuilder.build(contentSigner);
 				byte[] crlValue = x509crlHolder.getEncoded();

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,6 +36,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 import java.util.LinkedList;
@@ -350,10 +351,22 @@ public class PKITestUtils {
 		return generateKeyPair(1024);
 	}
 
+	public static KeyPair generateKeyPair(String keyAlgorithm) throws Exception {
+		return generateKeyPair(1024, keyAlgorithm);
+	}
+
 	public static KeyPair generateKeyPair(int keySize) throws Exception {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		return generateKeyPair(keySize, "RSA");
+	}
+
+	public static KeyPair generateKeyPair(int keySize, String keyAlgorithm) throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyAlgorithm);
 		SecureRandom random = new SecureRandom();
-		keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), random);
+		if ("RSA".equals(keyAlgorithm)) {
+			keyPairGenerator.initialize(new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4), random);
+		} else {
+			keyPairGenerator.initialize(new ECGenParameterSpec("secp384r1"));
+		}
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
 		return keyPair;
 	}

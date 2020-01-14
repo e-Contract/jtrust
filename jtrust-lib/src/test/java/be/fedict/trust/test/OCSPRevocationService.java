@@ -140,7 +140,13 @@ public class OCSPRevocationService implements RevocationService {
 	 */
 	public void reissueCertificate(String dn) throws Exception {
 		if (this.withOcspResponderCertificate) {
-			KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair ocspResponderKeyPair;
+			if (this.certificationAuthority.getSignatureAlgorithm().contains("RSA")) {
+				ocspResponderKeyPair = PKITestUtils.generateKeyPair();
+			} else {
+				ocspResponderKeyPair = PKITestUtils.generateKeyPair("EC");
+			}
+
 			this.ocspResponderPublicKey = ocspResponderKeyPair.getPublic();
 			this.ocspResponderPrivateKey = ocspResponderKeyPair.getPrivate();
 			this.ocspResponderCertificate = this.certificationAuthority.issueOCSPResponder(this.ocspResponderPublicKey,
@@ -164,7 +170,7 @@ public class OCSPRevocationService implements RevocationService {
 			try {
 				_doPost(request, response);
 			} catch (Exception e) {
-				LOG.error(e);
+				LOG.error("OCSP error: " + e.getMessage(), e);
 			}
 		}
 

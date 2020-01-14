@@ -32,6 +32,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -47,6 +49,8 @@ import be.fedict.trust.test.PKITestUtils;
 import be.fedict.trust.test.World;
 
 public class ScenarioTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioTest.class);
 
 	@BeforeClass
 	public static void oneTimeSetUp() throws Exception {
@@ -70,6 +74,26 @@ public class ScenarioTest {
 	}
 
 	@Test
+	public void testUntrustedRoot() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			try {
+				trustValidator.isTrusted(Collections.singletonList(rootCert));
+				fail();
+			} catch (TrustLinkerResultException e) {
+				// expected
+			}
+		}
+	}
+
+	@Test
 	public void testRootCA_SHA256withRSA() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
@@ -77,6 +101,24 @@ public class ScenarioTest {
 			world.start();
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			trustValidator.isTrusted(Collections.singletonList(rootCert));
+		}
+	}
+
+	@Test
+	public void testRootCA_ECC() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+			LOGGER.debug("certificate: {}", rootCert);
 
 			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
 			memoryCertificateRepository.addTrustPoint(rootCert);
@@ -210,6 +252,34 @@ public class ScenarioTest {
 	}
 
 	@Test
+	public void testTwoCAs_ECC() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+					rootCertificationAuthority);
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			world.start();
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate cert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(cert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			trustValidator.isTrusted(certChain);
+		}
+	}
+
+	@Test
 	public void testTwoCAs() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
@@ -264,12 +334,68 @@ public class ScenarioTest {
 	}
 
 	@Test
+	public void testTwoCAsOCSP_ECC() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			rootCertificationAuthority.addRevocationService(new OCSPRevocationService());
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+					rootCertificationAuthority);
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			world.start();
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate cert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(cert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			trustValidator.isTrusted(certChain);
+		}
+	}
+
+	@Test
 	public void testTwoCAsOCSPResponderCert() throws Exception {
 		try (World world = new World()) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			rootCertificationAuthority.addRevocationService(new OCSPRevocationService(true));
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
 					rootCertificationAuthority);
+			world.start();
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate cert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(cert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			trustValidator.isTrusted(certChain);
+		}
+	}
+
+	@Test
+	public void testTwoCAsOCSPResponderCert_ECC() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			rootCertificationAuthority.addRevocationService(new OCSPRevocationService(true));
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+					rootCertificationAuthority);
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
 			world.start();
 
 			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
