@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -72,8 +72,7 @@ public class CrlTrustLinker implements TrustLinker {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param crlRepository
-	 *            the CRL repository used by this CRL trust linker.
+	 * @param crlRepository the CRL repository used by this CRL trust linker.
 	 */
 	public CrlTrustLinker(CrlRepository crlRepository) {
 		this.crlRepository = crlRepository;
@@ -170,12 +169,9 @@ public class CrlTrustLinker implements TrustLinker {
 	/**
 	 * Checks the integrity of the given X509 CRL.
 	 * 
-	 * @param x509crl
-	 *            the X509 CRL to verify the integrity.
-	 * @param issuerCertificate
-	 *            the assumed issuer of the given X509 CRL.
-	 * @param validationDate
-	 *            the validate date.
+	 * @param x509crl           the X509 CRL to verify the integrity.
+	 * @param issuerCertificate the assumed issuer of the given X509 CRL.
+	 * @param validationDate    the validate date.
 	 * @return <code>true</code> if integrity is OK, <code>false</code> otherwise.
 	 */
 	public static boolean checkCrlIntegrity(X509CRL x509crl, X509Certificate issuerCertificate, Date validationDate) {
@@ -240,8 +236,7 @@ public class CrlTrustLinker implements TrustLinker {
 	/**
 	 * Gives back the CRL URI meta-data found within the given X509 certificate.
 	 * 
-	 * @param certificate
-	 *            the X509 certificate.
+	 * @param certificate the X509 certificate.
 	 * @return the CRL URI, or <code>null</code> if the extension is not present.
 	 */
 	public static URI getCrlUri(X509Certificate certificate) {
@@ -288,7 +283,13 @@ public class CrlTrustLinker implements TrustLinker {
 		return null;
 	}
 
-	private static BigInteger getCrlNumber(X509CRL crl) {
+	/**
+	 * Gives back the CRL number of the given X509 CRL.
+	 * 
+	 * @param crl the X509 CRL.
+	 * @return the CRL number, or <code>null</code> if not specified.
+	 */
+	public static BigInteger getCrlNumber(X509CRL crl) {
 		byte[] crlNumberExtensionValue = crl.getExtensionValue(Extension.cRLNumber.getId());
 		if (null == crlNumberExtensionValue) {
 			return null;
