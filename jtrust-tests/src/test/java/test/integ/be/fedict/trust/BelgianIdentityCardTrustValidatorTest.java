@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2016-2019 e-Contract.be BVBA.
+ * Copyright (C) 2016-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,6 +23,7 @@ import java.io.File;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -43,6 +44,7 @@ import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
 import be.fedict.trust.repository.CertificateRepository;
+import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class BelgianIdentityCardTrustValidatorTest {
 
@@ -71,6 +73,35 @@ public class BelgianIdentityCardTrustValidatorTest {
 		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(crlRepository);
 
 		trustValidator.addTrustLinker(new OcspTrustLinker(ocspRepository));
+		trustValidator.addTrustLinker(new CrlTrustLinker(cachedCrlRepository));
+
+		trustValidator.isTrusted(authnCertificateChain);
+	}
+
+	@Test
+	public void testValidityTrustedRoot() throws Exception {
+		Security.addProvider(new BeIDProvider());
+		KeyStore keyStore = KeyStore.getInstance("BeID");
+		keyStore.load(null);
+		Certificate[] authnCertificateChain = keyStore.getCertificateChain("Authentication");
+
+		LOGGER.debug("authn cert: {}", authnCertificateChain[0]);
+
+		Security.addProvider(new BouncyCastleProvider());
+
+		NetworkConfig networkConfig = null;
+		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
+		certificateRepository.addTrustPoint((X509Certificate) authnCertificateChain[authnCertificateChain.length - 1]);
+		TrustValidator trustValidator = new TrustValidator(certificateRepository);
+
+		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
+
+		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(networkConfig);
+
+		OnlineCrlRepository crlRepository = new OnlineCrlRepository(networkConfig);
+		CachedCrlRepository cachedCrlRepository = new CachedCrlRepository(crlRepository);
+
+		// trustValidator.addTrustLinker(new OcspTrustLinker(ocspRepository));
 		trustValidator.addTrustLinker(new CrlTrustLinker(cachedCrlRepository));
 
 		trustValidator.isTrusted(authnCertificateChain);

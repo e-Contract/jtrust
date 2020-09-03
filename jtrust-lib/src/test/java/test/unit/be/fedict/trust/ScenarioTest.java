@@ -46,6 +46,7 @@ import be.fedict.trust.test.Clock;
 import be.fedict.trust.test.FixedClock;
 import be.fedict.trust.test.OCSPRevocationService;
 import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.TimeStampAuthority;
 import be.fedict.trust.test.World;
 
 public class ScenarioTest {
@@ -116,6 +117,47 @@ public class ScenarioTest {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
 			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+			LOGGER.debug("certificate: {}", rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			trustValidator.isTrusted(Collections.singletonList(rootCert));
+		}
+	}
+
+	@Test
+	public void testTSA_ECC() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			TimeStampAuthority timeStampAuthority = new TimeStampAuthority(world, certificationAuthority);
+			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+			LOGGER.debug("certificate: {}", rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			trustValidator.isTrusted(Collections.singletonList(rootCert));
+		}
+	}
+
+	@Test
+	public void testECCSigningCertificate() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
+			world.start();
+
+			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
+					"CN=Signing");
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
 			LOGGER.debug("certificate: {}", rootCert);
