@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -59,9 +59,9 @@ import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class TSATest {
 
 	private static final String TSA_LOCATION = "http://tsa.belgium.be/connect";
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() {
 		Security.addProvider(new BouncyCastleProvider());
 	}
@@ -155,7 +155,7 @@ public class TSATest {
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testTSA2013() throws Exception {
 		LOGGER.debug("test TSA 2013");
 		InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
@@ -194,7 +194,7 @@ public class TSATest {
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testTSA2014() throws Exception {
 		LOGGER.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();
@@ -224,7 +224,7 @@ public class TSATest {
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testTSA2014_2() throws Exception {
 		LOGGER.debug("test TSA 2014");
 		List<X509Certificate> certificateChain = new LinkedList<>();

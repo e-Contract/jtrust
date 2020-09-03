@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -40,7 +40,7 @@ import be.fedict.trust.test.World;
 
 public class ExpiredCertificateTest {
 
-	@BeforeClass
+	@BeforeAll
 	public static void oneTimeSetUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 	}

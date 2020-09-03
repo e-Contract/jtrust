@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,15 +19,15 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.constraints.CertificatePoliciesCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
@@ -37,7 +38,7 @@ public class CertificatePoliciesCertificateConstraintTest {
 
 	private CertificatePoliciesCertificateConstraint testedInstance;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.testedInstance = new CertificatePoliciesCertificateConstraint();
 	}
@@ -48,17 +49,15 @@ public class CertificatePoliciesCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+				notAfter);
 
 		// operate
 		try {
 			this.testedInstance.check(certificate);
 			fail();
 		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
-					e.getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
 		}
 	}
 
@@ -68,20 +67,18 @@ public class CertificatePoliciesCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils.generateCertificate(
-				keyPair.getPublic(), "CN=Test", notBefore, notAfter, null,
-				keyPair.getPrivate(), true, -1, null, null, null,
-				"SHA1withRSA", false, true, true, null, "1.5.6.7");
+		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
+				notAfter, null, keyPair.getPrivate(), true, -1, null, null, null, "SHA1withRSA", false, true, true,
+				null, "1.5.6.7");
 
-		testedInstance.addCertificatePolicy("1.2.3.4");
+		this.testedInstance.addCertificatePolicy("1.2.3.4");
 
 		// operate
 		try {
 			this.testedInstance.check(certificate);
 			fail();
 		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
-					e.getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
 		}
 	}
 
@@ -92,12 +89,11 @@ public class CertificatePoliciesCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils.generateCertificate(
-				keyPair.getPublic(), "CN=Test", notBefore, notAfter, null,
-				keyPair.getPrivate(), true, -1, null, null, null,
-				"SHA1withRSA", false, true, true, null, certificatePolicy);
+		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
+				notAfter, null, keyPair.getPrivate(), true, -1, null, null, null, "SHA1withRSA", false, true, true,
+				null, certificatePolicy);
 
-		testedInstance.addCertificatePolicy(certificatePolicy);
+		this.testedInstance.addCertificatePolicy(certificatePolicy);
 
 		// operate
 		this.testedInstance.check(certificate);

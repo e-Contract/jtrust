@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2015-2019 e-Contract.be BVBA.
+ * Copyright (C) 2015-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,8 +23,8 @@ import java.security.Security;
 import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +35,8 @@ public class CachedCrlRepositoryTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CachedCrlRepositoryTest.class);
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeAll
+	public static void setUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 

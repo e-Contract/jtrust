@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2016 e-Contract.be BVBA.
+ * Copyright (C) 2016-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,8 +23,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class ECCTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testEntrustDemoECCPKI() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		X509Certificate rootCertificate = (X509Certificate) certificateFactory

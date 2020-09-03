@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,9 +19,9 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.BelgianTrustValidatorFactory;
 import be.fedict.trust.TrustValidator;
@@ -29,69 +30,56 @@ public class BelgianTrustValidatorFactoryTest {
 
 	@Test
 	public void testCreateTrustValidator() throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTrustValidator();
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTrustValidator();
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
 	public void testCreateTrustValidatorNoNetworkConfig() throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTrustValidator(null);
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTrustValidator(null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
-	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinker()
-			throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTrustValidator(null, null);
+	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinker() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTrustValidator(null, null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
-	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinkerNoRepo()
-			throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTrustValidator(null, null, null);
+	public void testCreateTrustValidatorNoNetworkConfigNoExternalTrustLinkerNoRepo() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTrustValidator(null, null, null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
-	public void testCreateNonRepudiationTrustValidatorNoNetworkConfig()
-			throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createNonRepudiationTrustValidator(null);
+	public void testCreateNonRepudiationTrustValidatorNoNetworkConfig() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createNonRepudiationTrustValidator(null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
-	public void testCreateNonRepudiationTrustValidatorNoNetworkConfigNoExternalTrustLinker()
-			throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createNonRepudiationTrustValidator(null, null);
+	public void testCreateNonRepudiationTrustValidatorNoNetworkConfigNoExternalTrustLinker() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createNonRepudiationTrustValidator(null, null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
-	public void testCreateNationalRegistryTrustValidatorNoNetworkConfig()
-			throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createNationalRegistryTrustValidator(null);
+	public void testCreateNationalRegistryTrustValidatorNoNetworkConfig() throws Exception {
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createNationalRegistryTrustValidator(null);
 
 		assertNotNull(trustValidator);
 	}
 
 	@Test
 	public void testCreateTSATrustValidator() throws Exception {
-		TrustValidator trustValidator = BelgianTrustValidatorFactory
-				.createTSATrustValidator(null, null);
+		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTSATrustValidator(null, null);
 
 		assertNotNull(trustValidator);
 	}

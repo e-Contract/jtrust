@@ -18,7 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.Security;
@@ -30,8 +30,8 @@ import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class ScenarioTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioTest.class);
 
-	@BeforeClass
+	@BeforeAll
 	public static void oneTimeSetUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 	}

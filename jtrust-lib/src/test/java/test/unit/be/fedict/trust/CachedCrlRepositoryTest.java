@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2015 e-Contract.be BVBA.
+ * Copyright (C) 2015-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,8 +19,8 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URI;
 import java.security.KeyPair;
@@ -30,8 +30,8 @@ import java.util.Date;
 
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlRepository;
@@ -44,45 +44,39 @@ public class CachedCrlRepositoryTest {
 	private X509Certificate testCertificate;
 	private KeyPair testKeyPair;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-
 		this.testKeyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusYears(1);
-		this.testCertificate = PKITestUtils.generateCertificate(
-				this.testKeyPair.getPublic(), "CN=Test", notBefore, notAfter,
-				null, this.testKeyPair.getPrivate(), true, 0, null, null);
+		this.testCertificate = PKITestUtils.generateCertificate(this.testKeyPair.getPublic(), "CN=Test", notBefore,
+				notAfter, null, this.testKeyPair.getPrivate(), true, 0, null, null);
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusHours(1);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(),
-				this.testCertificate, thisUpdate, nextUpdate);
-		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(),
-				this.testCertificate, thisUpdate, nextUpdate);
+		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
+				nextUpdate);
+		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
+				nextUpdate);
 	}
 
 	@Test
 	public void emptyCache() throws Exception {
 		// setup
-		CrlRepository mockCrlRepository = EasyMock
-				.createMock(CrlRepository.class);
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
 
-		CachedCrlRepository testedInstance = new CachedCrlRepository(
-				mockCrlRepository);
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 
 		// expectations
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate)).andReturn(this.testCrl);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
@@ -92,27 +86,22 @@ public class CachedCrlRepositoryTest {
 	@Test
 	public void cacheBeingUsed() throws Exception {
 		// setup
-		CrlRepository mockCrlRepository = EasyMock
-				.createMock(CrlRepository.class);
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
 
-		CachedCrlRepository testedInstance = new CachedCrlRepository(
-				mockCrlRepository);
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 
 		// expectations
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate)).andReturn(this.testCrl);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
-		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
@@ -123,32 +112,25 @@ public class CachedCrlRepositoryTest {
 	@Test
 	public void testFailingCrlNotCached() throws Exception {
 		// setup
-		CrlRepository mockCrlRepository = EasyMock
-				.createMock(CrlRepository.class);
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
 
-		CachedCrlRepository testedInstance = new CachedCrlRepository(
-				mockCrlRepository);
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 
 		// expectations
 		// fail the first time with null
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate)).andReturn(null);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate)).andReturn(null);
 		// second call behaves "normal"
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate)).andReturn(this.testCrl);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
-		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
@@ -162,54 +144,41 @@ public class CachedCrlRepositoryTest {
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusDays(7);
 		DateTime nextNextUpdate = nextUpdate.plusDays(7);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(),
-				this.testCertificate, thisUpdate, nextUpdate);
-		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(),
-				this.testCertificate, thisUpdate, nextUpdate);
-		X509CRL testCrl3 = PKITestUtils.generateCrl(
-				this.testKeyPair.getPrivate(), this.testCertificate,
-				nextUpdate, nextNextUpdate);
+		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
+				nextUpdate);
+		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
+				nextUpdate);
+		X509CRL testCrl3 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, nextUpdate,
+				nextNextUpdate);
 
-		CrlRepository mockCrlRepository = EasyMock
-				.createMock(CrlRepository.class);
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
-		Date validationDate2 = new DateTime(validationDate).plusHours(2)
-				.toDate();
-		Date validationDate3 = new DateTime(validationDate).plusHours(4)
-				.toDate();
+		Date validationDate2 = new DateTime(validationDate).plusHours(2).toDate();
+		Date validationDate3 = new DateTime(validationDate).plusHours(4).toDate();
 		Date validationDate4 = nextUpdate.plusHours(1).toDate();
 
-		CachedCrlRepository testedInstance = new CachedCrlRepository(
-				mockCrlRepository);
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 		testedInstance.setCacheAgingHours(3);
 
 		// verify
 		assertEquals(3, testedInstance.getCacheAgingHours());
 
 		// expectations
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate)).andReturn(this.testCrl);
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate3)).andReturn(this.testCrl2);
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						validationDate4)).andReturn(testCrl3);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate3))
+				.andReturn(this.testCrl2);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate4)).andReturn(testCrl3);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate);
-		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate2);
-		X509CRL resultCrl3 = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate3);
-		X509CRL resultCrl4 = testedInstance.findCrl(crlUri,
-				this.testCertificate, validationDate4);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate2);
+		X509CRL resultCrl3 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate3);
+		X509CRL resultCrl4 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate4);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
@@ -224,33 +193,26 @@ public class CachedCrlRepositoryTest {
 		// setup
 		DateTime thisUpdate = new DateTime();
 		DateTime nextUpdate = thisUpdate.plusDays(7);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(),
-				this.testCertificate, thisUpdate, nextUpdate);
+		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
+				nextUpdate);
 
-		CrlRepository mockCrlRepository = EasyMock
-				.createMock(CrlRepository.class);
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
 		Date validationDate = new Date();
-		Date expiredCacheValidationDate = new DateTime(validationDate)
-				.plusHours(4).toDate();
+		Date expiredCacheValidationDate = new DateTime(validationDate).plusHours(4).toDate();
 
-		CachedCrlRepository testedInstance = new CachedCrlRepository(
-				mockCrlRepository);
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 
 		// expectations
-		EasyMock.expect(
-				mockCrlRepository.findCrl(crlUri, this.testCertificate,
-						expiredCacheValidationDate)).andReturn(this.testCrl)
-				.times(2);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate))
+				.andReturn(this.testCrl).times(2);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri,
-				this.testCertificate, expiredCacheValidationDate);
-		X509CRL resultCrl2 = testedInstance.findCrl(crlUri,
-				this.testCertificate, expiredCacheValidationDate);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate);
 
 		// verify
 		EasyMock.verify(mockCrlRepository);

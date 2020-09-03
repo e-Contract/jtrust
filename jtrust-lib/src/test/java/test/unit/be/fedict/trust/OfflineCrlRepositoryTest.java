@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,9 +19,9 @@
 
 package test.unit.be.fedict.trust;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URI;
 import java.security.KeyPair;
@@ -32,9 +33,9 @@ import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.joda.time.DateTime;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.crl.OfflineCrlRepository;
 import be.fedict.trust.test.PKITestUtils;
@@ -43,13 +44,13 @@ public class OfflineCrlRepositoryTest {
 
 	private Date validationDate;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 		this.validationDate = new Date();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 	}
 
@@ -60,18 +61,14 @@ public class OfflineCrlRepositoryTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
-		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(),
-				certificate, notBefore, notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+				notAfter);
+		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(), certificate, notBefore, notAfter);
 
-		OfflineCrlRepository testedInstance = new OfflineCrlRepository(
-				Collections.singletonList(crl.getEncoded()));
+		OfflineCrlRepository testedInstance = new OfflineCrlRepository(Collections.singletonList(crl.getEncoded()));
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(
-				new URI("http://foo.org/bar"), certificate, validationDate);
+		X509CRL resultCrl = testedInstance.findCrl(new URI("http://foo.org/bar"), certificate, validationDate);
 
 		// verify
 		assertNotNull(resultCrl);
@@ -86,24 +83,19 @@ public class OfflineCrlRepositoryTest {
 		DateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+				notAfter);
 
 		KeyPair otherKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate otherCertificate = PKITestUtils
-				.generateSelfSignedCertificate(otherKeyPair, "CN=TestOther",
-						notBefore, notAfter);
+		X509Certificate otherCertificate = PKITestUtils.generateSelfSignedCertificate(otherKeyPair, "CN=TestOther",
+				notBefore, notAfter);
 
-		X509CRL crl = PKITestUtils.generateCrl(otherKeyPair.getPrivate(),
-				otherCertificate, notBefore, notAfter);
+		X509CRL crl = PKITestUtils.generateCrl(otherKeyPair.getPrivate(), otherCertificate, notBefore, notAfter);
 
-		OfflineCrlRepository testedInstance = new OfflineCrlRepository(
-				Collections.singletonList(crl.getEncoded()));
+		OfflineCrlRepository testedInstance = new OfflineCrlRepository(Collections.singletonList(crl.getEncoded()));
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(
-				new URI("http://foo.org/bar"), certificate, validationDate);
+		X509CRL resultCrl = testedInstance.findCrl(new URI("http://foo.org/bar"), certificate, validationDate);
 
 		// verify
 		assertNull(resultCrl);

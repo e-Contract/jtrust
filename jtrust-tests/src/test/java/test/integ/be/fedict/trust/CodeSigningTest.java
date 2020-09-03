@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,7 +19,7 @@
 
 package test.integ.be.fedict.trust;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.security.Security;
@@ -29,9 +29,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +46,13 @@ public class CodeSigningTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CodeSigningTest.class);
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testValidation2011_2014() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		InputStream fedictCertInputStream = CodeSigningTest.class.getResourceAsStream("/fedict-2011-2014.der");
@@ -127,7 +127,7 @@ public class CodeSigningTest {
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testEVZW() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		InputStream fedictCertInputStream = CodeSigningTest.class.getResourceAsStream("/evzw/www.egreffe.be.crt");
@@ -162,7 +162,7 @@ public class CodeSigningTest {
 	}
 
 	@Test
-	@Ignore("expired certificate")
+	@Disabled("expired certificate")
 	public void testCertipostCodeSigning() throws Exception {
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 		InputStream fedictCertInputStream = CodeSigningTest.class.getResourceAsStream("/FedICT-BE0367302178.cer");

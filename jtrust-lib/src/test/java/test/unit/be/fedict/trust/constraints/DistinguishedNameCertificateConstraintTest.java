@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
+ * Copyright (C) 2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,15 +19,15 @@
 
 package test.unit.be.fedict.trust.constraints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.constraints.DistinguishedNameCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
@@ -39,10 +40,9 @@ public class DistinguishedNameCertificateConstraintTest {
 
 	private final String validSubjectName = "CN=Test";
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
-		this.testedInstance = new DistinguishedNameCertificateConstraint(
-				validSubjectName);
+		this.testedInstance = new DistinguishedNameCertificateConstraint(validSubjectName);
 	}
 
 	@Test
@@ -51,17 +51,15 @@ public class DistinguishedNameCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=F00", notBefore,
-						notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=F00", notBefore,
+				notAfter);
 
 		// operate
 		try {
 			this.testedInstance.check(certificate);
 			fail();
 		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION,
-					e.getReason());
+			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
 		}
 	}
 
@@ -71,9 +69,8 @@ public class DistinguishedNameCertificateConstraintTest {
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		DateTime notBefore = new DateTime();
 		DateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils
-				.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-						notAfter);
+		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
+				notAfter);
 
 		// operate
 		this.testedInstance.check(certificate);
