@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009-2011 FedICT.
- * Copyright (C) 2019-2020 e-Contract.be BVBA.
+ * Copyright (C) 2019-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -78,12 +78,11 @@ public class TSLParser {
 	 * Main constructor.
 	 * 
 	 * @param tslInputStream
-	 * @throws CertificateException
 	 */
 	public TSLParser(InputStream tslInputStream) {
 		this.tslLocation = "unknown";
 		this.tslInputStream = tslInputStream;
-		this.tslConsumers = new LinkedList<TSLConsumer>();
+		this.tslConsumers = new LinkedList<>();
 		this.tslParserState = new TSLParserState();
 		try {
 			this.certificateFactory = CertificateFactory.getInstance("X.509");
