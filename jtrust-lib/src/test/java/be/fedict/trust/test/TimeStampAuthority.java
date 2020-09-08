@@ -214,11 +214,17 @@ public class TimeStampAuthority implements EndpointProvider {
 			Attribute attr = new Attribute(CMSAttributes.signingTime, new DERSet(new Time(now.toDate())));
 			ASN1EncodableVector v = new ASN1EncodableVector();
 			v.add(attr);
+			String signatureAlgorithm;
+			if ("RSA".equals(timeStampAuthority.keyAlgorithm)) {
+				signatureAlgorithm = "SHA256withRSA";
+			} else {
+				signatureAlgorithm = "SHA256withECDSA";
+			}
 			TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
 					new JcaSimpleSignerInfoGeneratorBuilder()
 							.setSignedAttributeGenerator(
 									new DefaultSignedAttributeTableGenerator(new AttributeTable(v)))
-							.build("SHA256withRSA", timeStampAuthority.keyPair.getPrivate(),
+							.build(signatureAlgorithm, timeStampAuthority.keyPair.getPrivate(),
 									timeStampAuthority.certificate),
 					new JcaDigestCalculatorProviderBuilder().build().get(
 							new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256)),
