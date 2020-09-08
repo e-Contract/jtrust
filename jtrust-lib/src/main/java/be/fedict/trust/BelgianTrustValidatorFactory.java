@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013-2019 e-Contract.be BVBA.
+ * Copyright (C) 2013-2020 e-Contract.be BV.
  * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -67,8 +67,7 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for authentication
 	 * certificates.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
+	 * @param networkConfig the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(NetworkConfig networkConfig) {
@@ -89,10 +88,8 @@ public class BelgianTrustValidatorFactory {
 	 * architecture based on Java EE.
 	 * </p>
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
-	 * @param externalTrustLinker
-	 *            the optional external trust linker to be used.
+	 * @param networkConfig       the optional network configuration to be used.
+	 * @param externalTrustLinker the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
@@ -106,10 +103,8 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for non-repudiation
 	 * certificates.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
-	 * @param externalTrustLinker
-	 *            the optional external trust linker to be used.
+	 * @param networkConfig       the optional network configuration to be used.
+	 * @param externalTrustLinker the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createNonRepudiationTrustValidator(NetworkConfig networkConfig,
@@ -124,8 +119,7 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for non-repudiation
 	 * certificates.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
+	 * @param networkConfig the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createNonRepudiationTrustValidator(NetworkConfig networkConfig) {
@@ -138,8 +132,7 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for the national
 	 * registry certificate.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
+	 * @param networkConfig the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createNationalRegistryTrustValidator(NetworkConfig networkConfig) {
@@ -153,8 +146,7 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for TSA
 	 * certificates.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
+	 * @param networkConfig the optional network configuration to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTSATrustValidator(NetworkConfig networkConfig) {
@@ -165,10 +157,8 @@ public class BelgianTrustValidatorFactory {
 	 * Creates a trust validator according to Belgian PKI rules for TSA
 	 * certificates.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
-	 * @param externalTrustLinker
-	 *            the optional external trust linker to be used.
+	 * @param networkConfig       the optional network configuration to be used.
+	 * @param externalTrustLinker the optional external trust linker to be used.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTSATrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker) {
@@ -196,12 +186,9 @@ public class BelgianTrustValidatorFactory {
 	 * architecture based on Java EE.
 	 * </p>
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration to be used.
-	 * @param externalTrustLinker
-	 *            the optional external trust linker to be used.
-	 * @param certificateRepository
-	 *            containing the Belgian eID trust points.
+	 * @param networkConfig         the optional network configuration to be used.
+	 * @param externalTrustLinker   the optional external trust linker to be used.
+	 * @param certificateRepository containing the Belgian eID trust points.
 	 * @return a trust validator instance.
 	 */
 	public static TrustValidator createTrustValidator(NetworkConfig networkConfig, TrustLinker externalTrustLinker,
@@ -228,6 +215,9 @@ public class BelgianTrustValidatorFactory {
 		X509Certificate rootCa4_2Certificate = loadCertificate("be/fedict/trust/belgiumrca4-2.crt");
 		memoryCertificateRepository.addTrustPoint(rootCa4_2Certificate);
 
+		X509Certificate rootCa6Certificate = loadCertificate("be/fedict/trust/belgiumrca6.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa6Certificate);
+
 		return memoryCertificateRepository;
 	}
 
@@ -240,6 +230,10 @@ public class BelgianTrustValidatorFactory {
 		X509Certificate newRootTsaCertificate = loadPemCertificate(
 				"be/fedict/trust/roots/Baltimore Cybertrust Root.pem");
 		memoryCertificateRepository.addTrustPoint(newRootTsaCertificate);
+
+		X509Certificate cybertrustGlobalRootTsaCertificate = loadCertificate(
+				"be/fedict/trust/roots/CybertrustGlobalRoot.crt");
+		memoryCertificateRepository.addTrustPoint(cybertrustGlobalRootTsaCertificate);
 
 		return memoryCertificateRepository;
 	}

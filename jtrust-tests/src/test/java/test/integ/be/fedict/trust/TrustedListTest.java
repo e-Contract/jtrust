@@ -93,8 +93,11 @@ public class TrustedListTest {
 		}
 
 		for (TestTSLConsumer.TSLError tslError : testTSLConsumer.errors) {
-			LOGGER.debug("TSL error on " + tslError.tslLocation + ": " + tslError.error.getMessage());
+			LOGGER.warn("TSL error on " + tslError.tslLocation + ": " + tslError.error.getMessage());
 		}
+
+		LOGGER.debug("CAs with policy: {}", testTSLConsumer.getHasPolicy());
+		LOGGER.debug("CAs without policy: {}", testTSLConsumer.getHasNoPolicy());
 	}
 
 	private final class HistogramEntryComparator implements Comparator<Map.Entry<String, Integer>> {
@@ -117,6 +120,10 @@ public class TrustedListTest {
 
 		private final Map<String, Integer> policyHistogram;
 
+		private int hasPolicy;
+
+		private int hasNoPolicy;
+
 		private final List<TSLError> errors;
 
 		private final class TSLError {
@@ -131,6 +138,8 @@ public class TrustedListTest {
 			this.extensionHistogram = new HashMap<>();
 			this.policyHistogram = new HashMap<>();
 			this.errors = new LinkedList<>();
+			this.hasPolicy = 0;
+			this.hasNoPolicy = 0;
 		}
 
 		public Map<String, Integer> getServiceTypeIdentifierHistogram() {
@@ -151,6 +160,14 @@ public class TrustedListTest {
 
 		public Map<String, Integer> getPolicyHistogram() {
 			return this.policyHistogram;
+		}
+
+		public int getHasPolicy() {
+			return this.hasPolicy;
+		}
+
+		public int getHasNoPolicy() {
+			return this.hasNoPolicy;
 		}
 
 		@Override
@@ -200,6 +217,7 @@ public class TrustedListTest {
 			}
 
 			List<ASN1ObjectIdentifier> extensionOids = certificateHolder.getExtensionOIDs();
+			boolean policyPresent = false;
 			for (ASN1ObjectIdentifier extensionOid : extensionOids) {
 				String oid = extensionOid.getId();
 				count = this.extensionHistogram.get(oid);
@@ -210,6 +228,7 @@ public class TrustedListTest {
 				}
 				this.extensionHistogram.put(oid, count);
 				if (oid.equals("2.5.29.32")) {
+					policyPresent = true;
 					Extension certificatePoliciesExtension = certificateHolder.getExtension(extensionOid);
 					CertificatePolicies certificatePolicies = CertificatePolicies
 							.getInstance(certificatePoliciesExtension.getParsedValue());
@@ -224,6 +243,11 @@ public class TrustedListTest {
 						this.policyHistogram.put(certPolicyId, count);
 					}
 				}
+			}
+			if (policyPresent) {
+				this.hasPolicy++;
+			} else {
+				this.hasNoPolicy++;
 			}
 		}
 
