@@ -18,6 +18,7 @@
 
 package test.unit.be.fedict.trust;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
@@ -135,6 +136,7 @@ public class ScenarioTest {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
 			TimeStampAuthority timeStampAuthority = new TimeStampAuthority(world, certificationAuthority);
+			timeStampAuthority.setKeyAlgorithm("EC");
 			world.start();
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
@@ -145,6 +147,8 @@ public class ScenarioTest {
 			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
 			trustValidator.isTrusted(Collections.singletonList(rootCert));
+
+			assertEquals("EC", timeStampAuthority.getCertificate().getPublicKey().getAlgorithm());
 		}
 	}
 
@@ -155,7 +159,7 @@ public class ScenarioTest {
 			certificationAuthority.setSignatureAlgorithm("SHA256withECDSA");
 			world.start();
 
-			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			KeyPair keyPair = PKITestUtils.generateKeyPair("EC");
 			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
 					"CN=Signing");
 

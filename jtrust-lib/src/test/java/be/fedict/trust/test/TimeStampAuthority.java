@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -83,6 +83,8 @@ public class TimeStampAuthority implements EndpointProvider {
 
 	private String url;
 
+	private String keyAlgorithm;
+
 	private final static Map<String, TimeStampAuthority> timeStampAuthorities;
 
 	static {
@@ -93,8 +95,7 @@ public class TimeStampAuthority implements EndpointProvider {
 	 * Main constructor.
 	 * 
 	 * @param world
-	 * @param certificationAuthority
-	 *            the TSA issuing CA.
+	 * @param certificationAuthority the TSA issuing CA.
 	 */
 	public TimeStampAuthority(World world, CertificationAuthority certificationAuthority) {
 		this.identifier = UUID.randomUUID().toString();
@@ -102,6 +103,21 @@ public class TimeStampAuthority implements EndpointProvider {
 		this.world = world;
 		this.world.addEndpointProvider(this);
 		this.certificationAuthority = certificationAuthority;
+		this.keyAlgorithm = "RSA";
+	}
+
+	public String getKeyAlgorithm() {
+		return this.keyAlgorithm;
+	}
+
+	/**
+	 * Sets the key algorithm used by this time stamp authority. This can be either
+	 * "RSA" or "EC".
+	 * 
+	 * @param keyAlgorithm
+	 */
+	public void setKeyAlgorithm(String keyAlgorithm) {
+		this.keyAlgorithm = keyAlgorithm;
 	}
 
 	@Override
@@ -128,7 +144,11 @@ public class TimeStampAuthority implements EndpointProvider {
 			throw new IllegalStateException();
 		}
 
-		this.keyPair = PKITestUtils.generateKeyPair();
+		if ("RSA".equals(this.keyAlgorithm)) {
+			this.keyPair = PKITestUtils.generateKeyPair();
+		} else {
+			this.keyPair = PKITestUtils.generateKeyPair("EC");
+		}
 
 		CertificationAuthority issuer = this.certificationAuthority;
 		if (issuer != null) {
