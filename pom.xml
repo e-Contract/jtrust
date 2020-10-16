@@ -104,7 +104,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 					<configuration>
 						<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 					</configuration>
@@ -112,12 +112,12 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.5</version>
+					<version>0.8.6</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>5.3.2</version>
+					<version>6.0.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -167,7 +167,7 @@
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.6.2</version>
+				<version>5.7.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -203,7 +203,7 @@
 			<dependency>
 				<groupId>be.fedict.commons-eid</groupId>
 				<artifactId>commons-eid-bom</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
+				<version>1.0.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
