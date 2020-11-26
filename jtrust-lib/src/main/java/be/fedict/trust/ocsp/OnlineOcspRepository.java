@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2020 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -218,7 +218,7 @@ public class OnlineOcspRepository implements OcspRepository {
 		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
 		Extension nonceExtension = basicOCSPResp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 		if (null == nonceExtension) {
-			LOGGER.debug("no nonce extension is response");
+			LOGGER.debug("no nonce extension in response");
 			return ocspResp;
 		}
 
