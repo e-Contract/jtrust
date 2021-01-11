@@ -240,6 +240,6 @@
 		<slf4j.version>1.7.30</slf4j.version>
 		<!-- also test 1.60,1.61,1.64 before releasing -->
 		<bouncycastle.version>1.64</bouncycastle.version>
-		<jetty.version>9.4.32.v20200930</jetty.version>
+		<jetty.version>9.4.35.v20201120</jetty.version>
 	</properties>
 </project>
