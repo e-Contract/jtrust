@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,6 +19,7 @@
 
 package test.unit.be.fedict.trust;
 
+import static be.fedict.trust.test.World.getFreePort;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,19 +42,20 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mortbay.jetty.testing.ServletTester;
 
 import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.test.PKITestUtils;
 
 public class OnlineCrlRepositoryTest {
 
-	private ServletTester servletTester;
+	private Server server;
 
 	private URI crlUri;
 
@@ -69,12 +71,16 @@ public class OnlineCrlRepositoryTest {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		this.servletTester = new ServletTester();
+		int freePort = getFreePort();
+		this.server = new Server(freePort);
+		ServletContextHandler servletContextHandler = new ServletContextHandler();
+		servletContextHandler.setContextPath("/pki");
 		String pathSpec = "/test.crl";
-		this.servletTester.addServlet(CrlRepositoryTestServlet.class, pathSpec);
-		this.servletTester.start();
+		servletContextHandler.addServlet(CrlRepositoryTestServlet.class, pathSpec);
+		this.server.setHandler(servletContextHandler);
+		this.server.start();
 
-		String servletUrl = this.servletTester.createSocketConnector(true);
+		String servletUrl = "http://localhost:" + freePort + "/pki";
 		this.crlUri = new URI(servletUrl + pathSpec);
 		this.validationDate = new Date();
 
@@ -85,7 +91,7 @@ public class OnlineCrlRepositoryTest {
 
 	@AfterEach
 	public void tearDown() throws Exception {
-		this.servletTester.stop();
+		this.server.stop();
 	}
 
 	@Test

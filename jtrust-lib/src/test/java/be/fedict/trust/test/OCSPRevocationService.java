@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -61,9 +61,9 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.testing.ServletTester;
 
 /**
  * Implementation of an OCSP revocation service.
@@ -119,9 +119,9 @@ public class OCSPRevocationService implements RevocationService {
 	}
 
 	@Override
-	public void addEndpoints(ServletTester servletTester) {
+	public void addEndpoints(ServletContextHandler context) {
 		String pathSpec = "/" + this.identifier + "/ocsp";
-		ServletHolder servletHolder = servletTester.addServlet(OCSPServlet.class, pathSpec);
+		ServletHolder servletHolder = context.addServlet(OCSPServlet.class, pathSpec);
 		servletHolder.setInitParameter("identifier", this.identifier);
 
 	}

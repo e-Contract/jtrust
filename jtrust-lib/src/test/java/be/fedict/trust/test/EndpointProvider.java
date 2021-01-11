@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package be.fedict.trust.test;
 
-import org.mortbay.jetty.testing.ServletTester;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 /**
  * Interface for endpoint providers.
@@ -31,16 +31,15 @@ public interface EndpointProvider {
 	/**
 	 * Adds a servlet endpoint to the Jetty servlet tester.
 	 * 
-	 * @param servletTester
+	 * @param context
 	 * @throws Exception
 	 */
-	void addEndpoints(ServletTester servletTester) throws Exception;
+	void addEndpoints(ServletContextHandler context) throws Exception;
 
 	/**
 	 * Called when the corresponding world has been started.
 	 * 
-	 * @param url
-	 *            the base URL of the embedded Jetty servlet container.
+	 * @param url the base URL of the embedded Jetty servlet container.
 	 * @throws Exception
 	 */
 	void started(String url) throws Exception;

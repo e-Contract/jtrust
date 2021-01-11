@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -59,9 +59,9 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.testing.ServletTester;
 
 /**
  * CRL revocation service implementation.
@@ -106,9 +106,9 @@ public class CRLRevocationService implements RevocationService {
 	}
 
 	@Override
-	public void addEndpoints(ServletTester servletTester) {
+	public void addEndpoints(ServletContextHandler context) {
 		String pathSpec = "/" + this.identifier + "/crl.der";
-		ServletHolder servletHolder = servletTester.addServlet(CRLServlet.class, pathSpec);
+		ServletHolder servletHolder = context.addServlet(CRLServlet.class, pathSpec);
 		servletHolder.setInitParameter("identifier", this.identifier);
 	}
 

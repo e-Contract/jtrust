@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,6 +19,7 @@
 
 package test.unit.be.fedict.trust;
 
+import static be.fedict.trust.test.World.getFreePort;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -41,18 +42,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mortbay.jetty.testing.ServletTester;
 
 import be.fedict.trust.ocsp.OnlineOcspRepository;
 import be.fedict.trust.test.PKITestUtils;
 
 public class OnlineOcspRepositoryTest {
 
-	private ServletTester servletTester;
+	private Server server;
 
 	private URI ocspUri;
 
@@ -66,12 +68,16 @@ public class OnlineOcspRepositoryTest {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		this.servletTester = new ServletTester();
+		int freePort = getFreePort();
+		this.server = new Server(freePort);
+		ServletContextHandler servletContextHandler = new ServletContextHandler();
+		servletContextHandler.setContextPath("/pki");
+		this.server.setHandler(servletContextHandler);
 		String pathSpec = "/test.ocsp";
-		this.servletTester.addServlet(OcspResponderTestServlet.class, pathSpec);
-		this.servletTester.start();
+		servletContextHandler.addServlet(OcspResponderTestServlet.class, pathSpec);
+		this.server.start();
 
-		String servletUrl = this.servletTester.createSocketConnector(true);
+		String servletUrl = "http://localhost:" + freePort + "/pki";
 		this.ocspUri = new URI(servletUrl + pathSpec);
 
 		this.testedInstance = new OnlineOcspRepository();
@@ -94,7 +100,7 @@ public class OnlineOcspRepositoryTest {
 
 	@AfterEach
 	public void tearDown() throws Exception {
-		this.servletTester.stop();
+		this.server.stop();
 	}
 
 	@Test

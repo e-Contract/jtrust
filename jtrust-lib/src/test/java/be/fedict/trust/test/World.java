@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,10 +18,12 @@
 
 package be.fedict.trust.test;
 
+import java.net.ServerSocket;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.mortbay.jetty.testing.ServletTester;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,7 @@ public class World implements AutoCloseable {
 
 	private boolean running;
 
-	private ServletTester servletTester;
+	private Server server;
 
 	private final Clock clock;
 
@@ -81,14 +83,18 @@ public class World implements AutoCloseable {
 	 * @throws Exception
 	 */
 	public void start() throws Exception {
-		this.servletTester = new ServletTester();
+		int freePort = getFreePort();
+		this.server = new Server(freePort);
+		ServletContextHandler servletContextHandler = new ServletContextHandler();
+		servletContextHandler.setContextPath("/pki");
+		this.server.setHandler(servletContextHandler);
 
 		for (EndpointProvider endpointProvider : this.endpointProviders) {
-			endpointProvider.addEndpoints(this.servletTester);
+			endpointProvider.addEndpoints(servletContextHandler);
 		}
 
-		this.servletTester.start();
-		String url = this.servletTester.createSocketConnector(true);
+		this.server.start();
+		String url = "http://localhost:" + freePort + "/pki";
 		this.running = true;
 
 		for (EndpointProvider endpointProvider : this.endpointProviders) {
@@ -112,7 +118,7 @@ public class World implements AutoCloseable {
 	 * @throws Exception
 	 */
 	public void stop() throws Exception {
-		this.servletTester.stop();
+		this.server.stop();
 		this.running = false;
 	}
 
@@ -130,6 +136,12 @@ public class World implements AutoCloseable {
 		LOGGER.debug("close");
 		if (this.running) {
 			stop();
+		}
+	}
+
+	public static int getFreePort() throws Exception {
+		try (ServerSocket serverSocket = new ServerSocket(0)) {
+			return serverSocket.getLocalPort();
 		}
 	}
 }

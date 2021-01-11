@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -57,9 +57,9 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampResponseGenerator;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.bouncycastle.util.Store;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.testing.ServletTester;
 
 /**
  * Implementation of a timestamp authority according to RFC 3161.
@@ -121,9 +121,9 @@ public class TimeStampAuthority implements EndpointProvider {
 	}
 
 	@Override
-	public void addEndpoints(ServletTester servletTester) throws Exception {
+	public void addEndpoints(ServletContextHandler context) throws Exception {
 		String pathSpec = "/" + this.identifier + "/tsa";
-		ServletHolder servletHolder = servletTester.addServlet(TSAServlet.class, pathSpec);
+		ServletHolder servletHolder = context.addServlet(TSAServlet.class, pathSpec);
 		servletHolder.setInitParameter("identifier", this.identifier);
 	}
 
