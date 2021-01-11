@@ -41,6 +41,8 @@ import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.cmp.PKIStatus;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
@@ -67,7 +69,7 @@ import org.joda.time.DateTime;
  * @author Frank Cornelis
  *
  */
-public class TimeStampAuthority implements EndpointProvider {
+public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 
 	private final World world;
 
@@ -84,6 +86,8 @@ public class TimeStampAuthority implements EndpointProvider {
 	private String url;
 
 	private String keyAlgorithm;
+
+	private FailBehavior failBehavior;
 
 	private final static Map<String, TimeStampAuthority> timeStampAuthorities;
 
@@ -186,6 +190,11 @@ public class TimeStampAuthority implements EndpointProvider {
 		return this.certificate;
 	}
 
+	@Override
+	public void setFailureBehavior(FailBehavior failBehavior) {
+		this.failBehavior = failBehavior;
+	}
+
 	public static final class TSAServlet extends HttpServlet {
 		private static final Log LOG = LogFactory.getLog(TSAServlet.class);
 
@@ -237,8 +246,13 @@ public class TimeStampAuthority implements EndpointProvider {
 			TimeStampResponseGenerator timeStampResponseGenerator = new TimeStampResponseGenerator(tsTokenGen,
 					TSPAlgorithms.ALLOWED);
 			LOG.debug("genTime: " + now);
-			TimeStampResponse timeStampResponse = timeStampResponseGenerator.generate(timeStampRequest, BigInteger.ONE,
-					now.toDate());
+			TimeStampResponse timeStampResponse;
+			if (null != timeStampAuthority.failBehavior && timeStampAuthority.failBehavior.fail()) {
+				timeStampResponse = timeStampResponseGenerator.generateFailResponse(PKIStatus.REJECTION,
+						PKIFailureInfo.systemFailure, "woops");
+			} else {
+				timeStampResponse = timeStampResponseGenerator.generate(timeStampRequest, BigInteger.ONE, now.toDate());
+			}
 
 			response.setContentType("application/timestamp-reply");
 			OutputStream outputStream = response.getOutputStream();
