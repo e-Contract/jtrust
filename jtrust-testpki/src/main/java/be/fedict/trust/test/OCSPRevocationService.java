@@ -36,8 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
@@ -64,6 +62,8 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of an OCSP revocation service.
@@ -158,7 +158,7 @@ public class OCSPRevocationService implements RevocationService {
 	}
 
 	public static final class OCSPServlet extends HttpServlet {
-		private static final Log LOG = LogFactory.getLog(OCSPServlet.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(OCSPServlet.class);
 
 		private static final long serialVersionUID = 1L;
 
@@ -170,7 +170,7 @@ public class OCSPRevocationService implements RevocationService {
 			try {
 				_doPost(request, response);
 			} catch (Exception e) {
-				LOG.error("OCSP error: " + e.getMessage(), e);
+				LOGGER.error("OCSP error: " + e.getMessage(), e);
 			}
 		}
 

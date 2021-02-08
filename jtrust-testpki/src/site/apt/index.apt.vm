@@ -1,0 +1,60 @@
+Test PKI Library
+
+ This Java library provides an implementation of a PKI that can be used in for example unit tests.
+ 
+ 
+* Maven
+ 
+ The library is available within the e-contract.be Maven repository.
+ Configure this Maven repository within your <<<pom.xml>>> as follows:
+  
++--
+<repositories>
+	<repository>
+		<id>e-contract.be</id>
+		<url>https://www.e-contract.be/maven2/</url>
+	</repository>
+</repositories>
++--
+
+ Add the library within your <<<pom.xml>>> dependencies element as follows:
+  
++--
+<dependency>
+	<groupId>be.fedict.jtrust</groupId>
+	<artifactId>jtrust-testpki</artifactId>
+	<version>${project.version}</version>
+</dependency>
++--
+ 
+* Usage
+
+ Example usage:
+ 
++--
+World world = new World();
+CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+		rootCertificationAuthority);
+world.start();
+
+X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+X509Certificate cert = certificationAuthority.getCertificate();
+List<X509Certificate> certChain = new LinkedList<>();
+certChain.add(cert);
+certChain.add(rootCert);
+
+MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+memoryCertificateRepository.addTrustPoint(rootCert);
+TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+trustValidator.isTrusted(certChain);
+
+world.stop();
++--
+
+  {{{./apidocs/index.html}Javadoc API documentation}}

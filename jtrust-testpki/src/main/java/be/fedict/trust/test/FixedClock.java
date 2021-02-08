@@ -33,8 +33,7 @@ public class FixedClock implements Clock {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param now
-	 *            the fixed time for this clock.
+	 * @param now the fixed time for this clock.
 	 */
 	public FixedClock(DateTime now) {
 		this.now = now;

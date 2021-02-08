@@ -36,8 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
@@ -62,6 +60,8 @@ import org.bouncycastle.util.Store;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a timestamp authority according to RFC 3161.
@@ -196,7 +196,7 @@ public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 	}
 
 	public static final class TSAServlet extends HttpServlet {
-		private static final Log LOG = LogFactory.getLog(TSAServlet.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(TSAServlet.class);
 
 		private static final long serialVersionUID = 1L;
 
@@ -208,7 +208,7 @@ public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 			try {
 				_doPost(request, response);
 			} catch (Exception e) {
-				LOG.error(e);
+				LOGGER.error("error: " + e.getMessage(), e);
 			}
 		}
 
@@ -239,13 +239,13 @@ public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 							new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256)),
 					new ASN1ObjectIdentifier("1.2"));
 
-			LOG.debug("certificate chain size: " + timeStampAuthority.certificateChain.size());
+			LOGGER.debug("certificate chain size: {}", timeStampAuthority.certificateChain.size());
 			Store certs = new JcaCertStore(timeStampAuthority.certificateChain);
 			tsTokenGen.addCertificates(certs);
 
 			TimeStampResponseGenerator timeStampResponseGenerator = new TimeStampResponseGenerator(tsTokenGen,
 					TSPAlgorithms.ALLOWED);
-			LOG.debug("genTime: " + now);
+			LOGGER.debug("genTime: {}", now);
 			TimeStampResponse timeStampResponse;
 			if (null != timeStampAuthority.failBehavior && timeStampAuthority.failBehavior.fail()) {
 				timeStampResponse = timeStampResponseGenerator.generateFailResponse(PKIStatus.REJECTION,

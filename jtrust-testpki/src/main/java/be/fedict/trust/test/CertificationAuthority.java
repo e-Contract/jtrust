@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -523,7 +523,7 @@ public class CertificationAuthority {
 			throw new IllegalStateException();
 		}
 		// make sure our CA certificate is generated before the issued certificate
-		X509Certificate caCert = getCertificate();
+		getCertificate();
 
 		Clock clock = this.world.getClock();
 		DateTime notBefore = clock.getTime();

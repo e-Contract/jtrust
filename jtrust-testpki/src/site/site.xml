@@ -2,18 +2,12 @@
 <project xmlns="http://maven.apache.org/DECORATION/1.8.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd"
-	name="Java Trust Library">
-	<bannerRight>
-		<src>https://www.e-contract.be/images/logo.svg</src>
-	</bannerRight>
+	name="Java Trust Test PKI Library">
 	<body>
 		<menu name="Overview">
 			<item name="Introduction" href="index.html" />
 		</menu>
+		<menu ref="parent" />
+		<menu ref="reports" />
 	</body>
-	<skin>
-		<groupId>org.apache.maven.skins</groupId>
-		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.9</version>
-	</skin>
 </project>

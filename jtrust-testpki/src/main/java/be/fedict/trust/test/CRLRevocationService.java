@@ -35,8 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -62,6 +60,8 @@ import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CRL revocation service implementation.
@@ -114,7 +114,7 @@ public class CRLRevocationService implements RevocationService {
 
 	public static final class CRLServlet extends HttpServlet {
 
-		private static final Log LOG = LogFactory.getLog(CRLServlet.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(CRLServlet.class);
 
 		private static final long serialVersionUID = 1L;
 
@@ -171,7 +171,7 @@ public class CRLRevocationService implements RevocationService {
 				OutputStream outputStream = resp.getOutputStream();
 				IOUtils.write(crlValue, outputStream);
 			} catch (Exception e) {
-				LOG.error("error: " + e.getMessage(), e);
+				LOGGER.error("error: " + e.getMessage(), e);
 				throw new IOException(e);
 			}
 		}
