@@ -43,6 +43,7 @@ import be.fedict.trust.TrustValidatorDecorator;
 import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
+import be.fedict.trust.test.BasicFailBehavior;
 import be.fedict.trust.test.CRLRevocationService;
 import be.fedict.trust.test.CertificationAuthority;
 import be.fedict.trust.test.Clock;
@@ -633,6 +634,45 @@ public class ScenarioTest {
 			} catch (TrustLinkerResultException e) {
 				// expected
 			}
+		}
+	}
+
+	@Test
+	public void testFailingOCSPResponder() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Intermediate CA",
+					rootCertificationAuthority);
+			OCSPRevocationService ocspRevocationService = new OCSPRevocationService();
+			BasicFailBehavior ocspFailBehavior = new BasicFailBehavior();
+			ocspRevocationService.setFailureBehavior(ocspFailBehavior);
+			certificationAuthority.addRevocationService(ocspRevocationService);
+			certificationAuthority.addRevocationService(new CRLRevocationService());
+
+			world.start();
+
+			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
+					"CN=End Entity");
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate caCert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(certificate);
+			certChain.add(caCert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			ocspFailBehavior.setFailing(true);
+			trustValidator.isTrusted(certChain);
 		}
 	}
 

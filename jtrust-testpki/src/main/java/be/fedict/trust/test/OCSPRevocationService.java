@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  * @author Frank Cornelis
  *
  */
-public class OCSPRevocationService implements RevocationService {
+public class OCSPRevocationService implements RevocationService, FailableEndpoint {
 
 	private final String identifier;
 
@@ -83,6 +83,8 @@ public class OCSPRevocationService implements RevocationService {
 	private CertificationAuthority certificationAuthority;
 
 	private static final Map<String, OCSPRevocationService> ocspRevocationServices;
+
+	private FailBehavior failBehavior;
 
 	private PublicKey ocspResponderPublicKey;
 	private PrivateKey ocspResponderPrivateKey;
@@ -177,6 +179,9 @@ public class OCSPRevocationService implements RevocationService {
 
 		private void _doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			OCSPRevocationService ocspRevocationService = getOCSPRevocationService();
+			if (null != ocspRevocationService.failBehavior && ocspRevocationService.failBehavior.fail()) {
+				throw new RuntimeException("failing OCSP responder");
+			}
 
 			byte[] reqData = IOUtils.toByteArray(request.getInputStream());
 			OCSPReq ocspReq = new OCSPReq(reqData);
@@ -270,5 +275,10 @@ public class OCSPRevocationService implements RevocationService {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setFailureBehavior(FailBehavior failBehavior) {
+		this.failBehavior = failBehavior;
 	}
 }
