@@ -549,8 +549,7 @@ public class ScenarioTest {
 
 			try {
 				LocalDateTime crlExpiredDateTime = clock.getTime().plusDays(2);
-				trustValidator.isTrusted(certChain,
-						Date.from(crlExpiredDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+				trustValidator.isTrusted(certChain, crlExpiredDateTime);
 				fail();
 			} catch (TrustLinkerResultException e) {
 				// expected

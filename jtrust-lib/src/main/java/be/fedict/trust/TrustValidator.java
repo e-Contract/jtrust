@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -21,6 +21,9 @@ package be.fedict.trust;
 
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,8 +67,8 @@ public class TrustValidator {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param certificateRepository
-	 *            the certificate repository used by this trust validator.
+	 * @param certificateRepository the certificate repository used by this trust
+	 *                              validator.
 	 */
 	public TrustValidator(CertificateRepository certificateRepository) {
 		this(certificateRepository, null);
@@ -74,12 +77,12 @@ public class TrustValidator {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param certificateRepository
-	 *            the certificate repository used by this trust validator.
-	 * @param revocationData
-	 *            optional {@link RevocationData} object. If not <code>null</code>
-	 *            the added {@link TrustLinker}'s should fill it up with used
-	 *            revocation data.
+	 * @param certificateRepository the certificate repository used by this trust
+	 *                              validator.
+	 * @param revocationData        optional {@link RevocationData} object. If not
+	 *                              <code>null</code> the added
+	 *                              {@link TrustLinker}'s should fill it up with
+	 *                              used revocation data.
 	 */
 	public TrustValidator(CertificateRepository certificateRepository, RevocationData revocationData) {
 		this.certificateRepository = certificateRepository;
@@ -93,8 +96,7 @@ public class TrustValidator {
 	 * Adds a trust linker to this trust validator. The order in which trust linkers
 	 * are added determine the runtime behavior of the trust validator.
 	 * 
-	 * @param trustLinker
-	 *            the trust linker component.
+	 * @param trustLinker the trust linker component.
 	 */
 	public void addTrustLinker(TrustLinker trustLinker) {
 		this.trustLinkers.add(trustLinker);
@@ -104,8 +106,7 @@ public class TrustValidator {
 	 * Sets the algorithm policy to be used when validation used signature
 	 * algorithms.
 	 * 
-	 * @param algorithmPolicy
-	 *            the algorithm policy component.
+	 * @param algorithmPolicy the algorithm policy component.
 	 */
 	public void setAlgorithmPolicy(AlgorithmPolicy algorithmPolicy) {
 		this.algorithmPolicy = algorithmPolicy;
@@ -115,8 +116,7 @@ public class TrustValidator {
 	 * Adds a certificate constraint to this trust validator. Keep this typo-version
 	 * of addCertificateContrainT for downwards compatibility.
 	 * 
-	 * @param certificateConstraint
-	 *            the certificate constraint component.
+	 * @param certificateConstraint the certificate constraint component.
 	 * @deprecated
 	 * @see TrustValidator#addCertificateConstraint(CertificateConstraint)
 	 */
@@ -127,8 +127,7 @@ public class TrustValidator {
 	/**
 	 * Adds a certificate constraint to this trust validator.
 	 *
-	 * @param certificateConstraint
-	 *            the certificate constraint component.
+	 * @param certificateConstraint the certificate constraint component.
 	 */
 	public void addCertificateConstraint(CertificateConstraint certificateConstraint) {
 		this.certificateConstraints.add(certificateConstraint);
@@ -138,10 +137,8 @@ public class TrustValidator {
 	 * Validates whether the given certificate path is valid according to the
 	 * configured trust linkers.
 	 * 
-	 * @param certificatePath
-	 *            the X509 certificate path to validate.
-	 * @throws TrustLinkerResultException
-	 *             in case the certificate path is invalid.
+	 * @param certificatePath the X509 certificate path to validate.
+	 * @throws TrustLinkerResultException in case the certificate path is invalid.
 	 * @see #isTrusted(List, Date)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath) throws TrustLinkerResultException {
@@ -152,13 +149,10 @@ public class TrustValidator {
 	 * Validates whether the given certificate path is valid according to the
 	 * configured trust linkers.
 	 * 
-	 * @param certificatePath
-	 *            the X509 certificate path to validate.
-	 * @param expiredMode
-	 *            set to <code>true</code> for validation mode of expired
-	 *            certificates.
-	 * @throws TrustLinkerResultException
-	 *             in case the certificate path is invalid.
+	 * @param certificatePath the X509 certificate path to validate.
+	 * @param expiredMode     set to <code>true</code> for validation mode of
+	 *                        expired certificates.
+	 * @throws TrustLinkerResultException in case the certificate path is invalid.
 	 * @see #isTrusted(List, Date)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath, boolean expiredMode)
@@ -198,8 +192,7 @@ public class TrustValidator {
 	/**
 	 * Checks whether the given certificate is self-signed.
 	 * 
-	 * @param certificate
-	 *            the X509 certificate.
+	 * @param certificate the X509 certificate.
 	 */
 	public static void isSelfSigned(X509Certificate certificate) throws TrustLinkerResultException {
 		checkSelfSigned(certificate);
@@ -209,8 +202,7 @@ public class TrustValidator {
 	 * Gives back the trust linker result of a verification of a self-signed X509
 	 * certificate.
 	 * 
-	 * @param certificate
-	 *            the self-signed certificate to validate.
+	 * @param certificate the self-signed certificate to validate.
 	 */
 	public static void checkSelfSigned(X509Certificate certificate) throws TrustLinkerResultException {
 		if (false == certificate.getIssuerX500Principal().equals(certificate.getSubjectX500Principal())) {
@@ -242,11 +234,9 @@ public class TrustValidator {
 	 * Validates whether the certificate path was valid at the given validation
 	 * date.
 	 * 
-	 * @param certificatePath
-	 *            the X509 certificate path to be validated.
-	 * @param validationDate
-	 *            the date at which the certificate path validation should be
-	 *            verified.
+	 * @param certificatePath the X509 certificate path to be validated.
+	 * @param validationDate  the date at which the certificate path validation
+	 *                        should be verified.
 	 * @see #isTrusted(List)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath, Date validationDate)
@@ -258,14 +248,39 @@ public class TrustValidator {
 	 * Validates whether the certificate path was valid at the given validation
 	 * date.
 	 * 
-	 * @param certificatePath
-	 *            the X509 certificate path to be validated.
-	 * @param validationDate
-	 *            the date at which the certificate path validation should be
-	 *            verified.
-	 * @param expiredMode
-	 *            set to <code>true</code> for validation mode of expired
-	 *            certificates.
+	 * @param certificatePath the X509 certificate path to be validated.
+	 * @param validationDate  the date at which the certificate path validation
+	 *                        should be verified.
+	 * @see #isTrusted(List)
+	 */
+	public void isTrusted(List<X509Certificate> certificatePath, Instant validationDate)
+			throws TrustLinkerResultException {
+		isTrusted(certificatePath, Date.from(validationDate), false);
+	}
+
+	/**
+	 * Validates whether the certificate path was valid at the given validation
+	 * date.
+	 * 
+	 * @param certificatePath the X509 certificate path to be validated.
+	 * @param validationDate  the date at which the certificate path validation
+	 *                        should be verified.
+	 * @see #isTrusted(List)
+	 */
+	public void isTrusted(List<X509Certificate> certificatePath, LocalDateTime validationDate)
+			throws TrustLinkerResultException {
+		isTrusted(certificatePath, Date.from(validationDate.atZone(ZoneId.systemDefault()).toInstant()), false);
+	}
+
+	/**
+	 * Validates whether the certificate path was valid at the given validation
+	 * date.
+	 * 
+	 * @param certificatePath the X509 certificate path to be validated.
+	 * @param validationDate  the date at which the certificate path validation
+	 *                        should be verified.
+	 * @param expiredMode     set to <code>true</code> for validation mode of
+	 *                        expired certificates.
 	 * @see #isTrusted(List)
 	 */
 	public void isTrusted(List<X509Certificate> certificatePath, Date validationDate, boolean expiredMode)

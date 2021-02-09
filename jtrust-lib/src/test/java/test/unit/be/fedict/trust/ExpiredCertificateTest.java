@@ -30,6 +30,8 @@ import java.util.List;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
@@ -41,6 +43,8 @@ import be.fedict.trust.test.FixedClock;
 import be.fedict.trust.test.World;
 
 public class ExpiredCertificateTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExpiredCertificateTest.class);
 
 	@BeforeAll
 	public static void oneTimeSetUp() throws Exception {
@@ -63,6 +67,27 @@ public class ExpiredCertificateTest {
 			trustValidator.isTrusted(Collections.singletonList(rootCert),
 					Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
+			trustValidator.isTrusted(Collections.singletonList(rootCert), true);
+		}
+	}
+
+	@Test
+	public void testExpiredRootCAJava8DateTimeAPI() throws Exception {
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
+		try (World world = new World(clock)) {
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			world.start();
+
+			X509Certificate rootCert = certificationAuthority.getCertificate();
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			LOGGER.debug("isTrusted test");
+			trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().plusMonths(2));
+
+			LOGGER.debug("isTrusted test expired mode");
 			trustValidator.isTrusted(Collections.singletonList(rootCert), true);
 		}
 	}
