@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -64,8 +64,8 @@ public class OnlineCrlRepository implements CrlRepository {
 	/**
 	 * Main construtor.
 	 * 
-	 * @param networkConfig
-	 *            the optional network configuration used for downloading CRLs.
+	 * @param networkConfig the optional network configuration used for downloading
+	 *                      CRLs.
 	 */
 	public OnlineCrlRepository(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
@@ -127,7 +127,7 @@ public class OnlineCrlRepository implements CrlRepository {
 		StatusLine statusLine = httpResponse.getStatusLine();
 		int statusCode = statusLine.getStatusCode();
 		if (HttpURLConnection.HTTP_OK != statusCode) {
-			LOGGER.debug("HTTP status code: {}", statusCode);
+			LOGGER.error("HTTP status code: {}", statusCode);
 			return null;
 		}
 

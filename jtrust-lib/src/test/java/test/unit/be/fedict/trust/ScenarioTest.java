@@ -19,6 +19,7 @@
 package test.unit.be.fedict.trust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
@@ -44,6 +45,7 @@ import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 import be.fedict.trust.test.BasicFailBehavior;
+import be.fedict.trust.test.BasicOCSPFailBehavior;
 import be.fedict.trust.test.CRLRevocationService;
 import be.fedict.trust.test.CertificationAuthority;
 import be.fedict.trust.test.Clock;
@@ -353,6 +355,38 @@ public class ScenarioTest {
 			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
 			trustValidator.isTrusted(certChain);
+		}
+	}
+
+	@Test
+	public void testFailingCRL() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.setSignatureAlgorithm("SHA256withRSA");
+			CRLRevocationService crlRevocationService = new CRLRevocationService();
+			BasicFailBehavior crlFailBehavior = new BasicFailBehavior();
+			crlRevocationService.setFailureBehavior(crlFailBehavior);
+			rootCertificationAuthority.addRevocationService(crlRevocationService);
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Intermediate CA",
+					rootCertificationAuthority);
+			certificationAuthority.setSignatureAlgorithm("SHA256withRSA");
+			world.start();
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate cert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(cert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			crlFailBehavior.setFailing(true);
+			assertThrows(TrustLinkerResultException.class, () -> trustValidator.isTrusted(certChain));
 		}
 	}
 
@@ -673,6 +707,44 @@ public class ScenarioTest {
 
 			ocspFailBehavior.setFailing(true);
 			trustValidator.isTrusted(certChain);
+		}
+	}
+
+	@Test
+	public void testFailingOCSPClock() throws Exception {
+		try (World world = new World()) {
+			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+
+			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Intermediate CA",
+					rootCertificationAuthority);
+			OCSPRevocationService ocspRevocationService = new OCSPRevocationService();
+			BasicOCSPFailBehavior ocspFailBehavior = new BasicOCSPFailBehavior();
+			ocspRevocationService.setFailureBehavior(ocspFailBehavior);
+			certificationAuthority.addRevocationService(ocspRevocationService);
+
+			world.start();
+
+			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
+					"CN=End Entity");
+
+			X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+			X509Certificate caCert = certificationAuthority.getCertificate();
+			List<X509Certificate> certChain = new LinkedList<>();
+			certChain.add(certificate);
+			certChain.add(caCert);
+			certChain.add(rootCert);
+
+			MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+			memoryCertificateRepository.addTrustPoint(rootCert);
+			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+
+			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+
+			ocspFailBehavior.setFailingClock(new FixedClock(LocalDateTime.now().plusHours(1)));
+			assertThrows(TrustLinkerResultException.class, () -> trustValidator.isTrusted(certChain));
 		}
 	}
 

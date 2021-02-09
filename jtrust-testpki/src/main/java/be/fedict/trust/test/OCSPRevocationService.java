@@ -191,7 +191,15 @@ public class OCSPRevocationService implements RevocationService, FailableEndpoin
 			BasicOCSPRespBuilder basicOCSPRespBuilder = new JcaBasicOCSPRespBuilder(
 					ocspRevocationService.ocspResponderPublicKey, digCalcProv.get(CertificateID.HASH_SHA1));
 
-			Clock clock = ocspRevocationService.certificationAuthority.getClock();
+			Clock clock = null;
+			if (null != ocspRevocationService.failBehavior
+					&& (ocspRevocationService.failBehavior instanceof OCSPFailBehavior)) {
+				OCSPFailBehavior ocspFailBehavior = (OCSPFailBehavior) ocspRevocationService.failBehavior;
+				clock = ocspFailBehavior.getFailingClock();
+			}
+			if (null == clock) {
+				clock = ocspRevocationService.certificationAuthority.getClock();
+			}
 			LocalDateTime now = clock.getTime();
 			LocalDateTime thisUpdate = now.minusSeconds(1);
 			LocalDateTime nextUpdate = thisUpdate.plusMinutes(1);

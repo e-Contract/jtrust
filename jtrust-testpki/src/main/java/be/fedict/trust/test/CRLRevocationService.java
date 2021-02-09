@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Frank Cornelis
  *
  */
-public class CRLRevocationService implements RevocationService {
+public class CRLRevocationService implements RevocationService, FailableEndpoint {
 
 	private final String identifier;
 
@@ -79,6 +79,8 @@ public class CRLRevocationService implements RevocationService {
 	private String crlUri;
 
 	private CertificationAuthority certificationAuthority;
+
+	private FailBehavior failBehavior;
 
 	private static final Map<String, CRLRevocationService> crlRevocationServices;
 
@@ -124,6 +126,9 @@ public class CRLRevocationService implements RevocationService {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			CRLRevocationService crlRevocationService = getCRLRevocationService();
+			if (null != crlRevocationService.failBehavior && crlRevocationService.failBehavior.fail()) {
+				throw new IOException("failing CRL endpoint");
+			}
 			CertificationAuthority certificationAuthority = crlRevocationService.certificationAuthority;
 			try {
 				// make sure we first get the CA certificate, so it gets generated before our
@@ -197,5 +202,10 @@ public class CRLRevocationService implements RevocationService {
 	@Override
 	public void setCertificationAuthority(CertificationAuthority certificationAuthority) {
 		this.certificationAuthority = certificationAuthority;
+	}
+
+	@Override
+	public void setFailureBehavior(FailBehavior failBehavior) {
+		this.failBehavior = failBehavior;
 	}
 }
