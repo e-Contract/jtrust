@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -25,6 +25,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -54,7 +57,6 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,8 +92,8 @@ public class OcspTrustLinker implements TrustLinker {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param ocspRepository
-	 *            the OCSP repository component used by this OCSP trust linker.
+	 * @param ocspRepository the OCSP repository component used by this OCSP trust
+	 *                       linker.
 	 */
 	public OcspTrustLinker(OcspRepository ocspRepository) {
 		this.ocspRepository = ocspRepository;
@@ -244,10 +246,11 @@ public class OcspTrustLinker implements TrustLinker {
 			if (false == certificateId.equals(responseCertificateId)) {
 				continue;
 			}
-			DateTime thisUpdate = new DateTime(singleResp.getThisUpdate());
-			DateTime nextUpdate;
+			LocalDateTime thisUpdate = singleResp.getThisUpdate().toInstant().atZone(ZoneId.systemDefault())
+					.toLocalDateTime();
+			LocalDateTime nextUpdate;
 			if (null != singleResp.getNextUpdate()) {
-				nextUpdate = new DateTime(singleResp.getNextUpdate());
+				nextUpdate = singleResp.getNextUpdate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			} else {
 				LOGGER.debug("no OCSP nextUpdate");
 				nextUpdate = thisUpdate;
@@ -255,9 +258,11 @@ public class OcspTrustLinker implements TrustLinker {
 			LOGGER.debug("OCSP thisUpdate: {}", thisUpdate);
 			LOGGER.debug("(OCSP) nextUpdate: {}", nextUpdate);
 			LOGGER.debug("validation date: {}", validationDate);
-			DateTime beginValidity = thisUpdate.minus(this.freshnessInterval);
-			DateTime endValidity = nextUpdate.plus(this.freshnessInterval);
-			DateTime validationDateTime = new DateTime(validationDate);
+			LocalDateTime beginValidity = thisUpdate.minus(this.freshnessInterval, ChronoUnit.MILLIS);
+			LocalDateTime endValidity = nextUpdate.plus(this.freshnessInterval, ChronoUnit.MILLIS);
+			LocalDateTime validationDateTime = validationDate.toInstant().atZone(ZoneId.systemDefault())
+					.toLocalDateTime();
+			;
 			if (validationDateTime.isBefore(beginValidity)) {
 				LOGGER.warn("OCSP response not yet valid");
 				continue;

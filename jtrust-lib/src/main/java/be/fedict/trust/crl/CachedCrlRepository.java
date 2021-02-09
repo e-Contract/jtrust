@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,12 +23,13 @@ import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,15 +54,15 @@ public class CachedCrlRepository implements CrlRepository {
 
 	private static class CacheEntry {
 
-		private final DateTime timestamp;
+		private final LocalDateTime timestamp;
 		private final X509CRL crl;
 
 		public CacheEntry(X509CRL crl) {
-			this.timestamp = new DateTime();
+			this.timestamp = LocalDateTime.now();
 			this.crl = crl;
 		}
 
-		public DateTime getTimestamp() {
+		public LocalDateTime getTimestamp() {
 			return this.timestamp;
 		}
 
@@ -73,8 +74,7 @@ public class CachedCrlRepository implements CrlRepository {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param crlRepository
-	 *            the delegated CRL repository.
+	 * @param crlRepository the delegated CRL repository.
 	 */
 	public CachedCrlRepository(CrlRepository crlRepository) {
 		this.crlRepository = crlRepository;
@@ -106,8 +106,8 @@ public class CachedCrlRepository implements CrlRepository {
 		 * refresh rate is every 3 hours. So it's a bit dangerous to only base the CRL
 		 * cache refresh strategy on the nextUpdate field as indicated by the CRL.
 		 */
-		DateTime cacheMaturityDateTime = cacheEntry.getTimestamp().plusHours(this.cacheAgingHours);
-		if (validationDate.after(cacheMaturityDateTime.toDate())) {
+		LocalDateTime cacheMaturityDateTime = cacheEntry.getTimestamp().plusHours(this.cacheAgingHours);
+		if (validationDate.after(Date.from(cacheMaturityDateTime.atZone(ZoneId.systemDefault()).toInstant()))) {
 			LOGGER.debug("refreshing the CRL cache: {}", crlUri);
 			return refreshCrl(crlUri, issuerCertificate, validationDate);
 		}
@@ -136,8 +136,7 @@ public class CachedCrlRepository implements CrlRepository {
 	/**
 	 * Sets the CRL cache aging period in hours.
 	 * 
-	 * @param cacheAgingHours
-	 *            the CRL cache aging period in hours.
+	 * @param cacheAgingHours the CRL cache aging period in hours.
 	 */
 	public void setCacheAgingHours(int cacheAgingHours) {
 		this.cacheAgingHours = cacheAgingHours;

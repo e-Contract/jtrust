@@ -31,7 +31,6 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import org.easymock.EasyMock;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -205,21 +204,24 @@ public class CachedCrlRepositoryTest {
 
 		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
-		Date validationDate = new Date();
-		Date expiredCacheValidationDate = new DateTime(validationDate).plusHours(4).toDate();
+		LocalDateTime validationDate = LocalDateTime.now();
+		LocalDateTime expiredCacheValidationDate = validationDate.plusHours(4);
 
 		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
 
 		// expectations
-		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate))
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate,
+				Date.from(expiredCacheValidationDate.atZone(ZoneId.systemDefault()).toInstant())))
 				.andReturn(this.testCrl).times(2);
 
 		// prepare
 		EasyMock.replay(mockCrlRepository);
 
 		// operate
-		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate);
-		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, expiredCacheValidationDate);
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate,
+				Date.from(expiredCacheValidationDate.atZone(ZoneId.systemDefault()).toInstant()));
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate,
+				Date.from(expiredCacheValidationDate.atZone(ZoneId.systemDefault()).toInstant()));
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
