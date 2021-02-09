@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -28,11 +28,11 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,8 +59,8 @@ public class OfflineCrlRepositoryTest {
 
 		// setup
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 				notAfter);
 		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(), certificate, notBefore, notAfter);
@@ -79,8 +79,8 @@ public class OfflineCrlRepositoryTest {
 	public void testCrlNotFound() throws Exception {
 
 		// setup
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,

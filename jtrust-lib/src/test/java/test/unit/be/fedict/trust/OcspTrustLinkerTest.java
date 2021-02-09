@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,13 +26,14 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -55,8 +56,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void noOcspUriInCertificate() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -81,8 +82,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void noOcspResponseInRepository() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -110,8 +111,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void validOcspResponse() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -144,8 +145,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void ocspResponder() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -178,8 +179,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void ocspResponseWronglySigned() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -213,8 +214,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void ocspResponseMD5Signature() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -251,8 +252,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void ocspNotFresh() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -271,7 +272,7 @@ public class OcspTrustLinkerTest {
 
 		EasyMock.replay(mockOcspRepository);
 
-		Date validationDate = notBefore.plusDays(1).toDate();
+		Date validationDate = Date.from(notBefore.plusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
 		// operate
 		TrustLinkerResult result = ocspTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate,
@@ -285,8 +286,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void wrongOcspResponse() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -322,8 +323,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void revokedOcsp() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -360,8 +361,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void validDedicatedAuthorizedOcspResponse() throws Exception {
 
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
@@ -401,8 +402,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void rootCAIssuesOcspResponseNoCertInResponse() throws Exception {
 
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
@@ -437,8 +438,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void rootCAIssuesOcspResponseRootCACertInResponse() throws Exception {
 
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
@@ -473,8 +474,8 @@ public class OcspTrustLinkerTest {
 	@Test
 	public void invalidDedicatedAuthorizedOcspResponse() throws Exception {
 
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",

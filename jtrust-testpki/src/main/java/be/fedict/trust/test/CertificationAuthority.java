@@ -26,6 +26,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,7 +57,6 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
-import org.joda.time.DateTime;
 
 /**
  * A certification authority. Can issue certificates and expose revocation
@@ -81,7 +82,7 @@ public class CertificationAuthority {
 	private final List<X509Certificate> issuedCertificates;
 
 	// value is revocation date
-	private final Map<X509Certificate, Date> revokedCertificates;
+	private final Map<X509Certificate, LocalDateTime> revokedCertificates;
 
 	private String signatureAlgorithm;
 
@@ -176,8 +177,8 @@ public class CertificationAuthority {
 		X509Certificate caCert = getCertificate();
 
 		Clock clock = this.world.getClock();
-		DateTime notBefore = clock.getTime();
-		DateTime notAfter = new DateTime(caCert.getNotAfter());
+		LocalDateTime notBefore = clock.getTime();
+		LocalDateTime notAfter = caCert.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -185,7 +186,8 @@ public class CertificationAuthority {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
@@ -311,8 +313,8 @@ public class CertificationAuthority {
 
 	private X509Certificate generateSelfSignedCertificate() throws Exception {
 		Clock clock = this.world.getClock();
-		DateTime notBefore = clock.getTime();
-		DateTime notAfter = notBefore.plusYears(1);
+		LocalDateTime notBefore = clock.getTime();
+		LocalDateTime notAfter = notBefore.plusYears(1);
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(this.name);
@@ -320,7 +322,8 @@ public class CertificationAuthority {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(this.keyPair.getPublic().getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
@@ -373,8 +376,9 @@ public class CertificationAuthority {
 		X509Certificate caCertificate = getCertificate();
 
 		Clock clock = this.world.getClock();
-		DateTime notBefore = clock.getTime();
-		DateTime notAfter = new DateTime(caCertificate.getNotAfter());
+		LocalDateTime notBefore = clock.getTime();
+		LocalDateTime notAfter = caCertificate.getNotAfter().toInstant().atZone(ZoneId.systemDefault())
+				.toLocalDateTime();
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -382,7 +386,8 @@ public class CertificationAuthority {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
@@ -440,8 +445,8 @@ public class CertificationAuthority {
 		X509Certificate caCert = getCertificate();
 
 		Clock clock = this.world.getClock();
-		DateTime notBefore = clock.getTime();
-		DateTime notAfter = new DateTime(caCert.getNotAfter());
+		LocalDateTime notBefore = clock.getTime();
+		LocalDateTime notAfter = caCert.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -449,7 +454,8 @@ public class CertificationAuthority {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
@@ -504,7 +510,7 @@ public class CertificationAuthority {
 		}
 		// make sure our CA certificate is generated before the issued certificate
 		X509Certificate caCert = getCertificate();
-		DateTime notAfter = new DateTime(caCert.getNotAfter());
+		LocalDateTime notAfter = caCert.getNotAfter().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 		return issueSigningCertificate(publicKey, name, notAfter);
 	}
 
@@ -517,7 +523,7 @@ public class CertificationAuthority {
 	 * @return
 	 * @throws Exception
 	 */
-	public X509Certificate issueSigningCertificate(PublicKey publicKey, String name, DateTime notAfter)
+	public X509Certificate issueSigningCertificate(PublicKey publicKey, String name, LocalDateTime notAfter)
 			throws Exception {
 		if (!this.world.isRunning()) {
 			throw new IllegalStateException();
@@ -526,7 +532,7 @@ public class CertificationAuthority {
 		getCertificate();
 
 		Clock clock = this.world.getClock();
-		DateTime notBefore = clock.getTime();
+		LocalDateTime notBefore = clock.getTime();
 
 		X500Name issuerName = new X500Name(this.name);
 		X500Name subjectName = new X500Name(name);
@@ -534,7 +540,8 @@ public class CertificationAuthority {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
@@ -589,7 +596,7 @@ public class CertificationAuthority {
 		if (this.revokedCertificates.containsKey(certificate)) {
 			throw new IllegalArgumentException();
 		}
-		Date revocationDate = this.world.getClock().getTime().toDate();
+		LocalDateTime revocationDate = this.world.getClock().getTime();
 		this.revokedCertificates.put(certificate, revocationDate);
 	}
 
@@ -607,7 +614,7 @@ public class CertificationAuthority {
 	 * 
 	 * @return
 	 */
-	public Map<X509Certificate, Date> getRevokedCertificates() {
+	public Map<X509Certificate, LocalDateTime> getRevokedCertificates() {
 		return this.revokedCertificates;
 	}
 }

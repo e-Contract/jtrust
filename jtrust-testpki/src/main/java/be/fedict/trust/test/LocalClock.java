@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package be.fedict.trust.test;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Implementation of a clock that used the local machine time.
@@ -29,7 +29,7 @@ import org.joda.time.DateTime;
 public class LocalClock implements Clock {
 
 	@Override
-	public DateTime getTime() {
-		return new DateTime();
+	public LocalDateTime getTime() {
+		return LocalDateTime.now();
 	}
 }

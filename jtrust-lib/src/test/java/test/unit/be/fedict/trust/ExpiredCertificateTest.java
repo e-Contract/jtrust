@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -20,12 +20,14 @@ package test.unit.be.fedict.trust;
 
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +49,7 @@ public class ExpiredCertificateTest {
 
 	@Test
 	public void testExpiredRootCA() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			world.start();
@@ -58,7 +60,8 @@ public class ExpiredCertificateTest {
 			memoryCertificateRepository.addTrustPoint(rootCert);
 			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
-			trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().toDate());
+			trustValidator.isTrusted(Collections.singletonList(rootCert),
+					Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
 			trustValidator.isTrusted(Collections.singletonList(rootCert), true);
 		}
@@ -66,7 +69,7 @@ public class ExpiredCertificateTest {
 
 	@Test
 	public void testExpiredCRL() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
@@ -87,10 +90,11 @@ public class ExpiredCertificateTest {
 			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 			trustValidatorDecorator.addTrustLinkerConfigWithoutRevocationStatus(trustValidator);
 
-			trustValidator.isTrusted(certChain, clock.getTime().toDate());
+			trustValidator.isTrusted(certChain, Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
-			DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
-			trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate(), true);
+			LocalDateTime crlExpiredDateTime = clock.getTime().plusDays(2);
+			trustValidator.isTrusted(certChain,
+					Date.from(crlExpiredDateTime.atZone(ZoneId.systemDefault()).toInstant()), true);
 
 			trustValidator.isTrusted(certChain, true);
 		}

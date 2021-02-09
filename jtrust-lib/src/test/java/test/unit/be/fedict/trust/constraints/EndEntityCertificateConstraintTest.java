@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +46,8 @@ public class EndEntityCertificateConstraintTest {
 	@Test
 	public void testEmptyEndEntities() throws Exception {
 		// setup
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
@@ -69,8 +69,8 @@ public class EndEntityCertificateConstraintTest {
 	@Test
 	public void testEndEntityMisMatch() throws Exception {
 		// setup
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
@@ -98,8 +98,8 @@ public class EndEntityCertificateConstraintTest {
 	@Test
 	public void testEndEntityMatch() throws Exception {
 		// setup
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",

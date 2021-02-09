@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -27,12 +27,12 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,8 @@ public class OfflineOcspRepositoryTest {
 	public void setUp() throws Exception {
 
 		this.rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		this.rootCertificate = PKITestUtils.generateSelfSignedCertificate(this.rootKeyPair, "CN=TestRoot", notBefore,
 				notAfter);
 
@@ -93,8 +93,8 @@ public class OfflineOcspRepositoryTest {
 	public void testOcspResponseNotFound() throws Exception {
 
 		// setup
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
 		X509Certificate otherCertificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=TestOther",
 				notBefore, notAfter, this.rootCertificate, this.rootKeyPair.getPrivate());

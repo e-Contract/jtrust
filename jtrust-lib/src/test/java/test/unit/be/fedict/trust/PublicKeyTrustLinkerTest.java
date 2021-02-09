@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,10 +26,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -52,8 +53,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testHasTrustLink() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -77,8 +78,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testExpiredCertificate() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -88,7 +89,7 @@ public class PublicKeyTrustLinkerTest {
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
-		Date validationDate = notAfter.plusDays(1).toDate();
+		Date validationDate = Date.from(notAfter.plusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
 		// operate
 		try {
@@ -104,8 +105,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testCertificateNotYetValid() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -115,7 +116,7 @@ public class PublicKeyTrustLinkerTest {
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
-		Date validationDate = notBefore.minusDays(1).toDate();
+		Date validationDate = Date.from(notBefore.minusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
 		// operate
 		try {
@@ -130,8 +131,8 @@ public class PublicKeyTrustLinkerTest {
 	@Test
 	public void testNoCaFlagFailsNotOnRootCAs() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter, false);
 
@@ -153,8 +154,8 @@ public class PublicKeyTrustLinkerTest {
 	@Test
 	public void testNoCaFlagFails() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter, false);
 
@@ -184,8 +185,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testChildNotAllowToBeCA() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter, true, 0);
 
@@ -211,8 +212,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testNoChildFails() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -237,8 +238,8 @@ public class PublicKeyTrustLinkerTest {
 	@Test
 	public void testCACertificateNoSKID() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateCertificate(rootKeyPair.getPublic(), "CN=TestRoot",
 				notBefore, notAfter, null, rootKeyPair.getPrivate(), true, -1, null, null, null, "SHA1withRSA", false,
 				false, true);
@@ -264,8 +265,8 @@ public class PublicKeyTrustLinkerTest {
 	public void testChildCACertificateNoAKIDNotSelfSigned() throws Exception {
 		// setup
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 
@@ -289,8 +290,8 @@ public class PublicKeyTrustLinkerTest {
 	@Test
 	public void testAKIDMisMatchSKID() throws Exception {
 		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
 				notBefore, notAfter);
 

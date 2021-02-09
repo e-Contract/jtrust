@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +61,6 @@ import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,20 +131,22 @@ public class CRLRevocationService implements RevocationService {
 				PrivateKey caPrivateKey = certificationAuthority.getPrivateKey();
 				X509Certificate caCertificate = certificationAuthority.getCertificate();
 				Clock clock = certificationAuthority.getClock();
-				DateTime now = clock.getTime();
+				LocalDateTime now = clock.getTime();
 				// make sure the CRL is younger than the "now" of the world
-				DateTime thisUpdate = now.minusMinutes(1);
-				DateTime nextUpdate = now.plusDays(1);
+				LocalDateTime thisUpdate = now.minusMinutes(1);
+				LocalDateTime nextUpdate = now.plusDays(1);
 
 				X500Name issuerName = new X500Name(caCertificate.getSubjectX500Principal().toString());
-				X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName, thisUpdate.toDate());
-				x509v2crlBuilder.setNextUpdate(nextUpdate.toDate());
+				X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName,
+						Date.from(thisUpdate.atZone(ZoneId.systemDefault()).toInstant()));
+				x509v2crlBuilder.setNextUpdate(Date.from(nextUpdate.atZone(ZoneId.systemDefault()).toInstant()));
 
-				for (Map.Entry<X509Certificate, Date> revokedCertificateEntry : certificationAuthority
+				for (Map.Entry<X509Certificate, LocalDateTime> revokedCertificateEntry : certificationAuthority
 						.getRevokedCertificates().entrySet()) {
 					X509Certificate revokedCertificate = revokedCertificateEntry.getKey();
-					Date revocationDate = revokedCertificateEntry.getValue();
-					x509v2crlBuilder.addCRLEntry(revokedCertificate.getSerialNumber(), revocationDate,
+					LocalDateTime revocationDate = revokedCertificateEntry.getValue();
+					x509v2crlBuilder.addCRLEntry(revokedCertificate.getSerialNumber(),
+							Date.from(revocationDate.atZone(ZoneId.systemDefault()).toInstant()),
 							CRLReason.privilegeWithdrawn);
 				}
 

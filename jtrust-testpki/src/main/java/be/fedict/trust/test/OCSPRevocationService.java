@@ -24,6 +24,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +63,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,9 +187,9 @@ public class OCSPRevocationService implements RevocationService {
 					ocspRevocationService.ocspResponderPublicKey, digCalcProv.get(CertificateID.HASH_SHA1));
 
 			Clock clock = ocspRevocationService.certificationAuthority.getClock();
-			DateTime now = clock.getTime();
-			DateTime thisUpdate = now.minusSeconds(1);
-			DateTime nextUpdate = thisUpdate.plusMinutes(1);
+			LocalDateTime now = clock.getTime();
+			LocalDateTime thisUpdate = now.minusSeconds(1);
+			LocalDateTime nextUpdate = thisUpdate.plusMinutes(1);
 
 			// request processing
 			Req[] requestList = ocspReq.getRequestList();
@@ -198,15 +199,18 @@ public class OCSPRevocationService implements RevocationService {
 				if (ocspRevocationService.isUnknownCertificate(certificateID)) {
 					certificateStatus = new UnknownStatus();
 				} else {
-					Date revocationDate = ocspRevocationService.getRevocationDate(certificateID);
+					LocalDateTime revocationDate = ocspRevocationService.getRevocationDate(certificateID);
 					if (null == revocationDate) {
 						certificateStatus = CertificateStatus.GOOD;
 					} else {
-						certificateStatus = new RevokedStatus(revocationDate, CRLReason.privilegeWithdrawn);
+						certificateStatus = new RevokedStatus(
+								Date.from(revocationDate.atZone(ZoneId.systemDefault()).toInstant()),
+								CRLReason.privilegeWithdrawn);
 					}
 				}
-				basicOCSPRespBuilder.addResponse(certificateID, certificateStatus, thisUpdate.toDate(),
-						nextUpdate.toDate(), null);
+				basicOCSPRespBuilder.addResponse(certificateID, certificateStatus,
+						Date.from(thisUpdate.atZone(ZoneId.systemDefault()).toInstant()),
+						Date.from(nextUpdate.atZone(ZoneId.systemDefault()).toInstant()), null);
 			}
 
 			// basic response generation
@@ -221,7 +225,8 @@ public class OCSPRevocationService implements RevocationService {
 			ContentSigner contentSigner = new JcaContentSignerBuilder(
 					ocspRevocationService.certificationAuthority.getSignatureAlgorithm())
 							.build(ocspRevocationService.ocspResponderPrivateKey);
-			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain, now.toDate());
+			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain,
+					Date.from(now.atZone(ZoneId.systemDefault()).toInstant()));
 
 			// response generation
 			OCSPRespBuilder ocspRespBuilder = new OCSPRespBuilder();
@@ -256,8 +261,8 @@ public class OCSPRevocationService implements RevocationService {
 		return true;
 	}
 
-	private Date getRevocationDate(CertificateID certificateID) {
-		for (Map.Entry<X509Certificate, Date> revokedCertificateEntry : this.certificationAuthority
+	private LocalDateTime getRevocationDate(CertificateID certificateID) {
+		for (Map.Entry<X509Certificate, LocalDateTime> revokedCertificateEntry : this.certificationAuthority
 				.getRevokedCertificates().entrySet()) {
 			X509Certificate revokedCertificate = revokedCertificateEntry.getKey();
 			if (revokedCertificate.getSerialNumber().equals(certificateID.getSerialNumber())) {

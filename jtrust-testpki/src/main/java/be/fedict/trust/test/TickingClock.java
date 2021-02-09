@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package be.fedict.trust.test;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Implementation of a clock that ticks from a given starting point.
@@ -28,15 +28,15 @@ import org.joda.time.DateTime;
  */
 public class TickingClock implements Clock {
 
-	private DateTime start;
+	private LocalDateTime start;
 
-	public TickingClock(DateTime start) {
+	public TickingClock(LocalDateTime start) {
 		this.start = start;
 	}
 
 	@Override
-	public DateTime getTime() {
-		DateTime now = this.start;
+	public LocalDateTime getTime() {
+		LocalDateTime now = this.start;
 		this.start = this.start.plusSeconds(1);
 		return now;
 	}
@@ -46,7 +46,7 @@ public class TickingClock implements Clock {
 	 * 
 	 * @param start
 	 */
-	public void reset(DateTime start) {
+	public void reset(LocalDateTime start) {
 		this.start = start;
 	}
 }

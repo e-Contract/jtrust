@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2020 e-Contract.be BV.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,13 +24,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -272,8 +274,8 @@ public class ScenarioTest {
 					.asList(new X509Certificate[] { validCertificate, rootCert });
 
 			KeyPair proxyKeyPair = PKITestUtils.generateKeyPair();
-			DateTime notBefore = new DateTime();
-			DateTime notAfter = notBefore.plusMonths(1);
+			LocalDateTime notBefore = LocalDateTime.now();
+			LocalDateTime notAfter = notBefore.plusMonths(1);
 			X509Certificate proxyCertificate = PKITestUtils.generateCertificate(proxyKeyPair.getPublic(), "CN=Proxy",
 					notBefore, notAfter, validCertificate, validKeyPair.getPrivate());
 			List<X509Certificate> proxyCertificationChain = Arrays
@@ -463,7 +465,7 @@ public class ScenarioTest {
 
 	@Test
 	public void testExpiredRootCA() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			world.start();
@@ -474,7 +476,8 @@ public class ScenarioTest {
 			memoryCertificateRepository.addTrustPoint(rootCert);
 			TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
-			trustValidator.isTrusted(Collections.singletonList(rootCert), clock.getTime().toDate());
+			trustValidator.isTrusted(Collections.singletonList(rootCert),
+					Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
 			try {
 				trustValidator.isTrusted(Collections.singletonList(rootCert));
@@ -487,7 +490,7 @@ public class ScenarioTest {
 
 	@Test
 	public void testTwoCAsExpired() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
@@ -508,7 +511,7 @@ public class ScenarioTest {
 			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-			trustValidator.isTrusted(certChain, clock.getTime().toDate());
+			trustValidator.isTrusted(certChain, Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
 			try {
 				trustValidator.isTrusted(certChain);
@@ -521,7 +524,7 @@ public class ScenarioTest {
 
 	@Test
 	public void testExpiredCRL() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			rootCertificationAuthority.addRevocationService(new CRLRevocationService());
@@ -542,11 +545,12 @@ public class ScenarioTest {
 			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-			trustValidator.isTrusted(certChain, clock.getTime().toDate());
+			trustValidator.isTrusted(certChain, Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
 			try {
-				DateTime crlExpiredDateTime = clock.getTime().plusDays(2);
-				trustValidator.isTrusted(certChain, crlExpiredDateTime.toDate());
+				LocalDateTime crlExpiredDateTime = clock.getTime().plusDays(2);
+				trustValidator.isTrusted(certChain,
+						Date.from(crlExpiredDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 				fail();
 			} catch (TrustLinkerResultException e) {
 				// expected
@@ -556,7 +560,7 @@ public class ScenarioTest {
 
 	@Test
 	public void testExpiredOCSP() throws Exception {
-		Clock clock = new FixedClock(new DateTime().minusYears(10));
+		Clock clock = new FixedClock(LocalDateTime.now().minusYears(10));
 		try (World world = new World(clock)) {
 			CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
 			rootCertificationAuthority.addRevocationService(new OCSPRevocationService());
@@ -577,11 +581,12 @@ public class ScenarioTest {
 			TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 			trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-			trustValidator.isTrusted(certChain, clock.getTime().toDate());
+			trustValidator.isTrusted(certChain, Date.from(clock.getTime().atZone(ZoneId.systemDefault()).toInstant()));
 
 			try {
-				DateTime ocspExpiredDateTime = clock.getTime().plusDays(2);
-				trustValidator.isTrusted(certChain, ocspExpiredDateTime.toDate());
+				LocalDateTime ocspExpiredDateTime = clock.getTime().plusDays(2);
+				trustValidator.isTrusted(certChain,
+						Date.from(ocspExpiredDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 				fail();
 			} catch (TrustLinkerResultException e) {
 				// expected

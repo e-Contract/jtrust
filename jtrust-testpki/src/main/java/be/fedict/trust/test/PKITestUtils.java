@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2020 e-Contract.be BV.
+ * Copyright (C) 2014-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -38,6 +38,8 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,55 +106,57 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.bouncycastle.util.Store;
-import org.joda.time.DateTime;
 
 public class PKITestUtils {
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey)
-			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey) throws IOException, InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, true);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag)
-			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag) throws IOException, InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, -1);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength) throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, null);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, null);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri)
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		X509Certificate certificate = generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter,
-				issuerCertificate, issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null, "SHA1withRSA");
+				issuerCertificate, issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, null, "SHA256withRSA");
 		return certificate;
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm)
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 
@@ -160,9 +164,10 @@ public class PKITestUtils {
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, false);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa)
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 
@@ -170,33 +175,35 @@ public class PKITestUtils {
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa, true, true);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa, includeSKID,
 				includeAKID, null);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID, PublicKey akidPublicKey)
-			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
-			SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID,
+			PublicKey akidPublicKey) throws IOException, InvalidKeyException, IllegalStateException,
+			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa, includeSKID,
 				includeAKID, akidPublicKey, null);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID, PublicKey akidPublicKey, String certificatePolicy)
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID,
+			PublicKey akidPublicKey, String certificatePolicy)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 
@@ -205,35 +212,37 @@ public class PKITestUtils {
 				includeAKID, akidPublicKey, certificatePolicy, null);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID, PublicKey akidPublicKey, String certificatePolicy,
-			Boolean qcCompliance) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID,
+			PublicKey akidPublicKey, String certificatePolicy, Boolean qcCompliance)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa, includeSKID,
 				includeAKID, akidPublicKey, certificatePolicy, qcCompliance, false);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID, PublicKey akidPublicKey, String certificatePolicy,
-			Boolean qcCompliance, boolean ocspResponder) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID,
+			PublicKey akidPublicKey, String certificatePolicy, Boolean qcCompliance, boolean ocspResponder)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 		return generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, issuerCertificate,
 				issuerPrivateKey, caFlag, pathLength, crlUri, ocspUri, keyUsage, signatureAlgorithm, tsa, includeSKID,
 				includeAKID, akidPublicKey, certificatePolicy, qcCompliance, ocspResponder, false);
 	}
 
-	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn, DateTime notBefore,
-			DateTime notAfter, X509Certificate issuerCertificate, PrivateKey issuerPrivateKey, boolean caFlag,
-			int pathLength, String crlUri, String ocspUri, KeyUsage keyUsage, String signatureAlgorithm, boolean tsa,
-			boolean includeSKID, boolean includeAKID, PublicKey akidPublicKey, String certificatePolicy,
-			Boolean qcCompliance, boolean ocspResponder, boolean qcSSCD)
-			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+	public static X509Certificate generateCertificate(PublicKey subjectPublicKey, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, X509Certificate issuerCertificate,
+			PrivateKey issuerPrivateKey, boolean caFlag, int pathLength, String crlUri, String ocspUri,
+			KeyUsage keyUsage, String signatureAlgorithm, boolean tsa, boolean includeSKID, boolean includeAKID,
+			PublicKey akidPublicKey, String certificatePolicy, Boolean qcCompliance, boolean ocspResponder,
+			boolean qcSSCD) throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 
 		X500Name issuerName;
@@ -246,7 +255,8 @@ public class PKITestUtils {
 		BigInteger serial = new BigInteger(128, new SecureRandom());
 		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(subjectPublicKey.getEncoded());
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
-				notBefore.toDate(), notAfter.toDate(), subjectName, publicKeyInfo);
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
 
 		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 		if (includeSKID) {
@@ -371,16 +381,16 @@ public class PKITestUtils {
 		return keyPair;
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, boolean caFlag, int pathLength, String crlUri)
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, boolean caFlag, int pathLength, String crlUri)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore, notAfter, caFlag, pathLength, crlUri, null);
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, boolean caFlag, int pathLength, String crlUri, KeyUsage keyUsage)
-			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, boolean caFlag, int pathLength, String crlUri,
+			KeyUsage keyUsage) throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		PublicKey subjectPublicKey = keyPair.getPublic();
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
@@ -389,10 +399,11 @@ public class PKITestUtils {
 		return certificate;
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, boolean caFlag, int pathLength, String crlUri, KeyUsage keyUsage,
-			String signatureAlgorithm) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, boolean caFlag, int pathLength, String crlUri,
+			KeyUsage keyUsage, String signatureAlgorithm)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 		PublicKey subjectPublicKey = keyPair.getPublic();
 		PrivateKey issuerPrivateKey = keyPair.getPrivate();
 		X509Certificate certificate = generateCertificate(subjectPublicKey, subjectDn, notBefore, notAfter, null,
@@ -400,43 +411,46 @@ public class PKITestUtils {
 		return certificate;
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, boolean caFlag, int pathLength)
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, boolean caFlag, int pathLength)
 			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore, notAfter, caFlag, pathLength, null);
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, boolean caFlag) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, boolean caFlag)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore, notAfter, caFlag, -1);
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter, String crlUri) throws IOException, InvalidKeyException, IllegalStateException,
-			NoSuchAlgorithmException, SignatureException, CertificateException, OperatorCreationException {
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter, String crlUri)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+			SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore, notAfter, true, -1, crlUri);
 	}
 
-	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn, DateTime notBefore,
-			DateTime notAfter) throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
+	public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair, String subjectDn,
+			LocalDateTime notBefore, LocalDateTime notAfter)
+			throws IOException, InvalidKeyException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException {
 		return generateSelfSignedCertificate(keyPair, subjectDn, notBefore, notAfter, true);
 	}
 
 	public static class RevokedCertificate {
 		private final BigInteger serialNumber;
-		private final DateTime revocationDate;
+		private final LocalDateTime revocationDate;
 
-		public RevokedCertificate(BigInteger serialNumber, DateTime revocationDate) {
+		public RevokedCertificate(BigInteger serialNumber, LocalDateTime revocationDate) {
 			this.serialNumber = serialNumber;
 			this.revocationDate = revocationDate;
 		}
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, BigInteger... revokedCertificateSerialNumbers)
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, BigInteger... revokedCertificateSerialNumbers)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException, IOException {
 
@@ -445,7 +459,7 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, String signatureAlgorithm,
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, String signatureAlgorithm,
 			BigInteger... revokedCertificateSerialNumbers)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException, IOException {
@@ -459,7 +473,7 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, List<RevokedCertificate> revokedCertificates)
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, List<RevokedCertificate> revokedCertificates)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException, IOException {
 
@@ -468,7 +482,7 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, List<String> deltaCrlUris,
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, List<String> deltaCrlUris,
 			List<RevokedCertificate> revokedCertificates)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException, IOException {
@@ -478,7 +492,7 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, OperatorCreationException, IOException {
@@ -488,7 +502,7 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates, String signatureAlgorithm)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, IOException, OperatorCreationException {
@@ -497,17 +511,19 @@ public class PKITestUtils {
 	}
 
 	public static X509CRL generateCrl(PrivateKey issuerPrivateKey, X509Certificate issuerCertificate,
-			DateTime thisUpdate, DateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
+			LocalDateTime thisUpdate, LocalDateTime nextUpdate, List<String> deltaCrlUris, boolean deltaCrl,
 			List<RevokedCertificate> revokedCertificates, String signatureAlgorithm, long numberOfRevokedCertificates)
 			throws InvalidKeyException, CRLException, IllegalStateException, NoSuchAlgorithmException,
 			SignatureException, CertificateException, IOException, OperatorCreationException {
 
 		X500Name issuerName = new X500Name(issuerCertificate.getSubjectX500Principal().toString());
-		X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName, thisUpdate.toDate());
-		x509v2crlBuilder.setNextUpdate(nextUpdate.toDate());
+		X509v2CRLBuilder x509v2crlBuilder = new X509v2CRLBuilder(issuerName,
+				Date.from(thisUpdate.atZone(ZoneId.systemDefault()).toInstant()));
+		x509v2crlBuilder.setNextUpdate(Date.from(nextUpdate.atZone(ZoneId.systemDefault()).toInstant()));
 
 		for (RevokedCertificate revokedCertificate : revokedCertificates) {
-			x509v2crlBuilder.addCRLEntry(revokedCertificate.serialNumber, revokedCertificate.revocationDate.toDate(),
+			x509v2crlBuilder.addCRLEntry(revokedCertificate.serialNumber,
+					Date.from(revokedCertificate.revocationDate.atZone(ZoneId.systemDefault()).toInstant()),
 					CRLReason.privilegeWithdrawn);
 		}
 		if (-1 != numberOfRevokedCertificates) {

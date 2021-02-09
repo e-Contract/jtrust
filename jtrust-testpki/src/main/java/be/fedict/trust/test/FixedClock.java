@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package be.fedict.trust.test;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Implementation of a clock that yields a fixed time.
@@ -28,19 +28,19 @@ import org.joda.time.DateTime;
  */
 public class FixedClock implements Clock {
 
-	private final DateTime now;
+	private final LocalDateTime now;
 
 	/**
 	 * Main constructor.
 	 * 
 	 * @param now the fixed time for this clock.
 	 */
-	public FixedClock(DateTime now) {
+	public FixedClock(LocalDateTime now) {
 		this.now = now;
 	}
 
 	@Override
-	public DateTime getTime() {
+	public LocalDateTime getTime() {
 		return this.now;
 	}
 }

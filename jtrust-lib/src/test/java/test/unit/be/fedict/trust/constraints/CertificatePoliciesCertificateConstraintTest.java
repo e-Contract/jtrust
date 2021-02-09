@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,8 +47,8 @@ public class CertificatePoliciesCertificateConstraintTest {
 	public void testNoCertificatePolicies() throws Exception {
 		// setup
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
 				notAfter);
 
@@ -65,8 +65,8 @@ public class CertificatePoliciesCertificateConstraintTest {
 	public void testCertificatePoliciesMismatch() throws Exception {
 		// setup
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
 				notAfter, null, keyPair.getPrivate(), true, -1, null, null, null, "SHA1withRSA", false, true, true,
 				null, "1.5.6.7");
@@ -87,8 +87,8 @@ public class CertificatePoliciesCertificateConstraintTest {
 		// setup
 		String certificatePolicy = "1.2.3.4.5";
 		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		DateTime notBefore = new DateTime();
-		DateTime notAfter = notBefore.plusMonths(1);
+		LocalDateTime notBefore = LocalDateTime.now();
+		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
 				notAfter, null, keyPair.getPrivate(), true, -1, null, null, null, "SHA1withRSA", false, true, true,
 				null, certificatePolicy);

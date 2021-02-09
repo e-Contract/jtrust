@@ -23,6 +23,9 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +62,6 @@ import org.bouncycastle.tsp.TimeStampTokenGenerator;
 import org.bouncycastle.util.Store;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,8 +221,9 @@ public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 			TimeStampRequest timeStampRequest = new TimeStampRequest(reqData);
 
 			// CMS signing-time also has to change accordingly
-			DateTime now = timeStampAuthority.certificationAuthority.getClock().getTime();
-			Attribute attr = new Attribute(CMSAttributes.signingTime, new DERSet(new Time(now.toDate())));
+			LocalDateTime now = timeStampAuthority.certificationAuthority.getClock().getTime();
+			Attribute attr = new Attribute(CMSAttributes.signingTime,
+					new DERSet(new Time(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))));
 			ASN1EncodableVector v = new ASN1EncodableVector();
 			v.add(attr);
 			String signatureAlgorithm;
@@ -251,7 +254,8 @@ public class TimeStampAuthority implements EndpointProvider, FailableEndpoint {
 				timeStampResponse = timeStampResponseGenerator.generateFailResponse(PKIStatus.REJECTION,
 						PKIFailureInfo.systemFailure, "woops");
 			} else {
-				timeStampResponse = timeStampResponseGenerator.generate(timeStampRequest, BigInteger.ONE, now.toDate());
+				timeStampResponse = timeStampResponseGenerator.generate(timeStampRequest, BigInteger.ONE,
+						Date.from(now.atZone(ZoneId.systemDefault()).toInstant()));
 			}
 
 			response.setContentType("application/timestamp-reply");

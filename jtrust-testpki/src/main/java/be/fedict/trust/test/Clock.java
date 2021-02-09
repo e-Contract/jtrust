@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018 e-Contract.be BVBA.
+ * Copyright (C) 2018-2021 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,7 @@
 
 package be.fedict.trust.test;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  * Interface for a clock used by a unit test PKI world.
@@ -33,5 +33,5 @@ public interface Clock {
 	 * 
 	 * @return
 	 */
-	DateTime getTime();
+	LocalDateTime getTime();
 }
