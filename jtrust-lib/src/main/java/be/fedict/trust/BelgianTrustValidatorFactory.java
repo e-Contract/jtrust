@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013-2020 e-Contract.be BV.
+ * Copyright (C) 2013-2021 e-Contract.be BV.
  * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -289,6 +289,10 @@ public class BelgianTrustValidatorFactory {
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.2.2");
 			// RootCA4 foreigner authn
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.7.2");
+			// RootCA6 citizen authn
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.13.6.1.1.1000");
+			// RootCA6 foreigner authn
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.13.6.2.1.1000");
 			break;
 		case SIGN:
 			// RootCA citizen sign
@@ -307,6 +311,10 @@ public class BelgianTrustValidatorFactory {
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.2.1");
 			// RootCA4 foreigner sign
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.7.1");
+			// RootCA6 citizen sign
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.13.6.1.2.1000");
+			// RootCA6 foreigner sign
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.13.6.2.2.1000");
 			break;
 		case NATIONAL_REGISTRY:
 			// Root CA
@@ -317,6 +325,8 @@ public class BelgianTrustValidatorFactory {
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.10.1.1.4");
 			// Root CA 4
 			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.12.1.1.4");
+			// Root CA 6
+			certificatePoliciesCertificateConstraint.addCertificatePolicy("2.16.56.13.6.0.1");
 			break;
 		}
 		trustValidator.addCertificateConstraint(certificatePoliciesCertificateConstraint);
