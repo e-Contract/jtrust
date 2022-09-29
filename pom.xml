@@ -43,7 +43,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.5.1</version>
+				<version>3.5.2</version>
 			</extension>
 		</extensions>
 		<pluginManagement>
@@ -51,12 +51,12 @@
 				<plugin>
 					<groupId>org.jvnet.jaxb2.maven2</groupId>
 					<artifactId>maven-jaxb2-plugin</artifactId>
-					<version>0.14.0</version>
+					<version>0.15.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.10.0</version>
+					<version>3.10.1</version>
 					<configuration>
 						<source>1.8</source>
 						<target>1.8</target>
@@ -82,17 +82,17 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.11.0</version>
+					<version>3.12.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.3.2</version>
+					<version>3.4.1</version>
 					<configuration>
 						<doclint>none</doclint>
 					</configuration>
@@ -105,7 +105,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.4.1</version>
 					<configuration>
 						<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 					</configuration>
@@ -113,12 +113,12 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.7</version>
+					<version>0.8.8</version>
 				</plugin>
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>7.0.0</version>
+					<version>7.2.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -128,7 +128,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.9</version>
+				<version>1.15</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -138,7 +138,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.7</version>
+				<version>2.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -163,7 +163,7 @@
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.8.2</version>
+				<version>5.9.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -176,7 +176,7 @@
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-slf4j-impl</artifactId>
 				<scope>test</scope>
-				<version>2.17.2</version>
+				<version>2.19.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -191,7 +191,7 @@
 			<dependency>
 				<groupId>org.eclipse.jetty.toolchain</groupId>
 				<artifactId>jetty-test-helper</artifactId>
-				<version>5.5</version>
+				<version>5.9</version>
 			</dependency>
 			<dependency>
 				<groupId>be.fedict.commons-eid</groupId>
@@ -233,9 +233,9 @@
 	</mailingLists>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.7.32</slf4j.version>
+		<slf4j.version>1.7.36</slf4j.version>
 		<!-- also test 1.60,1.61,1.64,... before releasing -->
-		<bouncycastle.version>1.69</bouncycastle.version>
-		<jetty.version>9.4.44.v20210927</jetty.version>
+		<bouncycastle.version>1.70</bouncycastle.version>
+		<jetty.version>9.4.48.v20220622</jetty.version>
 	</properties>
 </project>
