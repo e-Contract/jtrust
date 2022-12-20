@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2016-2020 e-Contract.be BV.
+ * Copyright (C) 2016-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,13 +19,11 @@
 
 package test.integ.be.fedict.trust;
 
-import java.io.File;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -127,17 +125,5 @@ public class BelgianIdentityCardTrustValidatorTest {
 		trustValidator.addCertificateConstraint(new QCStatementsCertificateConstraint(true, true));
 
 		trustValidator.isTrusted(certificateChain);
-	}
-
-	@Test
-	public void testWriteSignatureCertificateToFile() throws Exception {
-		Security.addProvider(new BeIDProvider());
-		KeyStore keyStore = KeyStore.getInstance("BeID");
-		keyStore.load(null);
-		Certificate[] certificateChain = keyStore.getCertificateChain("Signature");
-
-		File tmpFile = File.createTempFile("sign-cert-", ".der");
-		FileUtils.writeByteArrayToFile(tmpFile, certificateChain[0].getEncoded());
-		LOGGER.debug("sign cert file: {}", tmpFile.getAbsolutePath());
 	}
 }

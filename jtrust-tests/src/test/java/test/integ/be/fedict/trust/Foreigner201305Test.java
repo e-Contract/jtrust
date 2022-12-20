@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2013 FedICT.
- * Copyright (C) 2019-2020 e-Contract.be BV.
+ * Copyright (C) 2019-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,11 +19,6 @@
 
 package test.integ.be.fedict.trust;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.math.BigInteger;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -83,36 +78,5 @@ public class Foreigner201305Test {
 				Hex.encodeHex(((RSAPublicKey) foreigner201304Cert.getPublicKey()).getModulus().toByteArray())));
 		LOGGER.debug("201305 modulus: {}", new String(
 				Hex.encodeHex(((RSAPublicKey) foreigner201305Cert.getPublicKey()).getModulus().toByteArray())));
-	}
-
-	/**
-	 * wget --recursive -e robots=off http://certs.eid.belgium.be
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testAllCertificateAuthorities() throws Exception {
-		File dirFile = new File("/home/fcorneli/certs/certs.eid.belgium.be");
-		LOGGER.debug("directory: {}", dirFile.getAbsolutePath());
-		File[] certFiles = dirFile.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				LOGGER.debug(name);
-				return name.endsWith("crt");
-			}
-		});
-		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-		for (File certFile : certFiles) {
-			X509Certificate certificate = (X509Certificate) certificateFactory
-					.generateCertificate(new FileInputStream(certFile));
-			LOGGER.debug("certificate: {}", certificate.getSubjectX500Principal());
-			RSAPublicKey rsaPublicKey = (RSAPublicKey) certificate.getPublicKey();
-			int modulusSize = rsaPublicKey.getModulus().toByteArray().length;
-			LOGGER.debug("modulus size: {}", modulusSize);
-			int signatureSize = certificate.getSignature().length;
-			LOGGER.debug("signature size: {}", signatureSize);
-			assertEquals(modulusSize - 1, signatureSize);
-		}
-		LOGGER.debug("total number of CAs: {}", certFiles.length);
 	}
 }

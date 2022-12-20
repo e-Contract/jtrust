@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2013-2021 e-Contract.be BV.
+ * Copyright (C) 2013-2022 e-Contract.be BV.
  * Copyright (C) 2017 Corilus NV.
  *
  * This is free software; you can redistribute it and/or modify it
@@ -234,6 +234,9 @@ public class BelgianTrustValidatorFactory {
 		X509Certificate cybertrustGlobalRootTsaCertificate = loadCertificate(
 				"be/fedict/trust/roots/CybertrustGlobalRoot.crt");
 		memoryCertificateRepository.addTrustPoint(cybertrustGlobalRootTsaCertificate);
+
+		X509Certificate rootCa6Certificate = loadCertificate("be/fedict/trust/belgiumrca6.crt");
+		memoryCertificateRepository.addTrustPoint(rootCa6Certificate);
 
 		return memoryCertificateRepository;
 	}

@@ -19,10 +19,7 @@
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.security.Security;
@@ -34,8 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -54,11 +49,7 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +57,7 @@ import org.slf4j.LoggerFactory;
 import be.fedict.trust.BelgianTrustValidatorFactory;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
-import be.fedict.trust.constraints.TSACertificateConstraint;
 import be.fedict.trust.repository.CertificateRepository;
-import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class TSATest {
 
@@ -86,16 +75,11 @@ public class TSATest {
 		testTimestampServerTrust(TSA_LOCATION);
 	}
 
-	@Test
-	public void testStarfieldTechTrust() throws Exception {
-		testTimestampServerTrust("http://tsa.starfieldtech.com");
-	}
-
 	private void testTimestampServerTrust(String tsaLocation) throws Exception {
 		// setup
 		TimeStampRequestGenerator requestGen = new TimeStampRequestGenerator();
 		requestGen.setCertReq(true);
-		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
+		TimeStampRequest request = requestGen.generate(TSPAlgorithms.SHA256, new byte[32], BigInteger.valueOf(100));
 		byte[] requestData = request.getEncoded();
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
@@ -140,91 +124,6 @@ public class TSATest {
 		TrustValidator trustValidator = new TrustValidator(certificateRepository);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
-
-		trustValidator.isTrusted(certificateChain);
-	}
-
-	@Test
-	@Disabled("expired certificate")
-	public void testTSA2013() throws Exception {
-		LOGGER.debug("test TSA 2013");
-		InputStream inputStream = TSATest.class.getResourceAsStream("/Fedict-2013.txt");
-		byte[] data = IOUtils.toByteArray(inputStream);
-		byte[] derData = Base64.decode(data);
-		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-		Collection<X509Certificate> certificates = (Collection<X509Certificate>) certificateFactory
-				.generateCertificates(new ByteArrayInputStream(derData));
-		List<X509Certificate> certificateChain = new LinkedList<>();
-		for (X509Certificate certificate : certificates) {
-			certificateChain.add(0, certificate);
-		}
-
-		MemoryCertificateRepository certificateRepository = new MemoryCertificateRepository();
-		X509Certificate gsCert = (X509Certificate) certificateFactory
-				.generateCertificate(TSATest.class.getResourceAsStream("/be/fedict/trust/roots/globalsign-be.crt"));
-		certificateRepository.addTrustPoint(gsCert);
-		TrustValidator trustValidator = new TrustValidator(certificateRepository);
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(null);
-		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
-
-		trustValidator.addCertificateConstraint(new TSACertificateConstraint());
-
-		trustValidator.isTrusted(certificateChain);
-	}
-
-	private X509Certificate loadCertificate(String pemResourceName) throws IOException, CertificateException {
-		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-		InputStream tsaCertInputStream = TSATest.class.getResourceAsStream(pemResourceName);
-		PemReader pemReader = new PemReader(new InputStreamReader(tsaCertInputStream));
-		PemObject pemObject = pemReader.readPemObject();
-		X509Certificate certificate = (X509Certificate) certificateFactory
-				.generateCertificate(new ByteArrayInputStream(pemObject.getContent()));
-		pemReader.close();
-		return certificate;
-	}
-
-	@Test
-	@Disabled("expired certificate")
-	public void testTSA2014() throws Exception {
-		LOGGER.debug("test TSA 2014");
-		List<X509Certificate> certificateChain = new LinkedList<>();
-
-		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
-
-		CertificateRepository tsaCertificateRepository = BelgianTrustValidatorFactory.createTSACertificateRepository();
-		TrustValidator trustValidator = new TrustValidator(tsaCertificateRepository);
-		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
-		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
-
-		trustValidator.addCertificateConstraint(new TSACertificateConstraint());
-
-		trustValidator.isTrusted(certificateChain);
-	}
-
-	@Test
-	public void testReadTSA2014() throws Exception {
-		X509Certificate tsaCert = loadCertificate("/tsa2014/TimeStampingAuthority.pem");
-		LOGGER.debug("TSA cert: {}", tsaCert);
-		File tmpFile = File.createTempFile("tsa-2014-", ".der");
-		FileUtils.writeByteArrayToFile(tmpFile, tsaCert.getEncoded());
-		LOGGER.debug("TSA cert file: {}", tmpFile.getAbsolutePath());
-	}
-
-	@Test
-	@Disabled("expired certificate")
-	public void testTSA2014_2() throws Exception {
-		LOGGER.debug("test TSA 2014");
-		List<X509Certificate> certificateChain = new LinkedList<>();
-
-		certificateChain.add(loadCertificate("/tsa2014/TimeStampingAuthority.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Belgium ROOT CA 2.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Cybertrust Global Root.pem"));
-		certificateChain.add(loadCertificate("/tsa2014/Baltimore Cybertrust Root.pem"));
-
-		TrustValidator trustValidator = BelgianTrustValidatorFactory.createTSATrustValidator(null);
 
 		trustValidator.isTrusted(certificateChain);
 	}
