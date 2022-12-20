@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2021 e-Contract.be BV.
+ * Copyright (C) 2021-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -39,8 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Server;
@@ -48,6 +46,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.ocsp.OnlineOcspRepository;
 import be.fedict.trust.test.PKITestUtils;
@@ -194,7 +194,7 @@ public class OnlineOcspRepositoryTest {
 
 	public static class OcspResponderTestServlet extends HttpServlet {
 
-		private static final Log LOG = LogFactory.getLog(OcspResponderTestServlet.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(OcspResponderTestServlet.class);
 
 		private static final long serialVersionUID = 1L;
 
@@ -225,7 +225,7 @@ public class OnlineOcspRepositoryTest {
 		@Override
 		protected void doPost(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			LOG.debug("doPost");
+			LOGGER.debug("doPost");
 			if (null != OcspResponderTestServlet.contentType) {
 				response.addHeader("Content-Type", OcspResponderTestServlet.contentType);
 			}

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2020 e-Contract.be BV.
+ * Copyright (C) 2014-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,7 +16,6 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package be.fedict.trust.ocsp;
 
 import java.net.ConnectException;
@@ -25,20 +24,20 @@ import java.net.URI;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
@@ -65,9 +64,9 @@ import be.fedict.trust.NetworkConfig;
 /**
  * Online OCSP repository. This implementation will contact the OCSP Responder
  * to retrieve the OCSP response.
- * 
+ *
  * @author Frank Cornelis
- * 
+ *
  */
 public class OnlineOcspRepository implements OcspRepository {
 
@@ -79,10 +78,9 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	/**
 	 * Main construtor.
-	 * 
-	 * @param networkConfig
-	 *            the optional network configuration used during OCSP Responder
-	 *            communication.
+	 *
+	 * @param networkConfig the optional network configuration used during OCSP
+	 *                      Responder communication.
 	 */
 	public OnlineOcspRepository(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
@@ -97,7 +95,7 @@ public class OnlineOcspRepository implements OcspRepository {
 
 	/**
 	 * Sets the credentials to use to access protected OCSP services.
-	 * 
+	 *
 	 * @param credentials
 	 */
 	public void setCredentials(Credentials credentials) {
@@ -147,8 +145,8 @@ public class OnlineOcspRepository implements OcspRepository {
 		httpPost.setEntity(requestEntity);
 
 		int timeout = 10;
-		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom().setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000);
+		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom().setConnectTimeout(timeout, TimeUnit.SECONDS)
+				.setConnectionRequestTimeout(timeout, TimeUnit.SECONDS);
 
 		if (null != this.networkConfig) {
 			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
@@ -161,76 +159,75 @@ public class OnlineOcspRepository implements OcspRepository {
 		RequestConfig requestConfig = requestConfigBuilder.build();
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		httpClientBuilder.setDefaultRequestConfig(requestConfig);
-		HttpClient httpClient = httpClientBuilder.build();
+		try (CloseableHttpClient httpClient = httpClientBuilder.build()) {
 
-		HttpResponse httpResponse;
-		int responseCode;
-		try {
-			httpResponse = httpClient.execute(httpPost, httpClientContext);
-			StatusLine statusLine = httpResponse.getStatusLine();
-			responseCode = statusLine.getStatusCode();
-		} catch (ConnectException e) {
-			LOGGER.error("OCSP responder is down");
-			return null;
-		}
-
-		if (HttpURLConnection.HTTP_OK != responseCode) {
-			LOGGER.error("HTTP response code: {}", responseCode);
-			return null;
-		}
-
-		Header responseContentTypeHeader = httpResponse.getFirstHeader("Content-Type");
-		if (null == responseContentTypeHeader) {
-			LOGGER.error("no Content-Type response header");
-			return null;
-		}
-		String resultContentType = responseContentTypeHeader.getValue();
-		if (!"application/ocsp-response".equals(resultContentType)) {
-			LOGGER.error("result content type not application/ocsp-response");
-			LOGGER.error("actual content-type: {}", resultContentType);
-			if ("text/html".equals(resultContentType)) {
-				LOGGER.error("content: {}", EntityUtils.toString(httpResponse.getEntity()));
-			}
-			return null;
-		}
-
-		Header responseContentLengthHeader = httpResponse.getFirstHeader("Content-Length");
-		if (null != responseContentLengthHeader) {
-			String resultContentLength = responseContentLengthHeader.getValue();
-			if ("0".equals(resultContentLength)) {
-				LOGGER.debug("no content returned");
+			CloseableHttpResponse httpResponse;
+			int responseCode;
+			try {
+				httpResponse = httpClient.execute(httpPost, httpClientContext);
+				responseCode = httpResponse.getCode();
+			} catch (ConnectException e) {
+				LOGGER.error("OCSP responder is down");
 				return null;
 			}
-		}
 
-		HttpEntity httpEntity = httpResponse.getEntity();
-		OCSPResp ocspResp = new OCSPResp(httpEntity.getContent());
-		LOGGER.debug("OCSP response size: {} bytes", ocspResp.getEncoded().length);
-		httpPost.releaseConnection();
+			if (HttpURLConnection.HTTP_OK != responseCode) {
+				LOGGER.error("HTTP response code: {}", responseCode);
+				return null;
+			}
 
-		int ocspRespStatus = ocspResp.getStatus();
-		if (OCSPResponseStatus.SUCCESSFUL != ocspRespStatus) {
-			LOGGER.debug("OCSP response status: {}", ocspRespStatus);
+			Header responseContentTypeHeader = httpResponse.getFirstHeader("Content-Type");
+			if (null == responseContentTypeHeader) {
+				LOGGER.error("no Content-Type response header");
+				return null;
+			}
+			String resultContentType = responseContentTypeHeader.getValue();
+			if (!"application/ocsp-response".equals(resultContentType)) {
+				LOGGER.error("result content type not application/ocsp-response");
+				LOGGER.error("actual content-type: {}", resultContentType);
+				if ("text/html".equals(resultContentType)) {
+					LOGGER.error("content: {}", EntityUtils.toString(httpResponse.getEntity()));
+				}
+				return null;
+			}
+
+			Header responseContentLengthHeader = httpResponse.getFirstHeader("Content-Length");
+			if (null != responseContentLengthHeader) {
+				String resultContentLength = responseContentLengthHeader.getValue();
+				if ("0".equals(resultContentLength)) {
+					LOGGER.debug("no content returned");
+					return null;
+				}
+			}
+
+			HttpEntity httpEntity = httpResponse.getEntity();
+			OCSPResp ocspResp = new OCSPResp(httpEntity.getContent());
+			LOGGER.debug("OCSP response size: {} bytes", ocspResp.getEncoded().length);
+
+			int ocspRespStatus = ocspResp.getStatus();
+			if (OCSPResponseStatus.SUCCESSFUL != ocspRespStatus) {
+				LOGGER.debug("OCSP response status: {}", ocspRespStatus);
+				return ocspResp;
+			}
+
+			Object responseObject = ocspResp.getResponseObject();
+			BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
+			Extension nonceExtension = basicOCSPResp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+			if (null == nonceExtension) {
+				LOGGER.debug("no nonce extension in response");
+				return ocspResp;
+			}
+
+			ASN1OctetString nonceExtensionValue = extension.getExtnValue();
+			ASN1Primitive nonceValue = ASN1Primitive.fromByteArray(nonceExtensionValue.getOctets());
+			byte[] responseNonce = ((DEROctetString) nonceValue).getOctets();
+			if (!Arrays.areEqual(nonce, responseNonce)) {
+				LOGGER.error("nonce mismatch");
+				return null;
+			}
+			LOGGER.debug("nonce match");
+
 			return ocspResp;
 		}
-
-		Object responseObject = ocspResp.getResponseObject();
-		BasicOCSPResp basicOCSPResp = (BasicOCSPResp) responseObject;
-		Extension nonceExtension = basicOCSPResp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-		if (null == nonceExtension) {
-			LOGGER.debug("no nonce extension in response");
-			return ocspResp;
-		}
-
-		ASN1OctetString nonceExtensionValue = extension.getExtnValue();
-		ASN1Primitive nonceValue = ASN1Primitive.fromByteArray(nonceExtensionValue.getOctets());
-		byte[] responseNonce = ((DEROctetString) nonceValue).getOctets();
-		if (!Arrays.areEqual(nonce, responseNonce)) {
-			LOGGER.error("nonce mismatch");
-			return null;
-		}
-		LOGGER.debug("nonce match");
-
-		return ocspResp;
 	}
 }

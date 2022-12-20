@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2021 e-Contract.be BV.
+ * Copyright (C) 2020-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -40,8 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -49,6 +47,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.crl.OnlineCrlRepository;
 import be.fedict.trust.test.PKITestUtils;
@@ -153,7 +153,7 @@ public class OnlineCrlRepositoryTest {
 
 		private static final long serialVersionUID = 1L;
 
-		private static final Log LOG = LogFactory.getLog(CrlRepositoryTestServlet.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(CrlRepositoryTestServlet.class);
 
 		private static int responseStatus;
 
@@ -175,7 +175,7 @@ public class OnlineCrlRepositoryTest {
 		@Override
 		protected void doGet(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			LOG.debug("doGet");
+			LOGGER.debug("doGet");
 			if (null != CrlRepositoryTestServlet.crlData) {
 				OutputStream outputStream = response.getOutputStream();
 				IOUtils.write(CrlRepositoryTestServlet.crlData, outputStream);

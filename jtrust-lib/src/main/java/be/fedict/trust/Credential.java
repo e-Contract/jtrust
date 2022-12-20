@@ -1,6 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2010 FedICT.
+ * Copyright (C) 2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -17,8 +18,6 @@
  */
 
 package be.fedict.trust;
-
-import org.apache.http.auth.AuthScope;
 
 /**
  * Stores a credential required to access a protected PKI online service.
@@ -43,21 +42,14 @@ public class Credential {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param host
-	 *            the service host which requires the credential.
-	 * @param port
-	 *            the service port which requires the credential.
-	 * @param realm
-	 *            the service realm which requires the credential.
-	 * @param scheme
-	 *            the service scheme which requires the credential.
-	 * @param username
-	 *            the username.
-	 * @param password
-	 *            the password.
+	 * @param host     the service host which requires the credential.
+	 * @param port     the service port which requires the credential.
+	 * @param realm    the service realm which requires the credential.
+	 * @param scheme   the service scheme which requires the credential.
+	 * @param username the username.
+	 * @param password the password.
 	 */
-	public Credential(String host, int port, String realm, String scheme,
-			String username, String password) {
+	public Credential(String host, int port, String realm, String scheme, String username, String password) {
 		this.host = host;
 		this.port = port;
 		this.realm = realm;
@@ -75,9 +67,8 @@ public class Credential {
 	 * @param username
 	 * @param password
 	 */
-	public Credential(String host, int port, String realm, String username,
-			String password) {
-		this(host, port, realm, AuthScope.ANY_SCHEME, username, password);
+	public Credential(String host, int port, String realm, String username, String password) {
+		this(host, port, realm, null, username, password);
 	}
 
 	/**
@@ -89,7 +80,7 @@ public class Credential {
 	 * @param password
 	 */
 	public Credential(String host, int port, String username, String password) {
-		this(host, port, AuthScope.ANY_REALM, username, password);
+		this(host, port, null, username, password);
 	}
 
 	/**
@@ -100,7 +91,7 @@ public class Credential {
 	 * @param password
 	 */
 	public Credential(String host, String username, String password) {
-		this(host, AuthScope.ANY_PORT, username, password);
+		this(host, -1, username, password);
 	}
 
 	/**
@@ -110,7 +101,7 @@ public class Credential {
 	 * @param password
 	 */
 	public Credential(String username, String password) {
-		this(AuthScope.ANY_HOST, username, password);
+		this(null, username, password);
 	}
 
 	public String getHost() {

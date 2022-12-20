@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2014-2020 e-Contract.be BV.
+ * Copyright (C) 2014-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -42,8 +42,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -95,23 +93,23 @@ public class SSLTrustValidatorTest {
 
 	private static final class ClientTestX509TrustManager implements X509TrustManager {
 
-		private static final Log LOG = LogFactory.getLog(ClientTestX509TrustManager.class);
+		private static final Logger LOGGER = LoggerFactory.getLogger(ClientTestX509TrustManager.class);
 
 		@Override
 		public void checkClientTrusted(final X509Certificate[] chain, final String authType)
 				throws CertificateException {
-			LOG.debug("checkClientTrusted");
+			LOGGER.debug("checkClientTrusted");
 		}
 
 		@Override
 		public void checkServerTrusted(final X509Certificate[] chain, final String authType)
 				throws CertificateException {
-			LOG.debug("checkServerTrusted: " + authType);
+			LOGGER.debug("checkServerTrusted: {}", authType);
 		}
 
 		@Override
 		public X509Certificate[] getAcceptedIssuers() {
-			LOG.debug("getAcceptedIssuers");
+			LOGGER.debug("getAcceptedIssuers");
 			return null;
 		}
 

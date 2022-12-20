@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2019 e-Contract.be BVBA.
+ * Copyright (C) 2014-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -31,7 +31,6 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,7 +179,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 
 		ASN1Encodable basicConstraintsDecoded;
 		try {
-			basicConstraintsDecoded = X509ExtensionUtil.fromExtensionValue(basicConstraintsValue);
+			basicConstraintsDecoded = JcaX509ExtensionUtils.parseExtensionValue(basicConstraintsValue);
 		} catch (IOException e) {
 			LOGGER.error("IO error", e);
 			return false;

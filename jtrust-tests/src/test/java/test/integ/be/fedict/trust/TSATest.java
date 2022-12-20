@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2013-2020 e-Contract.be BV.
+ * Copyright (C) 2013-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,7 +16,6 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.integ.be.fedict.trust;
 
 import java.io.ByteArrayInputStream;
@@ -37,14 +36,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.SignerId;
@@ -102,9 +100,6 @@ public class TSATest {
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		HttpClient httpClient = httpClientBuilder.build();
-		// HttpHost proxy = new HttpHost("proxy.yourict.net", 8080);
-		// httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-		// proxy);
 		HttpPost postMethod = new HttpPost(tsaLocation);
 		ContentType contentType = ContentType.create("application/timestamp-query");
 		HttpEntity requestEntity = new ByteArrayEntity(requestData, contentType);
@@ -113,9 +108,8 @@ public class TSATest {
 
 		// operate
 		long t0 = System.currentTimeMillis();
-		HttpResponse httpResponse = httpClient.execute(postMethod);
-		StatusLine statusLine = httpResponse.getStatusLine();
-		int statusCode = statusLine.getStatusCode();
+		CloseableHttpResponse httpResponse = (CloseableHttpResponse) httpClient.execute(postMethod);
+		int statusCode = httpResponse.getCode();
 		long t1 = System.currentTimeMillis();
 		LOGGER.debug("dt TSP: {} ms ", (t1 - t0));
 		if (statusCode != HttpURLConnection.HTTP_OK) {
@@ -125,7 +119,6 @@ public class TSATest {
 
 		HttpEntity httpEntity = httpResponse.getEntity();
 		TimeStampResponse tspResponse = new TimeStampResponse(httpEntity.getContent());
-		postMethod.releaseConnection();
 
 		TimeStampToken timeStampToken = tspResponse.getTimeStampToken();
 		SignerId signerId = timeStampToken.getSID();
@@ -136,7 +129,6 @@ public class TSATest {
 		X509CertificateHolder signerCertificateHolder = signerCollectionIterator.next();
 
 		// TODO: check time-stamp token signature
-
 		List<X509Certificate> certificateChain = getCertificateChain(signerCertificateHolder, certificatesStore);
 
 		for (X509Certificate cert : certificateChain) {
@@ -146,8 +138,6 @@ public class TSATest {
 
 		CertificateRepository certificateRepository = BelgianTrustValidatorFactory.createTSACertificateRepository();
 		TrustValidator trustValidator = new TrustValidator(certificateRepository);
-		// NetworkConfig networkConfig = new NetworkConfig("proxy.yourict.net",
-		// 8080);
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator(null);
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>be.fedict</groupId>
 	<artifactId>jtrust</artifactId>
@@ -118,7 +118,7 @@
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>7.2.0</version>
+					<version>7.4.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -131,9 +131,9 @@
 				<version>1.15</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>4.5.13</version>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>5.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -163,14 +163,14 @@
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.9.0</version>
+				<version>5.9.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.easymock</groupId>
 				<artifactId>easymock</artifactId>
 				<scope>test</scope>
-				<version>4.3</version>
+				<version>5.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -236,6 +236,6 @@
 		<slf4j.version>1.7.36</slf4j.version>
 		<!-- also test 1.60,1.61,1.64,... before releasing -->
 		<bouncycastle.version>1.70</bouncycastle.version>
-		<jetty.version>9.4.48.v20220622</jetty.version>
+		<jetty.version>9.4.49.v20220914</jetty.version>
 	</properties>
 </project>
