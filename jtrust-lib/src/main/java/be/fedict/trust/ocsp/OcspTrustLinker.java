@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2021 e-Contract.be BV.
+ * Copyright (C) 2014-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -33,9 +33,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
@@ -326,9 +326,9 @@ public class OcspTrustLinker implements TrustLinker {
 				LOGGER.debug("not a uniform resource identifier");
 				continue;
 			}
-			DERIA5String str = DERIA5String.getInstance(gn.getName());
+			ASN1IA5String str = ASN1IA5String.getInstance(gn.getName());
 			String accessLocation = str.getString();
-			LOGGER.debug("access location: {}", accessLocation);
+			LOGGER.debug("OCSP access location: {}", accessLocation);
 			URI uri = toURI(accessLocation);
 			return uri;
 		}

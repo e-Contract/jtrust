@@ -31,13 +31,16 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
 import org.slf4j.Logger;
@@ -102,45 +105,68 @@ public class OnlineCrlRepository implements CrlRepository {
 	private X509CRL getCrl(URI crlUri) throws IOException, CertificateException, CRLException, NoSuchProviderException,
 			NoSuchParserException, StreamParsingException {
 		int timeout = 10;
-		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom().setConnectTimeout(timeout, TimeUnit.SECONDS)
-				.setConnectionRequestTimeout(timeout, TimeUnit.SECONDS);
-
-		if (null != this.networkConfig) {
-			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
-			requestConfigBuilder.setProxy(proxy);
-		}
 		HttpClientContext httpClientContext = HttpClientContext.create();
 		if (null != this.credentials) {
 			this.credentials.init(httpClientContext);
 		}
+		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom().setConnectionRequestTimeout(timeout,
+				TimeUnit.SECONDS);
 		RequestConfig requestConfig = requestConfigBuilder.build();
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		httpClientBuilder.setDefaultRequestConfig(requestConfig);
+		if (null != this.networkConfig) {
+			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
+			httpClientBuilder.setProxy(proxy);
+		}
+		PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder
+				.create();
+		connectionManagerBuilder.setConnectionConfigResolver(resolver -> {
+			return ConnectionConfig.custom().setConnectTimeout(timeout, TimeUnit.SECONDS)
+					.setSocketTimeout(timeout, TimeUnit.SECONDS).build();
+		});
+		httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 		try (CloseableHttpClient httpClient = httpClientBuilder.build()) {
 			String downloadUrl = crlUri.toURL().toString();
 			LOGGER.debug("downloading CRL from: {}", downloadUrl);
 			HttpGet httpGet = new HttpGet(downloadUrl);
 			httpGet.addHeader("User-Agent", "jTrust CRL Client");
-			try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+			HttpClientResponseHandler<X509CRL> responseHandler = (ClassicHttpResponse httpResponse) -> {
 				int statusCode = httpResponse.getCode();
 				if (HttpURLConnection.HTTP_OK != statusCode) {
 					LOGGER.error("HTTP status code: {}", statusCode);
 					return null;
 				}
 
-				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
-				LOGGER.debug("certificate factory provider: {}", certificateFactory.getProvider().getName());
-				LOGGER.debug("certificate factory class: {}", certificateFactory.getClass().getName());
+				// not guaranteed to be thread-safe
+				CertificateFactory certificateFactory;
+				try {
+					certificateFactory = CertificateFactory.getInstance("X.509", "BC");
+				} catch (CertificateException | NoSuchProviderException ex) {
+					LOGGER.error("error: " + ex.getMessage(), ex);
+					return null;
+				}
 				HttpEntity httpEntity = httpResponse.getEntity();
-				X509CRL crl = (X509CRL) certificateFactory.generateCRL(httpEntity.getContent());
+				X509CRL crl;
+				try {
+					crl = (X509CRL) certificateFactory.generateCRL(httpEntity.getContent());
+				} catch (CRLException ex) {
+					LOGGER.error("error: " + ex.getMessage(), ex);
+					return null;
+				}
 				if (null == crl) {
 					LOGGER.error("null CRL");
 					return null;
 				}
-				LOGGER.debug("X509CRL class: {}", crl.getClass().getName());
-				LOGGER.debug("CRL size: {} bytes", crl.getEncoded().length);
+				try {
+					LOGGER.debug("CRL size: {} bytes", crl.getEncoded().length);
+				} catch (CRLException ex) {
+					LOGGER.error("error: " + ex.getMessage(), ex);
+					return null;
+				}
 				return crl;
-			}
+			};
+			X509CRL crl = httpClient.execute(httpGet, httpClientContext, responseHandler);
+			return crl;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2020 e-Contract.be BV.
+ * Copyright (C) 2014-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -32,11 +32,11 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Enumerated;
+import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -267,7 +267,7 @@ public class CrlTrustLinker implements TrustLinker {
 					LOGGER.debug("not a uniform resource identifier");
 					continue;
 				}
-				DERIA5String derStr = DERIA5String.getInstance(name.getName());
+				ASN1IA5String derStr = ASN1IA5String.getInstance(name.getName());
 				String str = derStr.getString();
 				if (false == str.startsWith("http")) {
 					/*
@@ -277,6 +277,7 @@ public class CrlTrustLinker implements TrustLinker {
 					continue;
 				}
 				URI uri = toURI(str);
+				LOGGER.debug("CRL URI: {}", uri);
 				return uri;
 			}
 		}
