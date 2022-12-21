@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2017-2021 e-Contract.be BV.
+ * Copyright (C) 2017-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,11 +16,9 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.unit.be.fedict.trust.constraints;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
 import java.security.KeyPair;
@@ -28,6 +26,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +53,10 @@ public class QCStatementsCertificateConstraintTest {
 				notAfter);
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			testedInstance.check(certificate);
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, result.getReason());
 	}
 
 	@Test
@@ -93,12 +90,10 @@ public class QCStatementsCertificateConstraintTest {
 				null, null, Boolean.FALSE);
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			testedInstance.check(certificate);
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.CONSTRAINT_VIOLATION, result.getReason());
 	}
 
 	@Test

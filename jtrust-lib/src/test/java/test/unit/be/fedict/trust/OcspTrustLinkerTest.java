@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,11 +16,9 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.unit.be.fedict.trust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.security.KeyPair;
@@ -34,6 +32,7 @@ import java.util.Date;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -237,13 +236,11 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			ocspTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.INVALID_ALGORITHM, result.getReason());
 
 		// verify
 		EasyMock.verify(mockOcspRepository);
@@ -346,13 +343,11 @@ public class OcspTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			ocspTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.INVALID_REVOCATION_STATUS, result.getReason());
 
 		// verify
 		EasyMock.verify(mockOcspRepository);

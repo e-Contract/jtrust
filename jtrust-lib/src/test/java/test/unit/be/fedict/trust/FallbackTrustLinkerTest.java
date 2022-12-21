@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020 e-Contract.be BV.
+ * Copyright (C) 2020-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,16 +16,15 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.unit.be.fedict.trust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.linker.FallbackTrustLinker;
@@ -78,12 +77,10 @@ public class FallbackTrustLinkerTest {
 		EasyMock.replay(mockTrustLinker);
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			fallbackTrustLinker.hasTrustLink(null, null, validationDate, null, new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 
 		// verify
 		EasyMock.verify(mockTrustLinker);

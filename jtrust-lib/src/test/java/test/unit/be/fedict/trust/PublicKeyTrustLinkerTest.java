@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,12 +16,10 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.unit.be.fedict.trust;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.security.KeyPair;
 import java.security.Security;
@@ -31,6 +29,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -92,13 +91,12 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = Date.from(notAfter.plusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, result.getReason());
+
 	}
 
 	@Test
@@ -119,13 +117,11 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = Date.from(notBefore.minusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
 		// operate
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.INVALID_VALIDITY_INTERVAL, result.getReason());
 	}
 
 	@Test
@@ -171,14 +167,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate2, certificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException ex) {
-			// expected
-			assertEquals(TrustLinkerResultReason.NO_TRUST, ex.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 	}
 
 	@Test
@@ -199,13 +192,11 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate & verify
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 	}
 
 	@Test
@@ -226,13 +217,11 @@ public class PublicKeyTrustLinkerTest {
 		Date validationDate = new Date();
 
 		// operate & verify
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(root2Certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 	}
 
 	@Test
@@ -252,13 +241,11 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 	}
 
 	@Test
@@ -305,12 +292,10 @@ public class PublicKeyTrustLinkerTest {
 
 		Date validationDate = new Date();
 
-		try {
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
 			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
 					new DefaultAlgorithmPolicy());
-			fail();
-		} catch (TrustLinkerResultException e) {
-			assertEquals(TrustLinkerResultReason.NO_TRUST, e.getReason());
-		}
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
 	}
 }

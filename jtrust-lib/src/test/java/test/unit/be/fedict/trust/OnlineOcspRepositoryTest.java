@@ -16,13 +16,11 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.unit.be.fedict.trust;
 
 import static be.fedict.trust.test.World.getFreePort;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +42,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -53,6 +52,8 @@ import be.fedict.trust.ocsp.OnlineOcspRepository;
 import be.fedict.trust.test.PKITestUtils;
 
 public class OnlineOcspRepositoryTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(OnlineOcspRepositoryTest.class);
 
 	private Server server;
 
@@ -165,12 +166,10 @@ public class OnlineOcspRepositoryTest {
 		OcspResponderTestServlet.setOcspData("foobar".getBytes());
 
 		// operate & verify
-		try {
+		RuntimeException result = Assertions.assertThrows(RuntimeException.class, () -> {
 			this.testedInstance.findOcspResponse(this.ocspUri, this.certificate, this.rootCertificate, new Date());
-			fail();
-		} catch (Exception e) {
-			// expected
-		}
+		});
+		LOGGER.debug("message: {}", result.getMessage());
 	}
 
 	@Test
