@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2021 e-Contract.be BV.
+ * Copyright (C) 2020-2022 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -34,6 +34,7 @@ import java.util.Date;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,11 +43,15 @@ import be.fedict.trust.test.PKITestUtils;
 
 public class OfflineCrlRepositoryTest {
 
+	@BeforeAll
+	public static void installSecurityProviders() throws Exception {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
 	private Date validationDate;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		Security.addProvider(new BouncyCastleProvider());
 		this.validationDate = new Date();
 	}
 

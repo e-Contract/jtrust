@@ -60,12 +60,11 @@ public class SSLTrustValidatorTest {
 	@BeforeAll
 	public static void setUp() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
+		Security.addProvider(new BeIDProvider());
 	}
 
 	@Test
 	public void testTestEIDBelgiumBe() throws Exception {
-		Security.addProvider(new BeIDProvider());
-
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("BeID");
 
