@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2014-2022 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -16,7 +16,6 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package test.integ.be.fedict.trust;
 
 import java.io.FileInputStream;
@@ -51,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import be.fedict.commons.eid.jca.BeIDProvider;
 import be.fedict.trust.TrustValidator;
 import be.fedict.trust.TrustValidatorDecorator;
+import be.fedict.trust.ext.CriticalExtensionTrustLinker;
 import be.fedict.trust.repository.MemoryCertificateRepository;
 
 public class SSLTrustValidatorTest {
@@ -156,6 +156,7 @@ public class SSLTrustValidatorTest {
 		// next is kind of a default trust linked pattern.
 		TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
 		trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+		trustValidator.addTrustLinker(new CriticalExtensionTrustLinker());
 
 		// operate
 		trustValidator.isTrusted(certificateChain);

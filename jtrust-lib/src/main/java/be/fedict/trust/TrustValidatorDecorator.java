@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 FedICT.
- * Copyright (C) 2014-2018 e-Contract.be BVBA.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -23,6 +23,7 @@ import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.ext.CriticalExtensionTrustLinker;
 import be.fedict.trust.linker.AlwaysTrustTrustLinker;
 import be.fedict.trust.linker.FallbackTrustLinker;
 import be.fedict.trust.linker.PublicKeyTrustLinker;
@@ -43,8 +44,8 @@ public class TrustValidatorDecorator {
 	/**
 	 * Main constructor.
 	 * 
-	 * @param networkConfig
-	 *            the network configuration to be used. Can be <code>null</code> .
+	 * @param networkConfig the network configuration to be used. Can be
+	 *                      <code>null</code> .
 	 */
 	public TrustValidatorDecorator(NetworkConfig networkConfig) {
 		this.networkConfig = networkConfig;
@@ -60,10 +61,8 @@ public class TrustValidatorDecorator {
 	/**
 	 * Adds a default trust linker configuration to a given trust validator.
 	 * 
-	 * @param trustValidator
-	 *            the trust validator to be configured.
-	 * @param externalTrustLinker
-	 *            optional additional trust linker.
+	 * @param trustValidator      the trust validator to be configured.
+	 * @param externalTrustLinker optional additional trust linker.
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker) {
 		addDefaultTrustLinkerConfig(trustValidator, externalTrustLinker, false);
@@ -72,12 +71,9 @@ public class TrustValidatorDecorator {
 	/**
 	 * Adds a default trust linker configuration to a given trust validator.
 	 * 
-	 * @param trustValidator
-	 *            the trust validator to be configured.
-	 * @param externalTrustLinker
-	 *            optional additional trust linker.
-	 * @param noOcsp
-	 *            set to <code>true</code> to avoid OCSP validation.
+	 * @param trustValidator      the trust validator to be configured.
+	 * @param externalTrustLinker optional additional trust linker.
+	 * @param noOcsp              set to <code>true</code> to avoid OCSP validation.
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker,
 			boolean noOcsp) {
@@ -87,18 +83,15 @@ public class TrustValidatorDecorator {
 	/**
 	 * Adds a default trust linker configuration to a given trust validator.
 	 * 
-	 * @param trustValidator
-	 *            the trust validator to be configured.
-	 * @param externalTrustLinker
-	 *            optional additional trust linker.
-	 * @param noOcsp
-	 *            set to <code>true</code> to avoid OCSP validation.
-	 * @param crlRepository
-	 *            the optional CRL repository to use.
+	 * @param trustValidator      the trust validator to be configured.
+	 * @param externalTrustLinker optional additional trust linker.
+	 * @param noOcsp              set to <code>true</code> to avoid OCSP validation.
+	 * @param crlRepository       the optional CRL repository to use.
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator, TrustLinker externalTrustLinker,
 			boolean noOcsp, CrlRepository crlRepository) {
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker());
+		trustValidator.addTrustLinker(new CriticalExtensionTrustLinker());
 
 		OnlineOcspRepository ocspRepository = new OnlineOcspRepository(this.networkConfig);
 
@@ -122,8 +115,7 @@ public class TrustValidatorDecorator {
 	/**
 	 * Adds a default trust linker configuration to a given trust validator.
 	 * 
-	 * @param trustValidator
-	 *            the trust validator to be configured.
+	 * @param trustValidator the trust validator to be configured.
 	 */
 	public void addDefaultTrustLinkerConfig(TrustValidator trustValidator) {
 		addDefaultTrustLinkerConfig(trustValidator, null);
@@ -134,11 +126,11 @@ public class TrustValidatorDecorator {
 	 * certificates. Please notice that this configuration will not perform any
 	 * verification on the revocation status of the certificates.
 	 * 
-	 * @param trustValidator
-	 *            the trust validator to be configured.
+	 * @param trustValidator the trust validator to be configured.
 	 */
 	public void addTrustLinkerConfigWithoutRevocationStatus(TrustValidator trustValidator) {
 		trustValidator.addTrustLinker(new PublicKeyTrustLinker(true));
 		trustValidator.addTrustLinker(new AlwaysTrustTrustLinker());
+		trustValidator.addTrustLinker(new CriticalExtensionTrustLinker());
 	}
 }

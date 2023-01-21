@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2011 Frank Cornelis.
- * Copyright (C) 2016-2022 e-Contract.be BV.
+ * Copyright (C) 2016-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -38,6 +38,7 @@ import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlTrustLinker;
 import be.fedict.trust.crl.OnlineCrlRepository;
+import be.fedict.trust.ext.CriticalExtensionTrustLinker;
 import be.fedict.trust.linker.PublicKeyTrustLinker;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.ocsp.OnlineOcspRepository;
@@ -75,6 +76,7 @@ public class BelgianIdentityCardTrustValidatorTest {
 
 		trustValidator.addTrustLinker(new OcspTrustLinker(ocspRepository));
 		trustValidator.addTrustLinker(new CrlTrustLinker(cachedCrlRepository));
+		trustValidator.addTrustLinker(new CriticalExtensionTrustLinker());
 
 		trustValidator.isTrusted(authnCertificateChain);
 	}
