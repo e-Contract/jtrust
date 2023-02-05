@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2021-2022 e-Contract.be BV.
+ * Copyright (C) 2021-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,7 +18,6 @@
  */
 package test.unit.be.fedict.trust;
 
-import static be.fedict.trust.test.World.getFreePort;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -28,7 +27,6 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -40,16 +38,18 @@ import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.ocsp.OnlineOcspRepository;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class OnlineOcspRepositoryTest {
 
@@ -67,10 +67,14 @@ public class OnlineOcspRepositoryTest {
 
 	private KeyPair rootKeyPair;
 
+	@BeforeAll
+	public static void installSecurityProviders() throws Exception {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
 	@BeforeEach
 	public void setUp() throws Exception {
-		int freePort = getFreePort();
-		this.server = new Server(freePort);
+		this.server = new Server(0);
 		ServletContextHandler servletContextHandler = new ServletContextHandler();
 		servletContextHandler.setContextPath("/pki");
 		this.server.setHandler(servletContextHandler);
@@ -78,25 +82,22 @@ public class OnlineOcspRepositoryTest {
 		servletContextHandler.addServlet(OcspResponderTestServlet.class, pathSpec);
 		this.server.start();
 
-		String servletUrl = "http://localhost:" + freePort + "/pki";
+		ServerConnector serverConnector = (ServerConnector) this.server.getConnectors()[0];
+		int port = serverConnector.getLocalPort();
+		String servletUrl = "http://localhost:" + port + "/pki";
 		this.ocspUri = new URI(servletUrl + pathSpec);
 
 		this.testedInstance = new OnlineOcspRepository();
 
 		OcspResponderTestServlet.reset();
 
-		this.rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		this.rootCertificate = PKITestUtils.generateSelfSignedCertificate(this.rootKeyPair, "CN=TestRoot", notBefore,
-				notAfter);
+		this.rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		this.rootCertificate = new PKIBuilder.CertificateBuilder(this.rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		this.certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore, notAfter,
-				this.rootCertificate, this.rootKeyPair.getPrivate());
-
-		// required for org.bouncycastle.ocsp.CertificateID
-		Security.addProvider(new BouncyCastleProvider());
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		this.certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), this.rootKeyPair.getPrivate(),
+				this.rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).build();
 	}
 
 	@AfterEach
@@ -178,8 +179,8 @@ public class OnlineOcspRepositoryTest {
 		OcspResponderTestServlet.setResponseStatus(HttpServletResponse.SC_OK);
 		OcspResponderTestServlet.setContentType("application/ocsp-response");
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(this.certificate, false, this.rootCertificate,
-				this.rootCertificate, this.rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(this.rootKeyPair.getPrivate(), this.rootCertificate,
+				this.certificate, this.rootCertificate).build();
 
 		OcspResponderTestServlet.setOcspData(ocspResp.getEncoded());
 

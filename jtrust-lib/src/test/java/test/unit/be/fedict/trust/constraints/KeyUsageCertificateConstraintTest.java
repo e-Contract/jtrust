@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2022 e-Contract.be BV.
+ * Copyright (C) 2020-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import be.fedict.trust.constraints.KeyUsageCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKIBuilder;
 import be.fedict.trust.test.PKITestUtils;
 
 public class KeyUsageCertificateConstraintTest {
@@ -46,7 +47,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testNoKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
@@ -62,7 +63,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnFalseNonRepudiationFilter() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
@@ -80,7 +81,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnTrueNonRepudiationFilter() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
@@ -98,7 +99,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testDigitalSignatureKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature);
@@ -114,7 +115,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testDigitalSignatureNoNonRepudiationKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature);
@@ -131,7 +132,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageKeyEncipherment() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyEncipherment);
@@ -150,7 +151,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageDataEncipherment() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.dataEncipherment);
@@ -169,7 +170,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageKeyAgreement() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyAgreement);
@@ -188,7 +189,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageKeyCertSign() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.keyCertSign);
@@ -207,7 +208,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageCrlSign() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.cRLSign);
@@ -226,7 +227,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageEncypherOnly() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.encipherOnly);
@@ -245,7 +246,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnUnexpectedKeyUsageDecypherOnly() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.decipherOnly);
@@ -264,7 +265,7 @@ public class KeyUsageCertificateConstraintTest {
 	@Test
 	public void testFailingOnMissingKeyUsage() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		KeyUsage keyUsage = new KeyUsage(KeyUsage.decipherOnly);

@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2022 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -156,7 +156,7 @@ public class OcspTrustLinker implements TrustLinker {
 					.setProvider(BouncyCastleProvider.PROVIDER_NAME).build(certificate.getPublicKey());
 			boolean verificationResult = basicOCSPResp.isSignatureValid(contentVerifierProvider);
 			if (false == verificationResult) {
-				LOGGER.debug("OCSP response signature invalid");
+				LOGGER.warn("OCSP response signature invalid");
 				return TrustLinkerResult.UNDECIDED;
 			}
 		} else {
@@ -262,7 +262,6 @@ public class OcspTrustLinker implements TrustLinker {
 			LocalDateTime endValidity = nextUpdate.plus(this.freshnessInterval, ChronoUnit.MILLIS);
 			LocalDateTime validationDateTime = validationDate.toInstant().atZone(ZoneId.systemDefault())
 					.toLocalDateTime();
-			;
 			if (validationDateTime.isBefore(beginValidity)) {
 				LOGGER.warn("OCSP response not yet valid");
 				continue;
@@ -286,7 +285,7 @@ public class OcspTrustLinker implements TrustLinker {
 			}
 		}
 
-		LOGGER.debug("no matching OCSP response entry");
+		LOGGER.warn("no matching OCSP response entry");
 		return TrustLinkerResult.UNDECIDED;
 	}
 

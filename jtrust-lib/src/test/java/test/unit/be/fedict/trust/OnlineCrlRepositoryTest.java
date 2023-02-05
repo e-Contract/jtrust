@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2022 e-Contract.be BV.
+ * Copyright (C) 2020-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -19,7 +19,6 @@
 
 package test.unit.be.fedict.trust;
 
-import static be.fedict.trust.test.World.getFreePort;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,7 +30,6 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -42,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,7 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.crl.OnlineCrlRepository;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class OnlineCrlRepositoryTest {
 
@@ -65,14 +64,12 @@ public class OnlineCrlRepositoryTest {
 
 	@BeforeAll
 	public static void oneTimeSetUp() throws Exception {
-
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		int freePort = getFreePort();
-		this.server = new Server(freePort);
+		this.server = new Server(0);
 		ServletContextHandler servletContextHandler = new ServletContextHandler();
 		servletContextHandler.setContextPath("/pki");
 		String pathSpec = "/test.crl";
@@ -80,7 +77,9 @@ public class OnlineCrlRepositoryTest {
 		this.server.setHandler(servletContextHandler);
 		this.server.start();
 
-		String servletUrl = "http://localhost:" + freePort + "/pki";
+		ServerConnector serverConnector = (ServerConnector) this.server.getConnectors()[0];
+		int port = serverConnector.getLocalPort();
+		String servletUrl = "http://localhost:" + port + "/pki";
 		this.crlUri = new URI(servletUrl + pathSpec);
 		this.validationDate = new Date();
 
@@ -133,12 +132,11 @@ public class OnlineCrlRepositoryTest {
 	@Test
 	public void testDownloadCrl() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-				notAfter);
-		X509CRL crl = PKITestUtils.generateCrl(keyPair.getPrivate(), certificate, notBefore, notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair).withSubjectName("CN=Test")
+				.withValidityMonths(1).build();
+
+		X509CRL crl = new PKIBuilder.CRLBuilder(keyPair.getPrivate(), certificate).build();
 		CrlRepositoryTestServlet.setCrlData(crl.getEncoded());
 
 		// operate

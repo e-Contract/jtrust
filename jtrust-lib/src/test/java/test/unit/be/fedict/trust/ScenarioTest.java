@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2022 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -51,6 +51,7 @@ import be.fedict.trust.test.CertificationAuthority;
 import be.fedict.trust.test.Clock;
 import be.fedict.trust.test.FixedClock;
 import be.fedict.trust.test.OCSPRevocationService;
+import be.fedict.trust.test.PKIBuilder;
 import be.fedict.trust.test.PKITestUtils;
 import be.fedict.trust.test.TimeStampAuthority;
 import be.fedict.trust.test.World;
@@ -183,13 +184,13 @@ public class ScenarioTest {
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
 
-			KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair validKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
 					"CN=Valid");
 			List<X509Certificate> validCertificateChain = Arrays
 					.asList(new X509Certificate[] { validCertificate, rootCert });
 
-			KeyPair revokedKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair revokedKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate revokedCertificate = certificationAuthority
 					.issueSigningCertificate(revokedKeyPair.getPublic(), "CN=Revoked");
 			certificationAuthority.revoke(revokedCertificate);
@@ -223,13 +224,13 @@ public class ScenarioTest {
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
 
-			KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair validKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
 					"CN=Valid");
 			List<X509Certificate> validCertificateChain = Arrays
 					.asList(new X509Certificate[] { validCertificate, rootCert });
 
-			KeyPair revokedKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair revokedKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate revokedCertificate = certificationAuthority
 					.issueSigningCertificate(revokedKeyPair.getPublic(), "CN=Revoked");
 			certificationAuthority.revoke(revokedCertificate);
@@ -262,13 +263,13 @@ public class ScenarioTest {
 
 			X509Certificate rootCert = certificationAuthority.getCertificate();
 
-			KeyPair validKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair validKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate validCertificate = certificationAuthority.issueSigningCertificate(validKeyPair.getPublic(),
 					"CN=Valid");
 			List<X509Certificate> validCertificateChain = Arrays
 					.asList(new X509Certificate[] { validCertificate, rootCert });
 
-			KeyPair proxyKeyPair = PKITestUtils.generateKeyPair();
+			KeyPair proxyKeyPair = new PKIBuilder.KeyPairBuilder().build();
 			LocalDateTime notBefore = LocalDateTime.now();
 			LocalDateTime notAfter = notBefore.plusMonths(1);
 			X509Certificate proxyCertificate = PKITestUtils.generateCertificate(proxyKeyPair.getPublic(), "CN=Proxy",
@@ -631,7 +632,7 @@ public class ScenarioTest {
 
 			world.start();
 
-			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
 					"CN=End Entity");
 
@@ -677,7 +678,7 @@ public class ScenarioTest {
 
 			world.start();
 
-			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
 					"CN=End Entity");
 
@@ -715,7 +716,7 @@ public class ScenarioTest {
 
 			world.start();
 
-			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
 					"CN=End Entity");
 
@@ -754,7 +755,7 @@ public class ScenarioTest {
 
 			world.start();
 
-			KeyPair keyPair = PKITestUtils.generateKeyPair();
+			KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 			X509Certificate certificate = certificationAuthority.issueSigningCertificate(keyPair.getPublic(),
 					"CN=End Entity");
 

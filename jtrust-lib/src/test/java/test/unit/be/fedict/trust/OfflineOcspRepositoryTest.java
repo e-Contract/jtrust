@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2021 e-Contract.be BV.
+ * Copyright (C) 2020-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -27,18 +27,17 @@ import java.net.URI;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.ocsp.OfflineOcspRepository;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class OfflineOcspRepositoryTest {
 
@@ -48,34 +47,28 @@ public class OfflineOcspRepositoryTest {
 
 	private KeyPair rootKeyPair;
 
-	@BeforeEach
-	public void setUp() throws Exception {
-
-		this.rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		this.rootCertificate = PKITestUtils.generateSelfSignedCertificate(this.rootKeyPair, "CN=TestRoot", notBefore,
-				notAfter);
-
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		this.certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore, notAfter,
-				this.rootCertificate, this.rootKeyPair.getPrivate());
-
-		// required for org.bouncycastle.ocsp.CertificateID
+	@BeforeAll
+	public static void installSecurityProviders() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
-
 	}
 
-	@AfterEach
-	public void tearDown() throws Exception {
+	@BeforeEach
+	public void setUp() throws Exception {
+		this.rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		this.rootCertificate = new PKIBuilder.CertificateBuilder(this.rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
+
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		this.certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), this.rootKeyPair.getPrivate(),
+				this.rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).build();
 	}
 
 	@Test
 	public void testOcspResponseFound() throws Exception {
 
 		// setup
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(this.certificate, false, this.rootCertificate,
-				this.rootCertificate, this.rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(this.rootKeyPair.getPrivate(), this.rootCertificate, certificate,
+				this.rootCertificate).build();
 
 		OfflineOcspRepository testedInstance = new OfflineOcspRepository(
 				Collections.singletonList(ocspResp.getEncoded()));
@@ -91,16 +84,14 @@ public class OfflineOcspRepositoryTest {
 
 	@Test
 	public void testOcspResponseNotFound() throws Exception {
-
 		// setup
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate otherCertificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=TestOther",
-				notBefore, notAfter, this.rootCertificate, this.rootKeyPair.getPrivate());
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate otherCertificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(),
+				this.rootKeyPair.getPrivate(), this.rootCertificate).withSubjectName("CN=TestOther")
+				.withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(otherCertificate, false, this.rootCertificate,
-				this.rootCertificate, this.rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(this.rootKeyPair.getPrivate(), this.rootCertificate,
+				otherCertificate, this.rootCertificate).build();
 
 		OfflineOcspRepository testedInstance = new OfflineOcspRepository(
 				Collections.singletonList(ocspResp.getEncoded()));

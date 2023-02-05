@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2020-2022 e-Contract.be BV.
+ * Copyright (C) 2020-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import be.fedict.trust.constraints.TSACertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKIBuilder;
 import be.fedict.trust.test.PKITestUtils;
 
 public class TSACertificateConstraintTest {
@@ -45,7 +46,7 @@ public class TSACertificateConstraintTest {
 	@Test
 	public void testValidTSAConstraint() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=TestTSA", notBefore,
@@ -58,7 +59,7 @@ public class TSACertificateConstraintTest {
 	@Test
 	public void testInvalidTSAConstraint() throws Exception {
 		// setup
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=TestTSA", notBefore,

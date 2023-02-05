@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -18,11 +18,11 @@
 
 package be.fedict.trust.test;
 
-import java.net.ServerSocket;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,7 @@ public class World implements AutoCloseable {
 	 * @throws Exception
 	 */
 	public void start() throws Exception {
-		int freePort = getFreePort();
-		this.server = new Server(freePort);
+		this.server = new Server(0);
 		ServletContextHandler servletContextHandler = new ServletContextHandler();
 		servletContextHandler.setContextPath("/pki");
 		this.server.setHandler(servletContextHandler);
@@ -94,7 +93,10 @@ public class World implements AutoCloseable {
 		}
 
 		this.server.start();
-		String url = "http://localhost:" + freePort + "/pki";
+
+		ServerConnector serverConnector = (ServerConnector) this.server.getConnectors()[0];
+		int port = serverConnector.getLocalPort();
+		String url = "http://localhost:" + port + "/pki";
 		this.running = true;
 
 		for (EndpointProvider endpointProvider : this.endpointProviders) {
@@ -136,12 +138,6 @@ public class World implements AutoCloseable {
 		LOGGER.debug("close");
 		if (this.running) {
 			stop();
-		}
-	}
-
-	public static int getFreePort() throws Exception {
-		try (ServerSocket serverSocket = new ServerSocket(0)) {
-			return serverSocket.getLocalPort();
 		}
 	}
 }

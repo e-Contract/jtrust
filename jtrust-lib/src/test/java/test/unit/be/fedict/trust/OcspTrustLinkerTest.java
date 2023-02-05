@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2018-2022 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,7 +26,6 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 
 import org.bouncycastle.cert.ocsp.OCSPResp;
@@ -43,7 +42,7 @@ import be.fedict.trust.ocsp.OcspRepository;
 import be.fedict.trust.ocsp.OcspTrustLinker;
 import be.fedict.trust.policy.DefaultAlgorithmPolicy;
 import be.fedict.trust.revocation.RevocationData;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class OcspTrustLinkerTest {
 
@@ -54,15 +53,13 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void noOcspUriInCertificate() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate());
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(null, certificate, rootCertificate, null)).andReturn(null);
@@ -80,15 +77,13 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void noOcspResponseInRepository() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(new URI("ocsp-uri"), certificate, rootCertificate, null))
@@ -109,18 +104,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void validOcspResponse() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -143,18 +136,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponder() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -177,19 +168,17 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponseWronglySigned() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				ocspResponderKeyPair.getPrivate());
+		KeyPair ocspResponderKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(ocspResponderKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -212,18 +201,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspResponseMD5Signature() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri", null, "MD5withRSA");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate(), "MD5WITHRSA");
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).withSignatureAlgorithm("MD5withRSA").build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -248,18 +235,17 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void ocspNotFresh() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -282,21 +268,19 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void wrongOcspResponse() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		X509Certificate certificate2 = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test2", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		X509Certificate certificate2 = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test2").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp2 = PKITestUtils.createOcspResp(certificate2, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp2 = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate2,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -319,18 +303,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void revokedOcsp() throws Exception {
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, true, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).withRevoked().build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -355,25 +337,21 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void validDedicatedAuthorizedOcspResponse() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
+		KeyPair ocspResponderKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate ocspResponderCertificate = new PKIBuilder.CertificateBuilder(ocspResponderKeyPair.getPublic(),
+				rootKeyPair.getPrivate(), rootCertificate).withSubjectName("CN=OCSPResp").withOcspResponder()
+				.withValidityMonths(1).build();
 
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate ocspResponderCertificate = PKITestUtils.generateCertificate(ocspResponderKeyPair.getPublic(),
-				"CN=OCSPResp", notBefore, notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, null,
-				null, "SHA1withRSA", false, false, false, null, null, null, true);
-
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
-
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, ocspResponderCertificate,
-				ocspResponderKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(ocspResponderKeyPair.getPrivate(), ocspResponderCertificate,
+				certificate, rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -396,20 +374,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void rootCAIssuesOcspResponseNoCertInResponse() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
-
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
-
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -432,20 +406,16 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void rootCAIssuesOcspResponseRootCACertInResponse() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
-
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
-
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, rootCertificate,
-				rootKeyPair.getPrivate(), "SHA1withRSA", Collections.singletonList(rootCertificate));
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(rootKeyPair.getPrivate(), rootCertificate, certificate,
+				rootCertificate).withResponderChain(rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),
@@ -468,25 +438,22 @@ public class OcspTrustLinkerTest {
 
 	@Test
 	public void invalidDedicatedAuthorizedOcspResponse() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
 
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
+		KeyPair ocspResponderKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate ocspResponderCertificate = new PKIBuilder.CertificateBuilder(ocspResponderKeyPair.getPublic(),
+				rootKeyPair.getPrivate(), rootCertificate).withSubjectName("CN=OCSPResp")
+				// .withOcspResponder()
+				.withValidityMonths(1).build();
 
-		KeyPair rootKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate rootCertificate = PKITestUtils.generateSelfSignedCertificate(rootKeyPair, "CN=TestRoot",
-				notBefore, notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withOcspUri("ocsp-uri").withValidityMonths(1).build();
 
-		KeyPair ocspResponderKeyPair = PKITestUtils.generateKeyPair();
-		X509Certificate ocspResponderCertificate = PKITestUtils.generateCertificate(ocspResponderKeyPair.getPublic(),
-				"CN=OCSPResp", notBefore, notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, null,
-				null, "SHA1withRSA", false, false, false, null, null, null, false);
-
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, rootCertificate, rootKeyPair.getPrivate(), false, -1, null, "ocsp-uri");
-
-		OCSPResp ocspResp = PKITestUtils.createOcspResp(certificate, false, rootCertificate, ocspResponderCertificate,
-				ocspResponderKeyPair.getPrivate());
+		OCSPResp ocspResp = new PKIBuilder.OCSPBuilder(ocspResponderKeyPair.getPrivate(), ocspResponderCertificate,
+				certificate, rootCertificate).build();
 
 		OcspRepository mockOcspRepository = EasyMock.createMock(OcspRepository.class);
 		EasyMock.expect(mockOcspRepository.findOcspResponse(EasyMock.eq(new URI("ocsp-uri")), EasyMock.eq(certificate),

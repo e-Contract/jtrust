@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2019-2021 e-Contract.be BV.
+ * Copyright (C) 2019-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -26,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.fedict.trust.repository.MemoryCertificateRepository;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class MemoryCertificateRepositoryTest {
 
@@ -42,13 +41,10 @@ public class MemoryCertificateRepositoryTest {
 
 	@Test
 	public void trustPointFound() throws Exception {
-
 		// setup
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-				notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair).withSubjectName("CN=Test")
+				.withValidityMonths(1).build();
 
 		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();
 		testedInstance.addTrustPoint(certificate);
@@ -59,15 +55,12 @@ public class MemoryCertificateRepositoryTest {
 
 	@Test
 	public void trustPointNotFound() throws Exception {
-
 		// setup
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-				notAfter);
-		X509Certificate certificate2 = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test2", notBefore,
-				notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair).withSubjectName("CN=Test")
+				.withValidityMonths(1).build();
+		X509Certificate certificate2 = new PKIBuilder.CertificateBuilder(keyPair).withSubjectName("CN=Test2")
+				.withValidityMonths(1).build();
 
 		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();
 		testedInstance.addTrustPoint(certificate);
@@ -78,13 +71,10 @@ public class MemoryCertificateRepositoryTest {
 
 	@Test
 	public void trustPointFoundByDifferentCryptoProvider() throws Exception {
-
 		// setup
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
-		X509Certificate trustPoint = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
-				notAfter);
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate trustPoint = new PKIBuilder.CertificateBuilder(keyPair).withSubjectName("CN=Test")
+				.withValidityMonths(1).build();
 		LOGGER.debug("trust point certificate impl class: {}", trustPoint.getClass().getName());
 
 		MemoryCertificateRepository testedInstance = new MemoryCertificateRepository();

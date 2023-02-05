@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2017-2022 e-Contract.be BV.
+ * Copyright (C) 2017-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import be.fedict.trust.constraints.QCStatementsCertificateConstraint;
 import be.fedict.trust.linker.TrustLinkerResultException;
 import be.fedict.trust.linker.TrustLinkerResultReason;
+import be.fedict.trust.test.PKIBuilder;
 import be.fedict.trust.test.PKITestUtils;
 
 public class QCStatementsCertificateConstraintTest {
@@ -46,7 +47,7 @@ public class QCStatementsCertificateConstraintTest {
 		// setup
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(Boolean.TRUE);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateSelfSignedCertificate(keyPair, "CN=Test", notBefore,
@@ -65,7 +66,7 @@ public class QCStatementsCertificateConstraintTest {
 		// setup
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(Boolean.TRUE);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
@@ -82,7 +83,7 @@ public class QCStatementsCertificateConstraintTest {
 		// setup
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(Boolean.TRUE);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
@@ -102,7 +103,7 @@ public class QCStatementsCertificateConstraintTest {
 		// setup
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(null);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,
@@ -120,7 +121,7 @@ public class QCStatementsCertificateConstraintTest {
 		QCStatementsCertificateConstraint testedInstance = new QCStatementsCertificateConstraint(Boolean.TRUE,
 				Boolean.TRUE);
 
-		KeyPair keyPair = PKITestUtils.generateKeyPair();
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		LocalDateTime notAfter = notBefore.plusMonths(1);
 		X509Certificate certificate = PKITestUtils.generateCertificate(keyPair.getPublic(), "CN=Test", notBefore,

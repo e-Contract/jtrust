@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2022 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -132,6 +132,7 @@ public class CrlTrustLinker implements TrustLinker {
 			return TrustLinkerResult.TRUSTED;
 		} else if (crlEntry.getRevocationDate().after(validationDate)) {
 			LOGGER.debug("CRL OK for: {} at {}", childCertificate.getSubjectX500Principal(), validationDate);
+			LOGGER.debug("CRL entry revocation date: {}", crlEntry.getRevocationDate());
 			return TrustLinkerResult.TRUSTED;
 		}
 

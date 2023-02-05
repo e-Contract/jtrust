@@ -16,7 +16,6 @@
  * License along with this software; if not, see 
  * http://www.gnu.org/licenses/.
  */
-
 package be.fedict.trust.test;
 
 import java.io.ByteArrayInputStream;
@@ -110,6 +109,10 @@ import org.bouncycastle.util.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @deprecated
+ */
 public class PKITestUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PKITestUtils.class);
@@ -464,6 +467,7 @@ public class PKITestUtils {
 	}
 
 	public static class RevokedCertificate {
+
 		private final BigInteger serialNumber;
 		private final LocalDateTime revocationDate;
 

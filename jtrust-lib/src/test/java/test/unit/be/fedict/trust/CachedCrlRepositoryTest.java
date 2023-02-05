@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2015-2021 e-Contract.be BV.
+ * Copyright (C) 2015-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import be.fedict.trust.crl.CachedCrlRepository;
 import be.fedict.trust.crl.CrlRepository;
-import be.fedict.trust.test.PKITestUtils;
+import be.fedict.trust.test.PKIBuilder;
 
 public class CachedCrlRepositoryTest {
 
@@ -47,17 +47,10 @@ public class CachedCrlRepositoryTest {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		this.testKeyPair = PKITestUtils.generateKeyPair();
-		LocalDateTime notBefore = LocalDateTime.now();
-		LocalDateTime notAfter = notBefore.plusMonths(1);
-		this.testCertificate = PKITestUtils.generateCertificate(this.testKeyPair.getPublic(), "CN=Test", notBefore,
-				notAfter, null, this.testKeyPair.getPrivate(), true, 0, null, null);
-		LocalDateTime thisUpdate = LocalDateTime.now();
-		LocalDateTime nextUpdate = thisUpdate.plusHours(1);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
-				nextUpdate);
-		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
-				nextUpdate);
+		this.testKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		this.testCertificate = new PKIBuilder.CertificateBuilder(this.testKeyPair).withValidityMonths(1).build();
+		this.testCrl = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate).build();
+		this.testCrl2 = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate).build();
 	}
 
 	@Test
@@ -81,7 +74,7 @@ public class CachedCrlRepositoryTest {
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
-		assertEquals(testCrl, resultCrl);
+		assertEquals(this.testCrl, resultCrl);
 	}
 
 	@Test
@@ -106,8 +99,8 @@ public class CachedCrlRepositoryTest {
 
 		// verify
 		EasyMock.verify(mockCrlRepository);
-		assertEquals(testCrl, resultCrl);
-		assertEquals(testCrl, resultCrl2);
+		assertEquals(this.testCrl, resultCrl);
+		assertEquals(this.testCrl, resultCrl2);
 	}
 
 	@Test
@@ -136,7 +129,7 @@ public class CachedCrlRepositoryTest {
 		// verify
 		EasyMock.verify(mockCrlRepository);
 		assertNull(resultCrl);
-		assertEquals(testCrl, resultCrl2);
+		assertEquals(this.testCrl, resultCrl2);
 	}
 
 	@Test
@@ -144,13 +137,12 @@ public class CachedCrlRepositoryTest {
 		// setup
 		LocalDateTime thisUpdate = LocalDateTime.now();
 		LocalDateTime nextUpdate = thisUpdate.plusDays(7);
-		LocalDateTime nextNextUpdate = nextUpdate.plusDays(7);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
-				nextUpdate);
-		this.testCrl2 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
-				nextUpdate);
-		X509CRL testCrl3 = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, nextUpdate,
-				nextNextUpdate);
+		this.testCrl = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate)
+				.withValidityDays(7).build();
+		this.testCrl2 = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate)
+				.withValidityDays(7).build();
+		X509CRL testCrl3 = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate)
+				.withThisUpdate(LocalDateTime.now().plusDays(7)).withValidityDays(7).build();
 
 		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");
@@ -197,10 +189,8 @@ public class CachedCrlRepositoryTest {
 	@Test
 	public void cacheExpiredCacheValidationDateRefreshing() throws Exception {
 		// setup
-		LocalDateTime thisUpdate = LocalDateTime.now();
-		LocalDateTime nextUpdate = thisUpdate.plusDays(7);
-		this.testCrl = PKITestUtils.generateCrl(this.testKeyPair.getPrivate(), this.testCertificate, thisUpdate,
-				nextUpdate);
+		this.testCrl = new PKIBuilder.CRLBuilder(this.testKeyPair.getPrivate(), this.testCertificate)
+				.withValidityDays(7).build();
 
 		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
 		URI crlUri = new URI("urn:test:crl");

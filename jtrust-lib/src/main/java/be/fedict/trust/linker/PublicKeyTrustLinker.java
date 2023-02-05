@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2022 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -121,7 +121,7 @@ public class PublicKeyTrustLinker implements TrustLinker {
 			}
 		}
 		if (0 == certificate.getBasicConstraints() && -1 != childCertificate.getBasicConstraints()) {
-			LOGGER.debug("child should not be a CA");
+			LOGGER.warn("child should not be a CA: " + childCertificate.getSubjectX500Principal());
 			throw new TrustLinkerResultException(TrustLinkerResultReason.NO_TRUST, "child should not be a CA");
 		}
 
