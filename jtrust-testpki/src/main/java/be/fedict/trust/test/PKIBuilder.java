@@ -95,14 +95,36 @@ import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
+/**
+ * Builder for PKI artifacts like certificates, CRLs, and OCSP responses.
+ * 
+ * @author Frank Cornelis
+ *
+ */
 public class PKIBuilder {
 
+	private PKIBuilder() {
+
+	}
+
+	/**
+	 * Builder for key pairs.
+	 * 
+	 * @author Frank Cornelis
+	 *
+	 */
 	public static class KeyPairBuilder {
 
 		private String keyAlgorithm = "RSA";
 
 		private int keySize = 1024;
 
+		/**
+		 * Sets the key algorithm. Defaults to RSA.
+		 * 
+		 * @param keyAlgorithm RSA or EC
+		 * @return
+		 */
 		public KeyPairBuilder withKeyAlgorithm(String keyAlgorithm) {
 			this.keyAlgorithm = keyAlgorithm;
 			return this;
@@ -127,6 +149,12 @@ public class PKIBuilder {
 		}
 	}
 
+	/**
+	 * Builder for X509 certificates.
+	 * 
+	 * @author Frank Cornelis
+	 *
+	 */
 	public static class CertificateBuilder {
 
 		private final PublicKey subjectPublicKey;
@@ -140,7 +168,8 @@ public class PKIBuilder {
 		private boolean includeAKID;
 		private PublicKey akidPublicKey;
 		private boolean basicConstraints;
-		private int pathLength = -1;
+		private boolean basicConstraintsCA;
+		private Integer pathLength;
 		private String crlUri;
 		private String ocspUri;
 		private Integer keyUsage;
@@ -165,6 +194,11 @@ public class PKIBuilder {
 			this.subjectPublicKey = subjectPublicKey;
 		}
 
+		/**
+		 * Constructor for self-signed certificates.
+		 * 
+		 * @param keyPair
+		 */
 		public CertificateBuilder(KeyPair keyPair) {
 			this(keyPair.getPublic(), keyPair.getPrivate(), null);
 		}
@@ -194,24 +228,41 @@ public class PKIBuilder {
 			return this;
 		}
 
+		/**
+		 * Include subject key identifier.
+		 * 
+		 * @return
+		 */
 		public CertificateBuilder withIncludeSKID() {
 			this.includeSKID = true;
 			return this;
 		}
 
+		/**
+		 * Include authority key identifier.
+		 * 
+		 * @return
+		 */
 		public CertificateBuilder withIncludeAKID() {
 			this.includeAKID = true;
 			return this;
 		}
 
+		/**
+		 * Make the certificate builder to use an alternative authority key identifier.
+		 * 
+		 * @param akidPublicKey
+		 * @return
+		 */
 		public CertificateBuilder withAKIDPublicKey(PublicKey akidPublicKey) {
 			this.akidPublicKey = akidPublicKey;
 			this.includeAKID = true;
 			return this;
 		}
 
-		public CertificateBuilder withBasicConstraints() {
+		public CertificateBuilder withBasicConstraints(boolean ca) {
 			this.basicConstraints = true;
+			this.basicConstraintsCA = ca;
 			return this;
 		}
 
@@ -311,9 +362,9 @@ public class PKIBuilder {
 			}
 
 			if (this.basicConstraints) {
-				if (-1 == this.pathLength) {
+				if (null == this.pathLength) {
 					x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true,
-							new BasicConstraints(2147483647));
+							new BasicConstraints(this.basicConstraintsCA));
 				} else {
 					x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true,
 							new BasicConstraints(this.pathLength));
@@ -357,7 +408,7 @@ public class PKIBuilder {
 				if (this.qcRetentionPeriod) {
 					vec.add(new QCStatement(QCStatement.id_etsi_qcs_RetentionPeriod));
 				}
-				if (qcSSCD) {
+				if (this.qcSSCD) {
 					vec.add(new QCStatement(QCStatement.id_etsi_qcs_QcSSCD));
 				}
 				x509v3CertificateBuilder.addExtension(Extension.qCStatements, true, new DERSequence(vec));
@@ -409,6 +460,12 @@ public class PKIBuilder {
 		}
 	}
 
+	/**
+	 * Builder for X509 CRLs.
+	 * 
+	 * @author Frank Cornelis
+	 *
+	 */
 	public static class CRLBuilder {
 
 		private final PrivateKey issuerPrivateKey;
@@ -505,7 +562,7 @@ public class PKIBuilder {
 
 			JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
 			x509v2crlBuilder.addExtension(Extension.authorityKeyIdentifier, false,
-					extensionUtils.createAuthorityKeyIdentifier(issuerCertificate));
+					extensionUtils.createAuthorityKeyIdentifier(this.issuerCertificate));
 			x509v2crlBuilder.addExtension(Extension.cRLNumber, false, new CRLNumber(BigInteger.ONE));
 
 			if (null == this.signatureAlgorithm) {
@@ -536,6 +593,12 @@ public class PKIBuilder {
 		}
 	}
 
+	/**
+	 * Builder for OCSP responses.
+	 * 
+	 * @author Frank Cornelis
+	 *
+	 */
 	public static class OCSPBuilder {
 
 		private final PrivateKey ocspResponderPrivateKey;
@@ -551,6 +614,14 @@ public class PKIBuilder {
 
 		private List<X509Certificate> ocspResponderCertificateChain = null;
 
+		/**
+		 * 
+		 * @param ocspResponderPrivateKey  the OCSP responder private key.
+		 * @param ocspResponderCertificate the OCSP responder certificate.
+		 * @param certificate              the certificate subject to the OCSP
+		 *                                 request/response.
+		 * @param issuerCertificate        the issuer of the certificate in question.
+		 */
 		public OCSPBuilder(PrivateKey ocspResponderPrivateKey, X509Certificate ocspResponderCertificate,
 				X509Certificate certificate, X509Certificate issuerCertificate) {
 			this.ocspResponderPrivateKey = ocspResponderPrivateKey;
@@ -559,6 +630,11 @@ public class PKIBuilder {
 			this.issuerCertificate = issuerCertificate;
 		}
 
+		/**
+		 * Mark our certificate as being revoked.
+		 * 
+		 * @return
+		 */
 		public OCSPBuilder withRevoked() {
 			this.revoked = true;
 			return this;
@@ -569,6 +645,12 @@ public class PKIBuilder {
 			return this;
 		}
 
+		/**
+		 * Attaches a certificate to the embedded OCSP responder certificate chain.
+		 * 
+		 * @param certificate
+		 * @return
+		 */
 		public OCSPBuilder withResponderChain(X509Certificate certificate) {
 			if (null == this.ocspResponderCertificateChain) {
 				this.ocspResponderCertificateChain = new LinkedList<>();

@@ -78,7 +78,7 @@ public class CrlTrustLinkerTest {
 	public void invalidCrlUriInCertificate() throws Exception {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withValidityMonths(1).build();
+				.withBasicConstraints(true).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -99,7 +99,7 @@ public class CrlTrustLinkerTest {
 	public void noEntryInCrlRepository() throws Exception {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withValidityMonths(1).build();
+				.withBasicConstraints(true).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate =
@@ -129,7 +129,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -159,7 +159,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withValidityMonths(1).build();
+				.withBasicConstraints(true).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -189,7 +189,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.dataEncipherment).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.dataEncipherment).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -219,7 +219,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -252,7 +252,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate =
@@ -284,7 +284,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -314,7 +314,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		Date validationDate = Date.from(notBefore.plusDays(1).atZone(ZoneId.systemDefault()).toInstant());
 
@@ -344,7 +344,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -377,7 +377,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -408,7 +408,7 @@ public class CrlTrustLinkerTest {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withBasicConstraints().withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
+				.withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign).withValidityMonths(1).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -438,7 +438,7 @@ public class CrlTrustLinkerTest {
 		final KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		LocalDateTime notBefore = LocalDateTime.now();
 		final X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair)
-				.withSubjectName("CN=TestRoot").withBasicConstraints().withKeyUsage(KeyUsage.cRLSign)
+				.withSubjectName("CN=TestRoot").withBasicConstraints(true).withKeyUsage(KeyUsage.cRLSign)
 				.withValidityMonths(1).build();
 
 		final KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();

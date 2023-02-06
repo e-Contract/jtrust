@@ -168,6 +168,56 @@ public class PublicKeyTrustLinkerTest {
 	}
 
 	@Test
+	public void testNoCaFlagFails2() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
+
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withBasicConstraints(false).build();
+
+		KeyPair keyPair2 = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate2 = new PKIBuilder.CertificateBuilder(keyPair2.getPublic(), keyPair.getPrivate(),
+				certificate).withSubjectName("CN=Test 2").withValidityMonths(1).build();
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
+			publicKeyTrustLinker.hasTrustLink(certificate2, certificate, validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
+	}
+
+	@Test
+	public void testNoCaFlagFails3() throws Exception {
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).build();
+
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withBasicConstraints(false).build();
+
+		KeyPair keyPair2 = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate2 = new PKIBuilder.CertificateBuilder(keyPair2.getPublic(), keyPair.getPrivate(),
+				certificate).withSubjectName("CN=Test 2").withValidityMonths(1).withBasicConstraints(true).build();
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
+			publicKeyTrustLinker.hasTrustLink(certificate2, certificate, validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
+	}
+
+	@Test
 	public void testChildNotAllowToBeCA() throws Exception {
 		// setup
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
@@ -176,7 +226,30 @@ public class PublicKeyTrustLinkerTest {
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
-				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withBasicConstraints().build();
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withBasicConstraints(true).build();
+
+		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
+
+		Date validationDate = new Date();
+
+		// operate & verify
+		TrustLinkerResultException result = Assertions.assertThrows(TrustLinkerResultException.class, () -> {
+			publicKeyTrustLinker.hasTrustLink(certificate, rootCertificate, validationDate, new RevocationData(),
+					new DefaultAlgorithmPolicy());
+		});
+		assertEquals(TrustLinkerResultReason.NO_TRUST, result.getReason());
+	}
+
+	@Test
+	public void testChildNotAllowToBeCA2() throws Exception {
+		// setup
+		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
+				.withValidityMonths(1).withBasicConstraints(0).build();
+
+		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withBasicConstraints(false).build();
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
@@ -217,7 +290,7 @@ public class PublicKeyTrustLinkerTest {
 	public void testCACertificateNoSKID() throws Exception {
 		KeyPair rootKeyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate rootCertificate = new PKIBuilder.CertificateBuilder(rootKeyPair).withSubjectName("CN=TestRoot")
-				.withValidityMonths(1).withBasicConstraints().withAKIDPublicKey(rootKeyPair.getPublic()).build();
+				.withValidityMonths(1).withBasicConstraints(true).withAKIDPublicKey(rootKeyPair.getPublic()).build();
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
@@ -244,7 +317,7 @@ public class PublicKeyTrustLinkerTest {
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
 				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1).withIncludeSKID()
-				.withBasicConstraints().build();
+				.withBasicConstraints(true).build();
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 
@@ -266,11 +339,9 @@ public class PublicKeyTrustLinkerTest {
 
 		KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
 		KeyPair akidKeyPair = new PKIBuilder.KeyPairBuilder().build();
-		X509Certificate certificate =
-
-				new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(), rootCertificate)
-						.withSubjectName("CN=Test").withValidityMonths(1).withAKIDPublicKey(akidKeyPair.getPublic())
-						.withBasicConstraints().withIncludeAKID().withIncludeSKID().withBasicConstraints().build();
+		X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair.getPublic(), rootKeyPair.getPrivate(),
+				rootCertificate).withSubjectName("CN=Test").withValidityMonths(1)
+				.withAKIDPublicKey(akidKeyPair.getPublic()).withIncludeAKID().withIncludeSKID().build();
 
 		PublicKeyTrustLinker publicKeyTrustLinker = new PublicKeyTrustLinker();
 

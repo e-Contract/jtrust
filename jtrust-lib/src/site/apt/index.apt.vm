@@ -6,7 +6,7 @@ Java X509 Certificate Trust Library
  
 * Maven
  
- The Java client library is available within the e-contract.be Maven repository.
+ The Java library is available within the e-contract.be Maven repository.
  Configure this Maven repository within your <<<pom.xml>>> as follows:
   
 +--
@@ -18,7 +18,7 @@ Java X509 Certificate Trust Library
 </repositories>
 +--
 
- Add the client library within your <<<pom.xml>>> dependencies element as follows:
+ Add the library within your <<<pom.xml>>> dependencies element as follows:
   
 +--
 <dependency>

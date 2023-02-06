@@ -105,7 +105,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.4.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
@@ -115,7 +115,7 @@
 				<plugin>
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
-					<version>7.4.4</version>
+					<version>8.0.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

@@ -2,6 +2,12 @@ Java X509 Certificate Trust Library
 
  This project provides an implementation of a PKI validation algorithm for X509 certificates.
 
+ The project delivers two artifacts:
+
+    * a PKI validation library.
+
+    * a library to setup a test PKI, useful within unit tests and such.
+
  {{{./jtrust-lib/index.html}jTrust Library}}
  
   {{{./jtrust-testpki/index.html}jTrust Test PKI Library}}

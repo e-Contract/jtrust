@@ -27,34 +27,66 @@ Test PKI Library
 </dependency>
 +--
  
-* Usage
+* World Usage
 
+ Via the <<<World>>> you can setup a unit testable PKI infrastructure.
+ You can define a PKI topology, with each CA having its CRL/OCSP service.
  Example usage:
  
 +--
-World world = new World();
-CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
-rootCertificationAuthority.addRevocationService(new CRLRevocationService());
-CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
-		rootCertificationAuthority);
-world.start();
+try (World world = new World()) {
+    CertificationAuthority rootCertificationAuthority = new CertificationAuthority(world, "CN=Root CA");
+    rootCertificationAuthority.addRevocationService(new CRLRevocationService());
+    CertificationAuthority certificationAuthority = new CertificationAuthority(world, "CN=CA",
+                    rootCertificationAuthority);
+    world.start();
 
-X509Certificate rootCert = rootCertificationAuthority.getCertificate();
-X509Certificate cert = certificationAuthority.getCertificate();
-List<X509Certificate> certChain = new LinkedList<>();
-certChain.add(cert);
-certChain.add(rootCert);
+    X509Certificate rootCert = rootCertificationAuthority.getCertificate();
+    X509Certificate cert = certificationAuthority.getCertificate();
+    List<X509Certificate> certChain = new LinkedList<>();
+    certChain.add(cert);
+    certChain.add(rootCert);
 
-MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
-memoryCertificateRepository.addTrustPoint(rootCert);
-TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
+    MemoryCertificateRepository memoryCertificateRepository = new MemoryCertificateRepository();
+    memoryCertificateRepository.addTrustPoint(rootCert);
+    TrustValidator trustValidator = new TrustValidator(memoryCertificateRepository);
 
-TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
-trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
+    TrustValidatorDecorator trustValidatorDecorator = new TrustValidatorDecorator();
+    trustValidatorDecorator.addDefaultTrustLinkerConfig(trustValidator);
 
-trustValidator.isTrusted(certChain);
-
-world.stop();
+    trustValidator.isTrusted(certChain);
+}
 +--
+
+* PKIBuilder Usage
+
+ Via the <<<PKIBuilder>>> you can easily create different PKI artifacts like keys, certificate, CRLs using a fluent API.
+
+ Example usage:
+
++--
+KeyPair keyPair = new PKIBuilder.KeyPairBuilder().build();
+X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair).build();
++--
+
+ Example certification generation with tons of options:
+
++--
+X509Certificate certificate = new PKIBuilder.CertificateBuilder(keyPair)
+    .withSubjectName("CN=hehe")
+    .withBasicConstraints(5)
+    .withCertificatePolicy("1.2.3.4")
+    .withValidityYears(2)
+    .withCrlUri("https://crl")
+    .withOcspUri("https://ocsp")
+    .withOcspResponder()
+    .withQCCompliance()
+    .withQCRetentionPeriod()
+    .withQCSSCD()
+    .withTimeStamping()
+    .build();
++--
+
+* Documentation
 
   {{{./apidocs/index.html}Javadoc API documentation}}

@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -100,7 +100,7 @@ public class CertificationAuthority {
 		this.revocationServices = new LinkedList<>();
 		this.issuedCertificates = new LinkedList<>();
 		this.revokedCertificates = new HashMap<>();
-		this.signatureAlgorithm = "SHA1withRSA";
+		this.signatureAlgorithm = "SHA256withRSA";
 	}
 
 	/**
@@ -275,9 +275,9 @@ public class CertificationAuthority {
 			this.issuer.getCertificate();
 		}
 		if (this.signatureAlgorithm.contains("RSA")) {
-			this.keyPair = PKITestUtils.generateKeyPair();
+			this.keyPair = new PKIBuilder.KeyPairBuilder().build();
 		} else {
-			this.keyPair = PKITestUtils.generateKeyPair("EC");
+			this.keyPair = new PKIBuilder.KeyPairBuilder().withKeyAlgorithm("EC").build();
 		}
 		if (this.issuer == null) {
 			this.certificate = generateSelfSignedCertificate();
@@ -303,7 +303,11 @@ public class CertificationAuthority {
 			// make sure that the issuer is already issued
 			this.issuer.getCertificate();
 		}
-		this.keyPair = PKITestUtils.generateKeyPair();
+		if (this.signatureAlgorithm.contains("RSA")) {
+			this.keyPair = new PKIBuilder.KeyPairBuilder().build();
+		} else {
+			this.keyPair = new PKIBuilder.KeyPairBuilder().withKeyAlgorithm("EC").build();
+		}
 		if (this.issuer == null) {
 			this.certificate = generateSelfSignedCertificate();
 		} else {
