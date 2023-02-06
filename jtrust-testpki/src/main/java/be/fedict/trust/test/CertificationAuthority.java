@@ -588,6 +588,61 @@ public class CertificationAuthority {
 		return certificate;
 	}
 
+	public X509Certificate issueCertificate(PublicKey publicKey, String name, LocalDateTime notAfter) throws Exception {
+		if (!this.world.isRunning()) {
+			throw new IllegalStateException();
+		}
+		// make sure our CA certificate is generated before the issued certificate
+		getCertificate();
+
+		Clock clock = this.world.getClock();
+		LocalDateTime notBefore = clock.getTime();
+
+		X500Name issuerName = new X500Name(this.name);
+		X500Name subjectName = new X500Name(name);
+
+		BigInteger serial = new BigInteger(128, new SecureRandom());
+		SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
+		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(issuerName, serial,
+				Date.from(notBefore.atZone(ZoneId.systemDefault()).toInstant()),
+				Date.from(notAfter.atZone(ZoneId.systemDefault()).toInstant()), subjectName, publicKeyInfo);
+
+		JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+		x509v3CertificateBuilder.addExtension(Extension.subjectKeyIdentifier, false,
+				extensionUtils.createSubjectKeyIdentifier(publicKey));
+
+		x509v3CertificateBuilder.addExtension(Extension.authorityKeyIdentifier, false,
+				extensionUtils.createAuthorityKeyIdentifier(this.getPublicKey()));
+
+		x509v3CertificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+
+		for (RevocationService revocationService : this.revocationServices) {
+			revocationService.addExtension(x509v3CertificateBuilder);
+		}
+
+		AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(this.signatureAlgorithm);
+		AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+		AsymmetricKeyParameter asymmetricKeyParameter = PrivateKeyFactory
+				.createKey(this.keyPair.getPrivate().getEncoded());
+
+		ContentSigner contentSigner;
+		if (this.signatureAlgorithm.contains("RSA")) {
+			contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		} else {
+			contentSigner = new BcECContentSignerBuilder(sigAlgId, digAlgId).build(asymmetricKeyParameter);
+		}
+		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
+
+		byte[] encodedCertificate = x509CertificateHolder.getEncoded();
+
+		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificate = (X509Certificate) certificateFactory
+				.generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+		this.issuedCertificates.add(certificate);
+		return certificate;
+	}
+
 	/**
 	 * Revoked a given certificate.
 	 * 

@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -20,6 +20,7 @@ package be.fedict.trust.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -61,6 +62,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
@@ -123,7 +125,7 @@ public class OCSPRevocationService implements RevocationService, FailableEndpoin
 
 	@Override
 	public void addEndpoints(ServletContextHandler context) {
-		String pathSpec = "/" + this.identifier + "/ocsp";
+		String pathSpec = "/" + this.identifier + "/ocsp/*";
 		ServletHolder servletHolder = context.addServlet(OCSPServlet.class, pathSpec);
 		servletHolder.setInitParameter("identifier", this.identifier);
 
@@ -170,20 +172,36 @@ public class OCSPRevocationService implements RevocationService, FailableEndpoin
 		@Override
 		protected void doPost(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
+			LOGGER.debug("doPost");
+			byte[] reqData = IOUtils.toByteArray(request.getInputStream());
 			try {
-				_doPost(request, response);
+				_doPost(reqData, response);
 			} catch (Exception e) {
 				LOGGER.error("OCSP error: " + e.getMessage(), e);
 			}
 		}
 
-		private void _doPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		@Override
+		protected void doGet(HttpServletRequest request, HttpServletResponse response)
+				throws ServletException, IOException {
+			LOGGER.debug("doGet");
+			LOGGER.debug("request URI: {}", request.getRequestURI());
+			String requestBase64 = request.getRequestURI().substring(("/pki/" + this.identifier + "/ocsp/").length());
+			LOGGER.debug("request: {}", requestBase64);
+			byte[] reqData = Base64.decode(URLDecoder.decode(requestBase64, "UTF-8"));
+			try {
+				_doPost(reqData, response);
+			} catch (Exception e) {
+				LOGGER.error("OCSP error: " + e.getMessage(), e);
+			}
+		}
+
+		private void _doPost(byte[] reqData, HttpServletResponse response) throws Exception {
 			OCSPRevocationService ocspRevocationService = getOCSPRevocationService();
 			if (null != ocspRevocationService.failBehavior && ocspRevocationService.failBehavior.fail()) {
 				throw new RuntimeException("failing OCSP responder");
 			}
 
-			byte[] reqData = IOUtils.toByteArray(request.getInputStream());
 			OCSPReq ocspReq = new OCSPReq(reqData);
 
 			DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder()
@@ -237,7 +255,7 @@ public class OCSPRevocationService implements RevocationService, FailableEndpoin
 
 			ContentSigner contentSigner = new JcaContentSignerBuilder(
 					ocspRevocationService.certificationAuthority.getSignatureAlgorithm())
-							.build(ocspRevocationService.ocspResponderPrivateKey);
+					.build(ocspRevocationService.ocspResponderPrivateKey);
 			BasicOCSPResp basicOCSPResp = basicOCSPRespBuilder.build(contentSigner, chain,
 					Date.from(now.atZone(ZoneId.systemDefault()).toInstant()));
 
@@ -288,5 +306,9 @@ public class OCSPRevocationService implements RevocationService, FailableEndpoin
 	@Override
 	public void setFailureBehavior(FailBehavior failBehavior) {
 		this.failBehavior = failBehavior;
+	}
+
+	public String getOcspUrl() {
+		return this.ocspUri;
 	}
 }

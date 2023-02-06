@@ -1,6 +1,6 @@
 /*
  * Java Trust Project.
- * Copyright (C) 2018-2021 e-Contract.be BV.
+ * Copyright (C) 2018-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -125,6 +125,7 @@ public class CRLRevocationService implements RevocationService, FailableEndpoint
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			LOGGER.debug("doGet");
 			CRLRevocationService crlRevocationService = getCRLRevocationService();
 			if (null != crlRevocationService.failBehavior && crlRevocationService.failBehavior.fail()) {
 				throw new IOException("failing CRL endpoint");
@@ -207,5 +208,9 @@ public class CRLRevocationService implements RevocationService, FailableEndpoint
 	@Override
 	public void setFailureBehavior(FailBehavior failBehavior) {
 		this.failBehavior = failBehavior;
+	}
+
+	public String getCrlUri() {
+		return this.crlUri;
 	}
 }
