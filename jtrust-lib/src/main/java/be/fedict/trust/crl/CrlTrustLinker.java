@@ -32,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Enumerated;
-import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -56,6 +55,7 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.revocation.CRLRevocationData;
 import be.fedict.trust.revocation.RevocationData;
+import org.bouncycastle.asn1.DERIA5String;
 
 /**
  * Trust linker implementation based on CRL revocation information.
@@ -268,7 +268,7 @@ public class CrlTrustLinker implements TrustLinker {
 					LOGGER.debug("not a uniform resource identifier");
 					continue;
 				}
-				ASN1IA5String derStr = ASN1IA5String.getInstance(name.getName());
+				DERIA5String derStr = DERIA5String.getInstance(name.getName());
 				String str = derStr.getString();
 				if (false == str.startsWith("http")) {
 					/*

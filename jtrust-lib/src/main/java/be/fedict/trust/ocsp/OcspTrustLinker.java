@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -68,6 +67,7 @@ import be.fedict.trust.linker.TrustLinkerResultReason;
 import be.fedict.trust.policy.AlgorithmPolicy;
 import be.fedict.trust.revocation.OCSPRevocationData;
 import be.fedict.trust.revocation.RevocationData;
+import org.bouncycastle.asn1.DERIA5String;
 
 /**
  * Trust linker based on OCSP revocation information.
@@ -325,7 +325,7 @@ public class OcspTrustLinker implements TrustLinker {
 				LOGGER.debug("not a uniform resource identifier");
 				continue;
 			}
-			ASN1IA5String str = ASN1IA5String.getInstance(gn.getName());
+			DERIA5String str = DERIA5String.getInstance(gn.getName());
 			String accessLocation = str.getString();
 			LOGGER.debug("OCSP access location: {}", accessLocation);
 			URI uri = toURI(accessLocation);

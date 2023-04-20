@@ -236,7 +236,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j.version>1.7.36</slf4j.version>
-		<!-- also test 1.60,1.61,1.64,... before releasing -->
+		<!--
+                Also test 1.60,1.61,1.62,1.63,1.64,1.65,1.66,1.67,1.68,1.69 before releasing.
+                1.71,1.72,1.73 requires renaming the BouncyCastle artifacts to -jdk18on
+                -->
 		<bouncycastle.version>1.70</bouncycastle.version>
 		<jetty.version>9.4.51.v20230217</jetty.version>
 	</properties>
