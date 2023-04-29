@@ -104,6 +104,35 @@ public class CachedCrlRepositoryTest {
 	}
 
 	@Test
+	public void testEvictCRLCache() throws Exception {
+		// setup
+		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);
+		URI crlUri = new URI("urn:test:crl");
+		Date validationDate = new Date();
+
+		CachedCrlRepository testedInstance = new CachedCrlRepository(mockCrlRepository);
+
+		// expectations
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
+		EasyMock.expect(mockCrlRepository.findCrl(crlUri, this.testCertificate, validationDate))
+				.andReturn(this.testCrl);
+
+		// prepare
+		EasyMock.replay(mockCrlRepository);
+
+		// operate
+		X509CRL resultCrl = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
+		testedInstance.evictCrlCache(crlUri);
+		X509CRL resultCrl2 = testedInstance.findCrl(crlUri, this.testCertificate, validationDate);
+
+		// verify
+		EasyMock.verify(mockCrlRepository);
+		assertEquals(this.testCrl, resultCrl);
+		assertEquals(this.testCrl, resultCrl2);
+	}
+
+	@Test
 	public void testFailingCrlNotCached() throws Exception {
 		// setup
 		CrlRepository mockCrlRepository = EasyMock.createMock(CrlRepository.class);

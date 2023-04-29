@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2021 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -78,7 +78,7 @@ public class CachedCrlRepository implements CrlRepository {
 	 */
 	public CachedCrlRepository(CrlRepository crlRepository) {
 		this.crlRepository = crlRepository;
-		this.crlCache = Collections.synchronizedMap(new HashMap<URI, SoftReference<CacheEntry>>());
+		this.crlCache = Collections.synchronizedMap(new HashMap<>());
 		this.cacheAgingHours = DEFAULT_CACHE_AGING_HOURS;
 	}
 
@@ -127,7 +127,19 @@ public class CachedCrlRepository implements CrlRepository {
 	}
 
 	/**
+	 * Evicts a CRL from the CRL cache.
+	 *
+	 * @param crlUri the CRL URI.
+	 */
+	public void evictCrlCache(URI crlUri) {
+		LOGGER.debug("evict CRL cache: {}", crlUri);
+		this.crlCache.remove(crlUri);
+	}
+
+	/**
 	 * Gives back the CRL cache aging period in hours.
+	 *
+	 * @return the cache aging in hours.
 	 */
 	public int getCacheAgingHours() {
 		return this.cacheAgingHours;
