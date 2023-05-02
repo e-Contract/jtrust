@@ -1,7 +1,7 @@
 /*
  * Java Trust Project.
  * Copyright (C) 2009 FedICT.
- * Copyright (C) 2014-2022 e-Contract.be BV.
+ * Copyright (C) 2014-2023 e-Contract.be BV.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version
@@ -30,7 +30,7 @@ import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -152,13 +152,11 @@ public class OnlineOcspRepository implements OcspRepository {
 				TimeUnit.SECONDS);
 
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-		PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder
-				.create();
-		connectionManagerBuilder.setConnectionConfigResolver(resolver -> {
-			return ConnectionConfig.custom().setConnectTimeout(timeout, TimeUnit.SECONDS)
-					.setSocketTimeout(timeout, TimeUnit.SECONDS).build();
-		});
-		httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
+		BasicHttpClientConnectionManager basicHttpClientConnectionManager = new BasicHttpClientConnectionManager();
+		ConnectionConfig connectionConfig = ConnectionConfig.custom().setConnectTimeout(timeout, TimeUnit.SECONDS)
+				.setSocketTimeout(timeout, TimeUnit.SECONDS).build();
+		basicHttpClientConnectionManager.setConnectionConfig(connectionConfig);
+		httpClientBuilder.setConnectionManager(basicHttpClientConnectionManager);
 		if (null != this.networkConfig) {
 			HttpHost proxy = new HttpHost(this.networkConfig.getProxyHost(), this.networkConfig.getProxyPort());
 			httpClientBuilder.setProxy(proxy);
