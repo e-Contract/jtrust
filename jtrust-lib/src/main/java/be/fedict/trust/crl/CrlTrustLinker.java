@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Enumerated;
+import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -268,7 +269,7 @@ public class CrlTrustLinker implements TrustLinker {
 					LOGGER.debug("not a uniform resource identifier");
 					continue;
 				}
-				DERIA5String derStr = DERIA5String.getInstance(name.getName());
+				ASN1IA5String derStr = ASN1IA5String.getInstance(name.getName());
 				String str = derStr.getString();
 				if (false == str.startsWith("http")) {
 					/*
